@@ -244,6 +244,8 @@ export default function App(){
   if(name==="Reopen closed repository tab")return workspace.closed.length>0;
   if(["Open repository","Clone repository","Initialize a repository","Preferences"].includes(name))return true;
   if(!repo||loading)return false;
+  if(name==="Interactive rebase from selected commit")return !!currentCommit&&canMutate&&currentCommit.sha!==repo.head;
+  if(name==="Cherry-pick a sequence")return canMutate;
   if(name.includes("selected commit"))return !!currentCommit&&(!/Cherry|Revert|Reset/.test(name)||canMutate);
   if(name.includes("conflicted operation"))return !!repo.sequencer.active&&!busy;
   if(name==="Skip current rebase commit")return repo.sequencer.rebase&&!busy;
