@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix="arclane-favourites-") as temp:
     assert len(cli("workspace",root)["result"]["favourites"])==2
     print("PASS invalid favourite rejected without clobbering saved settings")
     (profile/"workspace.json").write_text(json.dumps({"tabs":[],"active":None,"closed":[],"favourites":[missing,str(repos[1])]}),encoding="utf-8")
-    assert cli("workspace",root)["result"]["favourites"]==[str(repos[1])]
+    assert [pathlib.Path(p).resolve() for p in cli("workspace",root)["result"]["favourites"]]==[repos[1].resolve()]
     print("PASS moved or missing repository safely skipped on startup")
     after=[(git(p,"rev-parse","HEAD"),git(p,"write-tree")) for p in repos]
     assert before==after
