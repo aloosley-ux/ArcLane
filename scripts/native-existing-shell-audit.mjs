@@ -76,7 +76,14 @@ try{
  session=await launch(repo,'partial-shell-audit-restart',9482,{},profile);page=session.page;
  await expect(page.getByRole('separator',{name:'Resize navigator'})).toHaveAttribute('aria-valuenow','270');
  await expect(page.getByRole('separator',{name:'Resize review bench'})).toHaveAttribute('aria-valuenow','300');
- checks.push('009 navigator and review bench keyboard min/clamp/persist after full executable shutdown/restart');
+ const pointer=page.getByRole('separator',{name:'Resize navigator'}),box=await pointer.boundingBox();
+ if(!box)throw Error('Navigator splitter missing pointer bounds');
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+ await page.mouse.down();await page.mouse.move(box.x+box.width/2+30,box.y+box.height/2,{steps:4});await page.mouse.up();
+ const resized=Number(await pointer.getAttribute('aria-valuenow'));
+ if(resized<290||resized>360)throw Error('Pointer drag did not resize navigator: '+resized);
+ await expect.poll(()=>page.evaluate(()=>localStorage.getItem('arclane-bench-navigator'))).toBe(String(resized));
+ checks.push('009 keyboard resize min/clamp/full executable restart, plus real pointer drag and stored width');
  }
  if(git('rev-parse','HEAD')!==original||git('write-tree')!==index||
     fs.readFileSync(path.join(repo,'tracked.txt'),'utf8')!==saved||
