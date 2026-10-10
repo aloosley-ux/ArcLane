@@ -12,6 +12,7 @@
 #[path="../commit_workflows.rs"] mod commit_workflows;
 #[path="../revision_review.rs"] mod revision_review;
 #[path="../rebase_workflows.rs"] mod rebase_workflows;
+#[path="../git_runtime.rs"] mod git_runtime;
 use serde_json::{json,Value};
 fn main(){
  let input:Vec<String>=std::env::args().collect();
@@ -36,7 +37,8 @@ fn main(){
     "diff"=>git::diff(&input[2],field("file").unwrap_or(""),opts["staged"]==true,field("commit")),
     "hunks"=>hunks::list(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true),
     "apply_hunk"=>{let root=git::root(&input[2])?;git::with_write_guard(&root,||hunks::apply(&root,field("file").ok_or("Missing file")?,opts["staged"]==true,opts["index"].as_u64().ok_or("Missing index")? as usize))},
-    "action"=>git::action(&input[2],field("op").ok_or("Missing action op")?,field("file"),field("input")),
+    "action"=>git::action_with_request(&input[2],field("op").ok_or("Missing action op")?,field("file"),field("input"),field("requestId")),
+    "cancel_git"=>{let repo=git::root(&input[2])?;Ok(json!({"cancelled":git_runtime::cancel(&repo,field("requestId").ok_or("Missing request ID")?)?}))},
     "collab"=>provider::query(&git::root(&input[2])?,field("kind").ok_or("Missing kind")?,field("id")),
     "collab_action"=>provider::mutate(&git::root(&input[2])?,field("operation").ok_or("Missing op")?,field("target").unwrap_or(""),&opts["detail"]),
     "tools"=>toolbox::inspect(&git::root(&input[2])?,field("section").ok_or("Missing section")?),
