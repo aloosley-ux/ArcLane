@@ -11,11 +11,14 @@
 
 ## Current working slices
 
-- Repository tabs and recent repository persistence; open folder picker.
+- Persistent repository tabs, aliases, ordering, active selection and closed-tab history; recent repositories and open folder picker. Right-click a tab for its actions; Ctrl+W closes a tab and Ctrl+Shift+T reopens it. Tabs survive a full application restart.
 - References sidebar (local, remote, tags, stashes, worktrees); graph history across refs, search and manual pagination.
 - Real staged/unstaged status and **selective hunk staging/unstaging**; read-only native side-by-side UTF-8 diff including expanded full-file view; **three-way text conflict resolution** with ours/theirs/manual decisions; file history and line blame; commits, branch/tag maintenance, merge/rebase/cherry-pick/revert (including conflict detection/continue/abort), stash apply/pop/drop, worktree create/lock/unlock/remove, soft/mixed reset, fetch, fast-forward pull, push.
 - Explicit clone and repository initialization with folder selection and Rust-side destination/transport validation.
-- GitHub PR and CI read-only integration via existing `gh` login, loaded **only on demand**.
+- Guarded commit amend with full message, author and co-author controls; remote-tracking sharing warnings; exact two-commit/ref comparisons, commit metadata and confirmed multi-file historical restore that preserves the index.
+- Context menus for commits and references; merge/rebase/fast-forward pull choices; stash patch review including untracked content and index restoration; detection and continue/abort of Git-paused merge/rebase/cherry-pick/revert operations when opening a repository.
+- Searchable patch and side-by-side diffs, word highlights, visible/ignored whitespace and persistent diff preferences. UTF-8 text is supported; patch views show at most 1,400 lines and search those displayed lines.
+- On-demand GitHub PR/issue/CI integration via existing `gh` login, including PR patches and CI job/step detail. Provider reads support scoped cancellation, bounded output, deadlines and Windows helper-process cleanup. **Provider acceptance uses offline fixtures; live GitHub compatibility is unverified.** Existing confirmed provider write controls have mock contract tests only.
 - Agent worktree organisation, **multiple live on-demand ConPTY PowerShell terminal tabs** and external editor integration. ConPTY processes terminate with their tabs or when the app closes. Does **not** represent real agent status until an integration exists.
 - Native process model: Git CLI processes are short-lived, with no repo polling, model inference or embedded server required during ordinary native use.
 
@@ -24,7 +27,7 @@
 - Latest installed source reference: GitKraken `12.6.0`, `%LOCALAPPDATA%/gitkraken/app-12.6.0/resources/app.asar`. The archival extraction uses REA's installed local ASAR library, with 340 code/resources entries **individually SHA-256 integrity checked, zero mismatches**, in `C:/AI/REA/Experiments/Forge/artifacts/gitkraken-12.6-app-code` (locally ignored, proprietary, not copied to Arclane).
 - REA 6.2.0 completed the 12.6 application architecture scan; an attempt to request only summary keys returned an empty filtered result. It is **not** legitimate to infer coverage from that output. Complete 12.5 REA static evidence and known limitations remain at `C:/AI/REA/Experiments/Forge/docs/GITKRAKEN_AUDIT.md`.
 - GitKraken 12.6 adds **stacked pull requests** (branch-to-branch PR chains and graph/list status) and **multiple terminal tabs per worktree/repo**. Stacked PR chains remain **unimplemented**; multiple embedded terminal tabs are implemented and validated in a packaged native Windows application. See official 12.6 release notes: https://gitkraken.com/blog/break-up-that-monster-pr-whats-new-in-gitkraken-desktop-12-6
-- The full 102-item baseline is in `docs/FEATURE_COVERAGE.md`; new 12.6 obligations are appended below. Every feature requires native interactive acceptance, not static labels or screenshot appearance.
+- The complete **104-obligation** ledger is in [docs/FEATURE_COVERAGE.md](docs/FEATURE_COVERAGE.md). Every accepted scope requires native interactive acceptance, not static labels or screenshot appearance.
 
 ## Boundaries
 
@@ -36,7 +39,11 @@
 
 ## Known gaps — major
 
-Side-by-side diff and text conflict resolver are functional but still lack syntax highlighting, rich per-word editing, image/binary conflicts, complex three-way merge automation and very large file scalability; no interactive rebase todo editor, full reflog recovery or robust undo; no complete multi-provider PR reviews/issues/CI workflow, Gitflow, LFS/submodule UX, signing, stacked PR visualisation, agent permission requests, or production installer acceptance. The custom commit graph has not yet been measured under 10k+ commits or octopus-merge complexity.
+Side-by-side diff and text conflict resolver lack syntax highlighting, rich per-word editing, image/binary conflicts, complex three-way merge automation and very large file scalability. Interactive rebase, general undo/redo and core Git process cancellation are outstanding; recovery currently offers non-destructive reflog-to-new-branch rescue. Gitflow starts and basic LFS/submodule tools exist, but their complete lifecycles remain unfinished. Live provider workflows, signing, complete stacked PR workflows, agent permission requests, worktree tab grouping and installer acceptance remain outstanding. The graph has been tested through 811 commits, not 10k+ or octopus-merge complexity. Repository tabs persist; terminal processes do not survive app restart.
+
+## Feature sprint checkpoint
+
+Six completed feature batches retain the Review Bench design. See [the sprint technical checkpoint](docs/FEATURE_SPRINT_2026-10-10.md) for commit hashes, implementation boundaries and final acceptance evidence. Build the executable with Tauri, then run `powershell -NoProfile -File scripts/verify-sprint.ps1` for all backend and packaged native regressions. Use `-Phase backend` or `-Phase native` for targeted runs. The backend tests use the shared release CLI at `C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe`; build that CLI from this checkout before running them. All Git mutation fixtures live under `Forge-Testbed`; provider suites use the local mock executable.
 
 ## Verified preview acceptance
 

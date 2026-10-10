@@ -9,7 +9,7 @@ Before changing code read:
 A polished, information-dense, responsive **Windows Git desktop application**, at least matching the broad daily workflow of GitKraken 12.6. Distinctive original UI, not a generic web dashboard. Rust + Tauri 2 + React/TypeScript; minimal CPU/memory, no routine background polling, no background AI model. The user is very demanding about actual rendered UI quality; inspect packaged pixels, not just source or visual mockups.
 
 ## Boundaries
-- Work only in C:\AI\REA\Experiments\Arclane.
+- Current feature sprint: work only in C:\AI\REA\Experiments\Arclane-Features on feature/gitkraken-parity. C:\AI\REA\Experiments\Arclane is the protected main checkout; do not modify it, switch branches, create worktrees or push.
 - The only authorised destructive Git testing location is a NEW test fixture in C:\AI\REA\Experiments\Forge-Testbed.
 - Never modify Cortana, SDS, Nostalgia, other real project repositories, installed GitKraken assets, or existing user work.
 - No live GitHub PR/issue/review/merge/push writes during development tests. Use scripts/mock-gh.rs and scripts/github-fixtures for offline mock tests. Obtain explicit approval before any real remote mutation.
@@ -18,7 +18,7 @@ A polished, information-dense, responsive **Windows Git desktop application**, a
 
 ## Building a real release
 ~~~powershell
-Set-Location 'C:\AI\REA\Experiments\Arclane'
+Set-Location 'C:\AI\REA\Experiments\Arclane-Features'
 npm run build
 $env:CARGO_TARGET_DIR='C:\AI\REA\Experiments\Forge\src-tauri\target'
 npx tauri build --no-bundle
@@ -36,3 +36,4 @@ Build/, dist/ and artifacts/ are ignored generated outputs. Source files, script
 - Mock GitHub tests require ignored artifacts/mock-gh/gh.exe. Build with rustc --edition 2021 scripts/mock-gh.rs -o artifacts/mock-gh/gh.exe. These prepend the mock to PATH; never silently remove that guard.
 - Keep docs/FEATURE_COVERAGE.md truthful. Mock test pass is not acceptance against real GitHub. User expects all 104 obligations eventually, not selective feature reductions.
 - Commit each coherent milestone with clean git status and actionable summary. Preserve existing branch/main history. Do not push without instruction.
+- Latest sprint architecture, verified scopes and remaining priorities: docs/FEATURE_SPRINT_2026-10-10.md. Complete regressions: powershell -NoProfile -File scripts/verify-sprint.ps1 (14 backend suites, 16 packaged UI suites); native launch smoke remains scripts/native-accept.ps1. Provider suites are strictly offline mock acceptance.

@@ -1,6 +1,6 @@
 # ArcLane — complete product workflow coverage ledger
 
-**Audit baseline: 2026-10-10**. 102 individually testable obligations across GitKraken's core interface and advanced workflows. These are **target behaviours, not promises of implemented features**. Column 4 describes the current Forge evidence; 'backend-tested' means only an underlying CLI slice was tested, never native-UI acceptance. 'partial' indicates incomplete coverage; 'prototype-only' indicates no behavioural acceptance. The matrix includes the entire product scope, not a suggestion to omit later sections. Source background in [GITKRAKEN_AUDIT.md](GITKRAKEN_AUDIT.md).
+**Audit baseline and sprint checkpoint: 2026-10-10**. 104 individually testable obligations (102 baseline plus two 12.6 additions below). These are **target behaviours, not promises of implemented features**. Column 4 combines historical evidence with scoped ArcLane backend and packaged Windows acceptance. 'backend-tested' means only an underlying CLI slice was tested, never native-UI acceptance. 'partial' indicates incomplete coverage; 'prototype-only' indicates no behavioural acceptance. An **accepted scope** does not imply every edge case or the whole GitKraken feature is complete. Provider mock evidence is never live acceptance. The matrix includes the entire product scope. Source background in [GITKRAKEN_AUDIT.md](GITKRAKEN_AUDIT.md); final sprint details in [FEATURE_SPRINT_2026-10-10.md](FEATURE_SPRINT_2026-10-10.md).
 
 | # | Domain | User-visible obligation | Current evidence | Acceptance condition |
 |---|---|---|---|---|
@@ -8,33 +8,33 @@
 | 002 | Application shell | Multi-repository tabs and tab history | accepted for repository tabs — three disposable repos, active selection, close/reopen history and full packaged executable restart verified; tab operations preserve HEAD/index/files | Open 3 repos; close/reopen app; tabs restored |
 | 003 | Application shell | Tab aliases, reordering, grouping worktrees | partial — local aliases, left/right ordering and closed aliases survive full executable restart; worktree grouping remains outstanding | Persist aliases/order and group across restart |
 | 004 | Application shell | Repo favourites, recent repos and search | not verified | Open from favourite/recents without rescanning idle |
-| 005 | Application shell | Command palette with keyboard actions | not verified | Ctrl+P search and activate commands |
+| 005 | Application shell | Command palette with keyboard actions | partial — packaged Ctrl+P opens searchable palette; selected Git actions and tab shortcuts verified; exhaustive command/shortcut coverage remains | Ctrl+P search and activate commands |
 | 006 | Application shell | Customisable toolbar and action states | not verified | Enabled state tracks actual repo state |
 | 007 | Application shell | Menu bar and Windows keyboard conventions | not verified | Access keys, focus and menu command tests |
 | 008 | Application shell | Profiles and workspace configurations | not verified | Separate repo and layout settings |
-| 009 | Application shell | Splitters, resizable panels, persistence | not verified | Resize to min width; restart retains widths |
-| 010 | Application shell | Configurable themes, zoom, high DPI | not verified | Compare 100%-200% and multiple monitors |
-| 011 | Application shell | Native window controls, minimize/restore | not verified | Windows UIA inspection and cold start |
+| 009 | Application shell | Splitters, resizable panels, persistence | partial — keyboard resizing of navigator/review bench and renderer-restart persistence native verified; full-app restart and broader splitter interactions unaccepted | Resize to min width; restart retains widths |
+| 010 | Application shell | Configurable themes, zoom, high DPI | partial — packaged light/dark and simulated 1080×680 layout inspected; 100%-200% multi-monitor DPI/zoom unaccepted | Compare 100%-200% and multiple monitors |
+| 011 | Application shell | Native window controls, minimize/restore | partial — packaged window launch and idle survival smoke tested; minimize/restore and UIA controls unaccepted | Windows UIA inspection and cold start |
 | 012 | Application shell | Settings, external tools, per-repo settings | not verified | Persist exact settings and run external tool |
-| 013 | Application shell | Undo/redo history with bounded rollback | not verified | Independent inverse Git state checks |
-| 014 | Application shell | Search across files, branches and commits | not verified | Result relevance and click navigation |
-| 015 | Application shell | Log/activity viewer with error details | not verified | Error trace without leaked secrets |
+| 013 | Application shell | Undo/redo history with bounded rollback | partial — toolbar opens reflog and native recovery creates a new rescue branch; general inverse undo/redo history absent | Independent inverse Git state checks |
+| 014 | Application shell | Search across files, branches and commits | partial — loaded history/reference filters, diff search and native blame search exist; unified cross-domain search absent | Result relevance and click navigation |
+| 015 | Application shell | Log/activity viewer with error details | partial — provider diagnostics/retry/token-like redaction offline verified; consolidated Git activity viewer absent | Error trace without leaked secrets |
 | 016 | Application shell | Tray/notification behaviour and low idle CPU | not verified | No running background service required |
-| 017 | Reference navigator and history | Local/remotes/tags/stashes hierarchy | not verified | Expand/collapse/search and verify refs |
+| 017 | Reference navigator and history | Local/remotes/tags/stashes hierarchy | partial — reference and stash rows used in packaged Git workflows; exhaustive expand/collapse/filter acceptance remains | Expand/collapse/search and verify refs |
 | 018 | Reference navigator and history | Ahead/behind and tracking indicators | backend-tested | Diverged testbed accurate independently |
 | 019 | Reference navigator and history | Branch folder grouping and filters | not verified | Grouped refs, name/path match |
 | 020 | Reference navigator and history | Hide/solo refs and graph | not verified | Hidden graph rows follow toggle; persistent |
 | 021 | Reference navigator and history | Drag-and-drop branch targets | not verified | Merge/rebase menus reflect source/target |
-| 022 | Reference navigator and history | WIP node and staged/unstaged badges | backend-tested | Mixed fixture shows all categories |
-| 023 | Reference navigator and history | Real DAG merges/octopus/branch lanes | prototype-only | Graph parents and crossings match git rev-list |
-| 024 | Reference navigator and history | Graph row virtualisation >10k commits | not verified | Bounded rows/memory, scroll position retained |
+| 022 | Reference navigator and history | WIP node and staged/unstaged badges | partial — native WIP selection, hunk stage/unstage and staged commit fixtures verified; exhaustive mixed-state badge acceptance remains | Mixed fixture shows all categories |
+| 023 | Reference navigator and history | Real DAG merges/octopus/branch lanes | partial — parent-based graph renders linear and merge fixtures; independent crossings/octopus-lane correctness unaccepted | Graph parents and crossings match git rev-list |
+| 024 | Reference navigator and history | Graph row virtualisation >10k commits | partial — final native run loads 350/700/811 commits with 27 mounted rows at sampled positions; >10k target unaccepted | Bounded rows/memory, scroll position retained |
 | 025 | Reference navigator and history | Commit columns and rearrangement | not verified | Reorder, author/date/SHA and save widths |
 | 026 | Reference navigator and history | Ghost branch and ancestry highlight | not verified | Hover selections use real reachability |
 | 027 | Reference navigator and history | Commit/branch multi-selection and diff range | accepted for two-tree review — Control-click two graph commits or choose two local/remote/tag references, inspect exact changed files and swap comparison direction; larger selection sets excluded | Select 2 commits/refs and compare |
-| 028 | Reference navigator and history | Graph search/filter by author/ref/path | not verified | Independent git log query checks |
+| 028 | Reference navigator and history | Graph search/filter by author/ref/path | partial — loaded-history message/author/SHA filter and ref scope exist; path filtering and complete independent Git query acceptance absent | Independent git log query checks |
 | 029 | Reference navigator and history | Graph keyboard navigation and copy SHA | partial — Arrow/Home/End selection and Shift+F10 context navigation native verified; copy SHA command wired, clipboard acceptance remains | Selection and exact SHA copied |
 | 030 | Reference navigator and history | Commit context menus and shortcuts | accepted for explicit commit/reference context menus — native cherry-pick, revert, soft/mixed reset and branch switch independently verify refs/index/files; inactive operations disabled | Correct actions guarded by selection |
-| 031 | Reference navigator and history | Detached HEAD and initial/empty repositories | not verified | Open and recover safely |
+| 031 | Reference navigator and history | Detached HEAD and initial/empty repositories | partial — empty init backend-tested; detached state guarded for pull; native recovery is SHA-to-new-branch only, full empty/detached lifecycle unaccepted | Open and recover safely |
 | 032 | Reference navigator and history | Worktree lists and selectable shared history | backend-tested | Create worktree & visible in list |
 | 033 | Files and commits | Stage/unstage full files | accepted for tracked text files — packaged native stage/unstage of bracket filename verified against exact index; neighbouring file unchanged | Index changes independently verified |
 | 034 | Files and commits | Stage/unstage selected hunks | accepted — index verified in packaged Windows UI including reverse unstage | Index exact diff independently verified |
@@ -54,13 +54,13 @@
 | 048 | Files and commits | Commit templates, trailers and editor settings | not verified | Template and multiline messages |
 | 049 | Files and commits | Safe discard and undo changed files | partial — native confirmed single-file discard preserves neighbouring bytes and staged index; undo/recovery for discarded bytes remains absent | Explicit preview and recover path |
 | 050 | Git operations | Clone/init/open URL and SSH support | partial — clone/init tested previously; this checkpoint adds validated remote-management tools; live SSH/account handling incomplete | Local origin clone and invalid credentials |
-| 051 | Git operations | Local/remote branch create/switch/rename/delete | partial | Branches match git show-ref |
+| 051 | Git operations | Local/remote branch create/switch/rename/delete | partial — backend create/rename/safe-delete and local tracking branch checks; native context switch/pick branch verified; remote deletion and full lifecycle unaccepted | Branches match git show-ref |
 | 052 | Git operations | Tags annotated/lightweight and push/delete | partial — annotated tag creation and remote tag pushes/deletes passed local fixtures; native basic create tested | Refs and tag content verified |
 | 053 | Git operations | Fetch from multiple remotes | partial — single remote explicit fetch available; multi-remote coverage remains untested | Remote refs and fetched object state |
 | 054 | Git operations | Pull merge/rebase/ff-only and abort | partial — all three strategies backend/native verified with local bare upstream, dirty states refused, strategy preference saved; sequencer abort covered by existing conflict workflows, live transport/auth unaccepted | Diverged/dirty worktree guarded |
 | 055 | Git operations | Push, set upstream, reject non-fast-forward | backend-tested | Local bare remote verifies push |
 | 056 | Git operations | Force push only with exact explicit confirmation | not verified | Blocked without confirmation, never automatic |
-| 057 | Git operations | Merge fast-forward and non-FF, abort | not verified | Correct parents and working tree |
+| 057 | Git operations | Merge fast-forward and non-FF, abort | partial — packaged two-parent pull merge, conflicted merge continue and exact abort state verified; standalone ff/non-FF option matrix unaccepted | Correct parents and working tree |
 | 058 | Git operations | Conflict detection, resolver and continue | accepted for text merges — native ours/theirs/manual resolution, clean staged index and merge continue verified | Unmerged paths surface; safe resolve |
 | 059 | Git operations | Rebase interactive pick/reword/squash/drop | not verified | Result SHA & commit order validated |
 | 060 | Git operations | Cherry pick single/multiple and conflict resume | partial — confirmed single-commit action and reopening a paused cherry-pick with native manual resolution/continue/abort verified; merge commits disabled, multi-pick absent | Expected tree diff and parent relationship |
@@ -89,11 +89,11 @@
 | 083 | Agent and terminal | External agent CLI detection/config | not verified | Detect local executables without side effects |
 | 084 | Agent and terminal | Create branch+worktree+agent session | not verified | Named worktree and child process verified |
 | 085 | Agent and terminal | Issue -> agent context handoff | not verified | Issue ID and title forwarded once |
-| 086 | Agent and terminal | Dedicated embedded terminal per worktree | not verified | Process attaches to intended cwd and exits cleanly |
+| 086 | Agent and terminal | Dedicated embedded terminal per worktree | partial — two real ConPTY tabs in selected repository with cwd/process/teardown acceptance; comprehensive worktree attachment matrix unaccepted | Process attaches to intended cwd and exits cleanly |
 | 087 | Agent and terminal | Agent session progress and permissions | not verified | Visible when supported; no invented status |
 | 088 | Agent and terminal | Session pause/stop/reopen and cleanup | not verified | No orphan CLI children or worktree deletion |
 | 089 | Agent and terminal | Custom agent, editor, diff/merge tool launches | not verified | Safe argv quoting including spaces |
-| 090 | Agent and terminal | No inference/background polling by default | not verified | Idle process/CPU/network measured |
+| 090 | Agent and terminal | No inference/background polling by default | partial — on-demand Git/provider/terminal architecture and sampled process-tree idle evidence; long-duration CPU/network budget unaccepted | Idle process/CPU/network measured |
 | 091 | Quality and recovery | Unicode/apostrophe/metacharacter paths | partial — backend Unicode/space/apostrophe/dollar tests and native literal bracket-file stage/unstage/hunk/discard verified; broad path/reparse-point coverage remains | Non-injection and diff verified |
 | 092 | Quality and recovery | Huge repo startup and history pagination | partial — 811 commits paged through native UI and verified against Git CLI | Load 10k+/100k history with bounded memory |
 | 093 | Quality and recovery | Cancellation/timeouts/no app hangs | partial — native gh read cancellation, 45-second production deadline, bounded combined output and Windows job-object helper cleanup offline verified; core Git process cancellation remains absent | Cancel long Git operation; UI remains responsive |
@@ -101,11 +101,11 @@
 | 095 | Quality and recovery | Error banners and retry with diagnostics | partial — labeled provider feed diagnostics, auth/network/rate-limit/access advice, token-like redaction and explicit retry backend/mock-native verified; live-provider failures unaccepted | Failed feeds clear stale records; successful independent feeds remain; explicit retry recovers |
 | 096 | Quality and recovery | Crash/restart while rebase/cherry-pick | accepted for reopening Git-paused text operations — native startup detects merge/rebase/cherry-pick/revert, resolves and continues or restores exact pre-operation state on abort; arbitrary mid-write crash recovery excluded | Detect sequencer and offer continue/abort |
 | 097 | Quality and recovery | Accessibility, keyboard focus, screen reader | not verified | UIA names, tabs, input and narration |
-| 098 | Quality and recovery | Offline work without GitHub or AI | not verified | Local workflows function disconnected |
-| 099 | Quality and recovery | No destructive real-repo acceptance writes | not verified | All mutations limited to disposable fixture repos |
+| 098 | Quality and recovery | Offline work without GitHub or AI | partial — local workflows use disposable Git fixtures and provider mock, no inference dependency; explicit network-disconnected OS acceptance unperformed | Local workflows function disconnected |
+| 099 | Quality and recovery | No destructive real-repo acceptance writes | partial — regression Git writes use fresh Forge-Testbed fixtures; source/evidence review confirms no live GitHub writes; this is test-scope evidence, not a runtime repository sandbox | All mutations limited to disposable fixture repos |
 | 100 | Quality and recovery | Reproducible Windows installer, cleanup, update | not verified | Fresh install and uninstall test |
 | 101 | Quality and recovery | Startup and idle resource budget | not verified | Measure cold start CPU/RAM and quiet idle |
-| 102 | Quality and recovery | Original visual language, no proprietary assets | not verified | Independent assets/code and tracked license audit |
+| 102 | Quality and recovery | Original visual language, no proprietary assets | partial — original Review Bench source/themes retained and packaged pixels inspected; comprehensive tracked license audit outstanding | Independent assets/code and tracked license audit |
 
 ## Completion rule
 
@@ -123,6 +123,10 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**Final sprint classification:** 14 accepted scopes, 45 partial scopes, 9 partial/mock-only scopes, 4 backend-only scopes and 32 unverified scopes = **104**. Accepted scope IDs: 002, 027, 030, 033, 034, 038, 039, 041, 042, 044, 046, 058, 061, 096. These are not 14 whole-feature parity claims. Final regression: **14 backend suites / 120 grouped checks**, **16 packaged UI suites**, plus the Windows window/idle smoke passed; all suite exit codes zero and no reported renderer exceptions. See [the technical checkpoint](FEATURE_SPRINT_2026-10-10.md) for commits, exact executable hash, process-tree sample and remaining work.
+
+**Feature sprint, batch 6 (2026-10-10):** `accept-workspace.py` passed five groups and `native-workspace-accept.mjs` seven packaged checks. Three repositories migrate from recent history once, then open tabs persist independently in `workspace.json`: alias, order, active selection and up to 30 closed tabs. Repeated backend saves and a full executable restart preserve state. Missing roots are skipped on load, invalid settings are refused on save, and close/reopen never deletes repositories or Git objects. Ctrl+W / Ctrl+Shift+T and context actions share the same state. Worktree grouping and persistent terminal processes remain absent.
 
 **Feature sprint, batch 5 (2026-10-10):** `accept-provider-process.py` passed five offline groups; `native-provider-process-accept.mjs` passed seven packaged mock checks. Existing mock provider backend (10) and native (11) regressions passed. Requests read stdout/stderr concurrently with a bounded memory budget, time out after 45 seconds in production, and attach gh plus helper children to a Windows job object. Cancellation is scoped by repository and request ID, including requests queued before workers start. Native tests independently inspect observed helper PIDs after cancellation/timeout. PR patch and CI detail command flags were checked against installed gh help; no live network compatibility or remote-write acceptance is claimed. Existing native evidence defaults now follow the running worktree. Provider mutations get timeout/output bounds but no cancel control; a timeout reports unknown remote completion and requires inspecting GitHub before retrying.
 

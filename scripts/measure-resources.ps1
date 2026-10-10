@@ -1,5 +1,5 @@
 $ErrorActionPreference='Stop'
-$root='C:\AI\REA\Experiments\Arclane'
+$root=Split-Path -Parent $PSScriptRoot
 $exe=Join-Path $root 'Build\Arclane.exe'
 $profile=Join-Path $root 'artifacts\resource-profile'
 New-Item -ItemType Directory -Force -Path $profile | Out-Null
