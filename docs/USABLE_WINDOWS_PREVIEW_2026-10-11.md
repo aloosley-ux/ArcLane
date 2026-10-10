@@ -31,6 +31,7 @@ The NSIS package build returned code zero; **clean-machine NSIS installation tes
 - `node scripts/native-workspace-accept.mjs`: **7 packaged checks PASS** after the workspace change.
 - `scripts/install-portable-preview.ps1` verified on a disposable target: copied hash, repeatable replacement with previous-version backup, and refusal to update a locked binary, all **PASS**.
 - Native installed EXE: launched successfully with ordinary user profile. The desktop link points at that executable.
+- Additional acceptance while the actual user's desktop copy remained open initially encountered a WebView2 debugger profile collision; native harness `launch()` now sets a separate `WEBVIEW2_USER_DATA_FOLDER` for each test profile. Repeated packaged `native-sequence-accept.mjs` (3 checks), `native-operation-workflows-accept.mjs` (9 + 3 checks) and `native-git-cancel-accept.mjs` (2 checks) **all passed concurrently with the user's running ArcLane copy**. Both backend `accept-favourites.py` and `accept-git-runtime.py` passed the final release regression run.
 
 No actual user Git repositories were mutated by any of these tests. Existing source checkouts were not modified; all mutating Git acceptance used disposable repositories. GitHub Actions and runners were not used.
 
