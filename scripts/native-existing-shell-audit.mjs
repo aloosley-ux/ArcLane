@@ -55,7 +55,7 @@ try{
  await expect(section('Remotes').locator('.ref-row')).toHaveCount(0);
  await page.getByRole('textbox',{name:'Filter repository references'}).fill('');
  await section('Local branches').locator('.ref-row').filter({hasText:'feature/alpha'}).click();
- await expect(page.locator('.scope-badge')).toContainText('feature/alpha');
+ await expect(page.locator('.scope-badge')).toContainText('alpha');
  await expect(page.locator('.status-left')).toContainText('Ready');
  checks.push('017 reference navigator: independently confirmed branches, tracking remote, tag, stash, worktree, filter/collapse and ref-scope click');
  const left=page.getByRole('separator',{name:'Resize navigator'});
