@@ -30,10 +30,14 @@ def slow_hook(repo,seconds):
         encoding="utf-8",newline="\n")
 def launch(repo):
     return subprocess.Popen([CLI,"action",str(repo),json.dumps({"op":"commit","input":"Slow verified commit"})],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
-def await_marker(repo,timeout=7):
+def await_marker(repo,running,timeout=7):
     marker=repo/".git"/"arclane-accept-running"
     stop=time.monotonic()+timeout
-    while not marker.exists() and time.monotonic()<stop:time.sleep(.05)
+    while not marker.exists() and time.monotonic()<stop:
+        if running.poll() is not None:
+            out,err=running.communicate()
+            raise AssertionError(f"Git exited before hook: code={running.returncode} stdout={out} stderr={err}")
+        time.sleep(.05)
     assert marker.exists(),"Slow operation never entered its pre-commit hook"
 with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
     parent=pathlib.Path(tmp)
@@ -49,7 +53,7 @@ with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
     slow_hook(repo,4)
     running=launch(repo)
     try:
-        await_marker(repo)
+        await_marker(repo,running)
         start=time.monotonic()
         blocked=call(linked,"stage_all",expected=False)
         assert "Another ArcLane process" in blocked.stderr,(blocked.stderr,blocked.stdout)
