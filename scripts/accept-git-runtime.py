@@ -7,10 +7,10 @@ def git(repo,*args):
     r=subprocess.run(["git","-C",str(repo),*args],capture_output=True,text=True,timeout=12)
     assert r.returncode==0,(args,r.stderr)
     return r.stdout.strip()
-def call(repo,op,*,extra=None,timeout=20,expected=None):
+def call(repo,op,*,input="",extra=None,timeout=20,expected=None):
     e=os.environ.copy()
     if extra:e.update(extra)
-    p=subprocess.run([CLI,"action",str(repo),json.dumps({"op":op})],capture_output=True,text=True,env=e,timeout=timeout)
+    p=subprocess.run([CLI,"action",str(repo),json.dumps({"op":op,"input":input})],capture_output=True,text=True,env=e,timeout=timeout)
     if expected is not None:assert (p.returncode==0)==expected,(op,p.stdout,p.stderr)
     return p
 def setup(repo):
@@ -80,7 +80,7 @@ with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
     staged=git(timeout_repo,"write-tree")
     slow_hook(timeout_repo,5)
     env={"ARCLANE_TEST_GIT_OPERATIONS":"1","ARCLANE_GIT_ACCEPT_TIMEOUT_MS":"300"}
-    timed=call(timeout_repo,"commit",extra=env,expected=False,timeout=13)
+    timed=call(timeout_repo,"commit",input="Timed commit",extra=env,expected=False,timeout=13)
     assert "timed out" in timed.stderr,timed.stderr
     assert "Completion may be unknown" in timed.stderr,timed.stderr
     assert git(timeout_repo,"rev-parse","HEAD")==start
@@ -89,7 +89,7 @@ with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
     assert not (timeout_repo/".git"/"index.lock").exists()
     print("PASS timeout stops Git descendants, leaves unchanged HEAD and staged data")
     (timeout_repo/".git"/"hooks"/"pre-commit").unlink()
-    done=call(timeout_repo,"commit",expected=True)
+    done=call(timeout_repo,"commit",input="Recovered commit",expected=True)
     assert git(timeout_repo,"rev-parse","HEAD")!=start
     assert git(timeout_repo,"write-tree")==git(timeout_repo,"rev-parse","HEAD^{tree}")
     print("PASS fresh Git operation resumes after timeout without manual lock deletion")
