@@ -71,7 +71,7 @@
 | 065 | Git operations | Gitflow workflow | partial — Gitflow feature/release/hotfix starts verified in local Git fixtures; finishing/merge lifecycle not implemented | Branches established per repo config |
 | 066 | Git operations | Patch generate/apply and reject | not verified | Resulting diff content verified |
 | 067 | Git operations | Undo/recover destructive operations | partial — reflog list and SHA-to-new-branch rescue tested; general undo/redo absent | Recoverable reflog-backed operations |
-| 068 | Git operations | Error, cancellation and in-progress state handling | not verified | Git sequencer conflicts and abort actions |
+| 068 | Git operations | Error, cancellation and in-progress state handling | partial | Native delayed-reply fixtures verify repository ownership and pending main-view mutation guards; sequencer conflict/abort paths covered separately. Backend cancellation and shared operation serialization remain incomplete |
 | 069 | Provider collaboration | GitHub auth with existing gh credential | partial/mock only — gh delegated auth; live auth states untested; no token storage | No key read/exfiltration; login detection |
 | 070 | Provider collaboration | GitHub orgs/repos and SSH configuration | not verified | Discover and open authenticated repo |
 | 071 | Provider collaboration | GitHub pull request listing and metadata | partial/mock only — PR list/detail fixture and native UI passed; live GitHub not verified | Real PR title/base/head and status |
@@ -98,7 +98,7 @@
 | 092 | Quality and recovery | Huge repo startup and history pagination | partial — 811 commits paged through native UI and verified against Git CLI | Load 10k+/100k history with bounded memory |
 | 093 | Quality and recovery | Cancellation/timeouts/no app hangs | not verified | Cancel long Git operation; UI remains responsive |
 | 094 | Quality and recovery | Multi-process and lock-file handling | not verified | No concurrent index modification races |
-| 095 | Quality and recovery | Error banners and retry with diagnostics | not verified | Failed operation leaves stable state |
+| 095 | Quality and recovery | Error banners and retry with diagnostics | partial | Offline native provider fixture verifies failed PR feed clears stale records, successful issue feed remains available, and explicit retry recovers. Actionable provider diagnostics and live failure recovery remain unaccepted |
 | 096 | Quality and recovery | Crash/restart while rebase/cherry-pick | not verified | Detect sequencer and offer continue/abort |
 | 097 | Quality and recovery | Accessibility, keyboard focus, screen reader | not verified | UIA names, tabs, input and narration |
 | 098 | Quality and recovery | Offline work without GitHub or AI | not verified | Local workflows function disconnected |

@@ -39,16 +39,16 @@ export default function Collaboration({path}:{path:string}){
    let active=true;setBusy(true);setError("");
    void Promise.allSettled([client.collabQuery(path,"prs"),client.collabQuery(path,"issues"),client.collabQuery(path,"runs")]).then(results=>{
      if(!active)return;
-     if(results[0].status==="fulfilled")setPrs(results[0].value as Pr[]);
-     if(results[1].status==="fulfilled")setIssues(results[1].value as Issue[]);
-     if(results[2].status==="fulfilled")setRuns(results[2].value as Run[]);
+     setPrs(results[0].status==="fulfilled"?results[0].value as Pr[]:[]);
+     setIssues(results[1].status==="fulfilled"?results[1].value as Issue[]:[]);
+     setRuns(results[2].status==="fulfilled"?results[2].value as Run[]:[]);
      const failures=results.filter(r=>r.status==="rejected");
      if(failures.length)setError(failures.length===3?"Could not load GitHub data. Check that gh is installed, signed in, and the current Git remote points to a GitHub repository.":failures.length+" GitHub data feeds unavailable");
    }).finally(()=>{if(active)setBusy(false)});
    return()=>{active=false;};
  },[path,refresh]);
  useEffect(()=>{
-   if(!selected)return;
+   if(!selected){setDetail(null);setDetailsBusy(false);return;}
    let active=true;setDetailsBusy(true);setDetail(null);
    void client.collabQuery(path,selected.type,String(selected.id)).then(value=>{if(active)setDetail(value as Pr|Issue)}).catch(e=>{if(active)setError(String(e))}).finally(()=>{if(active)setDetailsBusy(false)});
    return()=>{active=false;};

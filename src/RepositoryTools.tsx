@@ -1,4 +1,4 @@
-import{useCallback,useEffect,useState}from "react";
+import{useEffect,useState}from "react";
 import{ArchiveRestore,ArrowDownToLine,ArrowLeftRight,ArrowUpRight,Box,Check,ChevronRight,Cloud,GitBranch,GitCommitHorizontal,GitFork,GitMerge,HardDrive,History,LoaderCircle,LockKeyhole,Plus,RefreshCw,ShieldAlert,ShieldCheck,Tag,Trash2,X}from "lucide-react";
 import{client}from "./api";
 import "./repository-tools.css";
@@ -33,15 +33,13 @@ export default function RepositoryTools({path,branch,onUpdate}:{path:string;bran
  const[value,setValue]=useState("");
  const[releaseType,setReleaseType]=useState("feature");
  const[refresh,setRefresh]=useState(0);
- const load=useCallback(async()=>{
-   setLoading(true);setError("");
-   try{
-     const next=section==="tags"?{remotes:(await client.toolboxView(path,"remotes")).remotes as Remote[]}:await client.toolboxView(path,section);
-     setData(next as ToolData);
-   }catch(e){setError(String(e));}
-   finally{setLoading(false);}
+ useEffect(()=>{
+   let active=true;setData({});setLoading(true);setError("");
+   void client.toolboxView(path,section==="tags"?"remotes":section).then(next=>{
+     if(active)setData((section==="tags"?{remotes:next.remotes}:next) as ToolData);
+   }).catch(e=>{if(active)setError(String(e));}).finally(()=>{if(active)setLoading(false);});
+   return()=>{active=false;};
  },[path,section,refresh]);
- useEffect(()=>{void load();},[load]);
  const begin=(action:Pending)=>{setError("");setTyped("");setAmended(action.input);setPending(action);};
  const run=async()=>{
    if(!pending||busy||typed!==pending.confirm)return;

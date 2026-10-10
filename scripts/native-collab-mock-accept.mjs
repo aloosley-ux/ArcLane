@@ -3,7 +3,10 @@ import{spawn,execFileSync}from "node:child_process";
 import{chromium}from "playwright";
 const base="C:\\AI\\REA\\Experiments\\Arclane";
 const repo=fs.mkdtempSync("C:\\AI\\REA\\Experiments\\Forge-Testbed\\arclane-native-provider-");
-const profile=path.join(base,"artifacts","native-provider-profile");
+const profile=fs.mkdtempSync(path.join(base,"artifacts","native-provider-profile-"));
+const data=path.join(profile,"github-fixtures");fs.mkdirSync(data);
+for(const file of fs.readdirSync(path.join(base,"scripts","github-fixtures")))fs.copyFileSync(path.join(base,"scripts","github-fixtures",file),path.join(data,file));
+if(!fs.existsSync(path.join(base,"artifacts","mock-gh","gh.exe")))throw Error("Hermetic mock gh.exe missing; refusing to launch provider tests");
 const log=path.join(base,"artifacts","native-provider-mock-gh.log");
 fs.mkdirSync(profile,{recursive:true});fs.writeFileSync(log,"");
 const git=(...a)=>execFileSync("git",["-C",repo,...a],{encoding:"utf8"}).trim();
@@ -16,7 +19,7 @@ const checks=[],errors=[];let browser,child;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const env={...process.env,PATH:path.join(base,"artifacts","mock-gh")+";"+process.env.PATH,
  ARCLANE_DATA_DIR:profile,
- ARCLANE_GH_MOCK_DATA:path.join(base,"scripts","github-fixtures"),
+ ARCLANE_GH_MOCK_DATA:data,
  ARCLANE_GH_MOCK_LOG:log,
  WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"};
 try{
@@ -54,6 +57,23 @@ try{
  checks.push("native renderer has no JavaScript exceptions");
  const calls=fs.readFileSync(log,"utf8");if(!calls.includes("pr\tlist")||!calls.includes("issue\tlist"))throw Error("Expected invocation log was not written by local mocked gh");
  checks.push("all provider reads routed to local mock gh.exe");
+ // A failed refresh must not keep presenting records from the previous successful feed.
+ fs.renameSync(path.join(data,"prs.json"),path.join(data,"prs-unavailable.json"));
+ await page.getByRole("button",{name:/Pull requests \d/}).click();
+ await page.getByRole("button",{name:"Refresh GitHub"}).click();
+ await page.locator(".collab-toast.error").waitFor({timeout:9000});
+ if(await page.locator(".collab-item").count()!==0)throw Error("Failed PR feed retained stale records");
+ checks.push("failed mock PR feed clears obsolete PR records");
+ await page.getByRole("button",{name:/Issues/}).click();
+ await page.locator(".collab-item").filter({hasText:"Improve payment retries"}).waitFor({timeout:9000});
+ checks.push("unavailable PR feed preserves independently successful issue feed");
+ fs.renameSync(path.join(data,"prs-unavailable.json"),path.join(data,"prs.json"));
+ await page.getByRole("button",{name:"Refresh GitHub"}).click();
+ await page.getByRole("button",{name:/Pull requests \d/}).click();
+ await page.locator(".collab-item").nth(3).waitFor({timeout:9000});
+ checks.push("mock PR feed recovers on an explicit retry");
+ if(git("status","--porcelain")!==prior)throw Error("Feed failure/retry changed the Git repository");
+ if(errors.length)throw Error(errors.join("\n"));
  console.log("NATIVE_COLLAB_MOCK_ACCEPTED",checks.length,JSON.stringify(checks));
 }catch(e){errors.push(String(e?.stack||e));console.error("NATIVE_COLLAB_MOCK_FAILURE",String(e));process.exitCode=1;}
 finally{fs.writeFileSync(path.join(base,"artifacts","native-collab-mock-acceptance.json"),JSON.stringify({checks,errors,repo,note:"Fixture/mocked gh only — no real GitHub integration acceptance"},null,2));await browser?.close().catch(()=>{});if(child&&child.exitCode===null){try{execFileSync("taskkill",["/PID",String(child.pid),"/T","/F"],{stdio:"ignore"});}catch{}}}
