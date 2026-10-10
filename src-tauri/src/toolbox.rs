@@ -12,7 +12,7 @@ fn git(path:&Path,parts:Vec<String>)->Result<String,String>{
      .env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")
      .env("GIT_OPTIONAL_LOCKS","0").env("GIT_ALLOW_PROTOCOL","file:https:ssh");
  #[cfg(windows)] proc.creation_flags(0x08000000);
- let result=proc.output().map_err(|e|format!("Git not available: {e}"))?;
+ let result=crate::git_runtime::output(proc).map_err(|e|format!("Git not available: {e}"))?;
  let out=String::from_utf8_lossy(if result.status.success(){&result.stdout}else{&result.stderr}).trim().to_string();
  if result.status.success(){Ok(out)}else{Err(if out.is_empty(){format!("Git exited with {}",result.status)}else{out})}
 }
