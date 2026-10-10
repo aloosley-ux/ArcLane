@@ -399,7 +399,7 @@ export default function App(){
   {success&&<div className="toast success-toast"><Check size={17}/>{success}</div>}
   {contextMenu&&<ContextMenu menu={contextMenu} onClose={()=>setContextMenu(null)}/>}
   {pullOptions&&<PullOptions key={path} upstream={repo?.upstream} dirty={!!repo?.files.length} busy={!!busy} onPull={strategy=>runAction(strategy)} onClose={()=>setPullOptions(false)}/>}
-  {pickSeries!==null&&repo&&!repo.sequencer.active&&<CherryPickSeries key={path+pickSeries} head={repo.head} commits={commits} initial={pickSeries} onApply={items=>runAction("cherry_pick_series",null,JSON.stringify({expectedHead:repo.head,commits:items}))} onClose={()=>setPickSeries(null)}/>
+  {pickSeries!==null&&repo&&!repo.sequencer.active&&<CherryPickSeries key={path+pickSeries} head={repo.head} commits={commits} initial={pickSeries} onApply={items=>runAction("cherry_pick_series",null,JSON.stringify({expectedHead:repo.head,commits:items}))} onClose={()=>setPickSeries(null)}/>}
   {stashReview&&<StashReview key={path+stashReview} path={path} id={stashReview} busy={!!busy} onAction={(op,sha,id)=>runAction(op,sha,id)} onClose={()=>setStashReview(null)}/>}
   {revisionReview&&<RevisionReviewPanel key={path+revisionReview.to+(revisionReview.from||"")} path={path} to={revisionReview.to} from={revisionReview.from} refs={refs} commits={commits} busy={!!busy} onSave={input=>runAction("restore_revision_files",null,input)} onClose={()=>setRevisionReview(null)}/>}
   {commitOptions&&<CommitOptions key={path} path={path} message={commitText.trim()+(commitBody.trim()?"\n\n"+commitBody.trim():"")} busy={!!busy} onSave={input=>runAction("commit_options",null,input)} onClose={()=>setCommitOptions(false)}/>}
