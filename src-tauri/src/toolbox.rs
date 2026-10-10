@@ -115,7 +115,10 @@ pub fn inspect(path:&Path,section:&str)->Result<Value,String>{
     let names=git(path,args(&["for-each-ref","--format=%(refname:short)","refs/heads/"]))?;
     let mut branches=vec![];
     for prefix in ["feature/","release/","hotfix/"]{
-      for n in names.lines().filter(|b|b.starts_with(prefix)){branches.push(json!({"kind":prefix.trim_end_matches('/'),"name":n}));}
+      for n in names.lines().filter(|b|b.starts_with(prefix)){
+         let head=git(path,args(&["rev-parse",n]))?;
+         branches.push(json!({"kind":prefix.trim_end_matches('/'),"name":n,"head":head}));
+       }
     }
     Ok(json!({"branches":branches,"hasDevelop":names.lines().any(|l|l=="develop"),"hasMain":names.lines().any(|l|l=="main"),"hasMaster":names.lines().any(|l|l=="master")}))
   },
@@ -124,6 +127,32 @@ pub fn inspect(path:&Path,section:&str)->Result<Value,String>{
 }
 pub fn perform(path:&Path,op:&str,file:&str,input:&str)->Result<Value,String>{
  let value=input.trim();
+ if op=="gitflow_finish_feature" {
+     // Finish merges into develop but never deletes the source or pushes remotely.
+     if !file.starts_with("feature/")||file.len()<=8 {
+         return Err("Choose an existing feature/* branch".into());
+     }
+     branch(path,file)?;branch(path,"develop")?;sha_valid(path,value)?;
+     let current=git(path,args(&["symbolic-ref","--quiet","--short","HEAD"]))?;
+     if current!=file {return Err("Switch to the selected feature branch before finishing it".into());}
+     if git(path,args(&["rev-parse","HEAD"]))?!=git(path,args(&["rev-parse",value]))? {
+         return Err("Feature HEAD moved since review. Refresh before finishing.".into());
+     }
+     clean(path)?;
+     let git_dir=git(path,args(&["rev-parse","--git-dir"]))?;
+     let marker=std::path::PathBuf::from(git_dir);
+     let folder=if marker.is_absolute(){marker}else{path.join(marker)};
+     if ["MERGE_HEAD","CHERRY_PICK_HEAD","REVERT_HEAD","rebase-merge","rebase-apply","sequencer"].iter().any(|name|folder.join(name).exists()){
+         return Err("Continue or abort the existing Git operation first".into());
+     }
+     git(path,args(&["switch","develop"]))?;
+     match git(path,args(&["merge","--no-ff","--no-edit",file])) {
+         Ok(output)=>return Ok(json!({"ok":true,"command":"git switch develop && git merge --no-ff --no-edit",
+             "output":format!("Merged {file} into develop. The feature branch was retained. {output}")})),
+         Err(error)=>return Err(format!("Feature merge did not complete on develop: {error}. If Git paused for conflicts, resolve and continue or abort. The feature branch was retained."))
+     }
+ }
+
  let line:Vec<String>=match op{
    "remote_add"=>{ref_part(file)?;if remote(path,file).is_ok(){return Err("Remote already exists".into());}remote_url(value)?;
        args(&["remote","add",file,value])},
