@@ -74,7 +74,7 @@ try{
  checks.push('009 navigator and review bench keyboard min/clamp/persist after full executable shutdown/restart');
  if(git('rev-parse','HEAD')!==original||git('write-tree')!==index||
     fs.readFileSync(path.join(repo,'tracked.txt'),'utf8')!==saved||
-    git('show-ref','--verify','refs/heads/feature/alpha')!==original)throw Error('Read-only native audit changed exact Git refs/index/files');
+    git('rev-parse','refs/heads/feature/alpha')!==original)throw Error('Read-only native audit changed exact Git refs/index/files');
  checks.push('Independent HEAD, index, bytes and local-branch ref unaffected');
  await evidence(session,'native-existing-shell-audit',checks,repo);
 }catch(error){await evidence(session,'native-existing-shell-audit-failure',checks,repo).catch(()=>{});throw error}
