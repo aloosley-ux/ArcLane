@@ -5,6 +5,7 @@ use std::{path::{Path,Component},process::{Command,Stdio}};
 const MAX:usize=2_000_000;
 fn git(path:&Path,argv:&[String])->Result<String,String>{
  let mut cmd=Command::new("git");
+ if argv.iter().any(|arg|arg=="--") { cmd.arg("--literal-pathspecs"); }
  cmd.arg("-C").arg(path).arg("-c").arg("core.quotepath=false").args(argv)
    .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
    .env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")

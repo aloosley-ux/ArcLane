@@ -6,6 +6,7 @@ use std::{collections::BTreeMap,fs,path::{Component,Path},process::{Command,Stdi
 
 fn git_bytes(root:&Path,argv:&[String])->Result<Vec<u8>,String>{
  let mut command=Command::new("git");
+ if argv.iter().any(|arg|arg=="--") { command.arg("--literal-pathspecs"); }
  command.arg("-C").arg(root).arg("-c").arg("core.quotepath=false").args(argv)
     .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
     .env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")

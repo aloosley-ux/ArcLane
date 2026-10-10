@@ -6,6 +6,7 @@ use std::{path::{Path,Component},process::{Command,Stdio}};
 
 fn git(path:&Path,parts:Vec<String>)->Result<String,String>{
  let mut proc=Command::new("git");
+ if parts.iter().any(|arg|arg=="--") { proc.arg("--literal-pathspecs"); }
  proc.arg("-C").arg(path).arg("-c").arg("core.quotepath=false").args(parts)
      .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
      .env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")

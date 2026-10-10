@@ -6,6 +6,9 @@ use std::os::windows::process::CommandExt;
 
 fn spawn(program: &str, args: &[String], cwd: Option<&Path>) -> Result<String,String> {
     let mut cmd = Command::new(program);
+    // UI path selections follow `--`. Scope literal mode to these commands:
+    // stash internally builds magic pathspecs and must retain normal Git semantics.
+    if program == "git" && args.iter().any(|arg|arg=="--") { cmd.arg("--literal-pathspecs"); }
     cmd.args(args).stdin(Stdio::null()).env("GIT_TERMINAL_PROMPT","0")
         .env("GCM_INTERACTIVE","never").env("GIT_OPTIONAL_LOCKS","0");
     if let Some(p) = cwd { cmd.current_dir(p); }

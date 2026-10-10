@@ -1,4 +1,4 @@
-# Forge — complete product workflow coverage ledger
+# ArcLane — complete product workflow coverage ledger
 
 **Audit baseline: 2026-10-10**. 102 individually testable obligations across GitKraken's core interface and advanced workflows. These are **target behaviours, not promises of implemented features**. Column 4 describes the current Forge evidence; 'backend-tested' means only an underlying CLI slice was tested, never native-UI acceptance. 'partial' indicates incomplete coverage; 'prototype-only' indicates no behavioural acceptance. The matrix includes the entire product scope, not a suggestion to omit later sections. Source background in [GITKRAKEN_AUDIT.md](GITKRAKEN_AUDIT.md).
 
@@ -36,7 +36,7 @@
 | 030 | Reference navigator and history | Commit context menus and shortcuts | not verified | Correct actions guarded by selection |
 | 031 | Reference navigator and history | Detached HEAD and initial/empty repositories | not verified | Open and recover safely |
 | 032 | Reference navigator and history | Worktree lists and selectable shared history | backend-tested | Create worktree & visible in list |
-| 033 | Files and commits | Stage/unstage full files | backend-tested | Index changes independently verified |
+| 033 | Files and commits | Stage/unstage full files | accepted for tracked text files — packaged native stage/unstage of bracket filename verified against exact index; neighbouring file unchanged | Index changes independently verified |
 | 034 | Files and commits | Stage/unstage selected hunks | accepted — index verified in packaged Windows UI including reverse unstage | Index exact diff independently verified |
 | 035 | Files and commits | Untracked, ignored, renamed and deleted files | partial | Mixed fixture correctly groups file states |
 | 036 | Files and commits | Inline and side-by-side textual diffs | partial — verified UTF-8 paired snapshots, virtual scroll, wide view; syntax highlighting and binary/image diffs remain | Whitespace/line endings and syntax highlighting |
@@ -52,7 +52,7 @@
 | 046 | Files and commits | File history and blame | accepted — native commit timeline, parent comparison, correct author attribution and search verified | Line origin matches git blame |
 | 047 | Files and commits | Git hooks, skip hooks and GPG signing | not verified | Configured hook and signed commit tests |
 | 048 | Files and commits | Commit templates, trailers and editor settings | not verified | Template and multiline messages |
-| 049 | Files and commits | Safe discard and undo changed files | not verified | Explicit preview and recover path |
+| 049 | Files and commits | Safe discard and undo changed files | partial — native confirmed single-file discard preserves neighbouring bytes and staged index; undo/recovery for discarded bytes remains absent | Explicit preview and recover path |
 | 050 | Git operations | Clone/init/open URL and SSH support | partial — clone/init tested previously; this checkpoint adds validated remote-management tools; live SSH/account handling incomplete | Local origin clone and invalid credentials |
 | 051 | Git operations | Local/remote branch create/switch/rename/delete | partial | Branches match git show-ref |
 | 052 | Git operations | Tags annotated/lightweight and push/delete | partial — annotated tag creation and remote tag pushes/deletes passed local fixtures; native basic create tested | Refs and tag content verified |
@@ -94,7 +94,7 @@
 | 088 | Agent and terminal | Session pause/stop/reopen and cleanup | not verified | No orphan CLI children or worktree deletion |
 | 089 | Agent and terminal | Custom agent, editor, diff/merge tool launches | not verified | Safe argv quoting including spaces |
 | 090 | Agent and terminal | No inference/background polling by default | not verified | Idle process/CPU/network measured |
-| 091 | Quality and recovery | Unicode/apostrophe/metacharacter paths | backend-tested | Non-injection and diff verified |
+| 091 | Quality and recovery | Unicode/apostrophe/metacharacter paths | partial — backend Unicode/space/apostrophe/dollar tests and native literal bracket-file stage/unstage/hunk/discard verified; broad path/reparse-point coverage remains | Non-injection and diff verified |
 | 092 | Quality and recovery | Huge repo startup and history pagination | partial — 811 commits paged through native UI and verified against Git CLI | Load 10k+/100k history with bounded memory |
 | 093 | Quality and recovery | Cancellation/timeouts/no app hangs | not verified | Cancel long Git operation; UI remains responsive |
 | 094 | Quality and recovery | Multi-process and lock-file handling | not verified | No concurrent index modification races |

@@ -5,6 +5,7 @@ use std::{path::Path,process::{Command,Stdio},io::Write};
 
 fn run(repo:&Path,args:&[String],stdin:Option<&[u8]>)->Result<Vec<u8>,String>{
  let mut cmd=Command::new("git");
+ if args.iter().any(|arg|arg=="--") { cmd.arg("--literal-pathspecs"); }
  cmd.arg("-C").arg(repo).arg("-c").arg("core.quotepath=false")
     .args(args).stdin(if stdin.is_some(){Stdio::piped()}else{Stdio::null()})
     .stdout(Stdio::piped()).stderr(Stdio::piped())

@@ -7,6 +7,7 @@
 
  fn git(path:&Path,args:&[String])->Result<String,String>{
     let mut cmd=Command::new("git");
+    if args.iter().any(|arg|arg=="--") { cmd.arg("--literal-pathspecs"); }
     cmd.arg("-C").arg(path).arg("-c").arg("core.quotepath=false")
        .args(args).stdin(Stdio::null()).env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")
        .env("GIT_OPTIONAL_LOCKS","0").stdout(Stdio::piped()).stderr(Stdio::piped());

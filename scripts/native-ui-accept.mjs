@@ -77,10 +77,16 @@ try{
  result.tests.push("native UI staged only selected hunk verified against Git index");
  if(fs.readFileSync(path.join(repo,"segments.txt"),"utf8")!==edited.join(""))throw Error("Native hunk action mutated working file");
  result.tests.push("native partial staging did not alter working file bytes");
+ // The index changes before refresh/reinspection finishes. Verify the settled UI
+ // before switching panels, and target Unstage explicitly instead of a stale Stage button.
+ await page.waitForFunction(()=>{
+  const buttons=[...document.querySelectorAll(".hunk-card .hunk-head button")];
+  return buttons.length===1&&!buttons[0].disabled&&buttons[0].textContent.includes("Stage hunk");
+ },{},{timeout:12000});
  const stagedFile=page.locator(".change-group-head.staged-head").locator("xpath=following-sibling::*[1]").locator(".change-select").filter({hasText:"segments.txt"}).first();
  await stagedFile.click({timeout:12000});
  await page.getByRole("button",{name:/Hunks/}).click();
- await page.locator(".hunk-card .hunk-head button").first().click();
+ await page.getByRole("button",{name:"Unstage hunk",exact:true}).click({timeout:12000});
  for(let n=0;n<40;n++){await wait(160);if(!git("diff","--cached","--","segments.txt").trim())break;}
  if(git("diff","--cached","--","segments.txt").trim())throw Error("Native unstage hunk did not restore index");
  result.tests.push("native UI unstaged hunk independently verified");
