@@ -103,6 +103,41 @@
        "rebase_continue"=>{require_in_progress(path,"rebase-merge",Some("rebase-apply"))?;args(&["rebase","--continue"])},
        "rebase_skip"=>{require_in_progress(path,"rebase-merge",Some("rebase-apply"))?;args(&["rebase","--skip"])},
        "cherry_pick"=>{valid_commit(path,val)?;args(&["cherry-pick",val])},
+       "cherry_pick_series"=>{
+          // Full-series validation happens before Git can modify the index or HEAD.
+          // Ordered JSON, rather than shell-parsed input, keeps hashes unambiguous.
+          let plan:Value=serde_json::from_str(val).map_err(|_|"Invalid cherry-pick plan JSON".to_string())?;
+          let expected=plan["expectedHead"].as_str().ok_or("Expected starting HEAD is required")?;
+          valid_commit(path,expected)?;
+          if git(path,&args(&["rev-parse","HEAD"]))?!=git(path,&args(&["rev-parse",expected]))?{
+              return Err("HEAD changed since opening the sequence. Reopen and review before retrying.".into());
+          }
+          if git(path,&args(&["symbolic-ref","-q","--short","HEAD"])).is_err(){
+              return Err("Switch to a local branch before cherry-picking a series".into());
+          }
+          if sequencer_status(path)["active"]==true {
+              return Err("Continue or abort the current Git operation first".into());
+          }
+          if !git(path,&args(&["status","--porcelain","--untracked-files=normal"]))?.is_empty(){
+              return Err("Commit or stash changes before starting a cherry-pick series".into());
+          }
+          let commits=plan["commits"].as_array().ok_or("A commit array is required")?;
+          if commits.is_empty()||commits.len()>32 {return Err("Select between 1 and 32 commits".into());}
+          let mut seen=std::collections::HashSet::new();
+          let mut command=args(&["cherry-pick","--no-edit"]);
+          for item in commits {
+              let sha=item.as_str().ok_or("Each entry must be a commit SHA")?;
+              valid_commit(path,sha)?;
+              let full=git(path,&args(&["rev-parse",sha]))?;
+              if !seen.insert(full.clone()){return Err("Duplicate commits in sequence".into());}
+              let parents=git(path,&args(&["rev-list","--parents","-n","1",&full]))?;
+              if parents.split_whitespace().count()>2 {
+                  return Err("Merge commits require mainline selection and are not supported in multi-pick".into());
+              }
+              command.push(full);
+          }
+          command
+       },
        "cherry_pick_abort"=>{require_in_progress(path,"CHERRY_PICK_HEAD",Some("sequencer"))?;args(&["cherry-pick","--abort"])},
        "cherry_pick_continue"=>{require_in_progress(path,"CHERRY_PICK_HEAD",Some("sequencer"))?;args(&["cherry-pick","--continue"])},
        "revert"=>{valid_commit(path,val)?;args(&["revert","--no-edit",val])},
