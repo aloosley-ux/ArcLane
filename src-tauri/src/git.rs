@@ -192,6 +192,12 @@ pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Va
 fn action_unlocked(p:&Path,op:&str,file:Option<&str>,input:Option<&str>)->Result<Value,String>{
     let filename=file.unwrap_or("");
     let detail=input.unwrap_or("").trim();
+    if op=="rebase_interactive" { return crate::rebase_workflows::execute(p,detail); }
+    if let Some(step)=op.strip_prefix("rebase_"){
+        if ["continue","abort","skip"].contains(&step){
+            return crate::rebase_workflows::resume(p,step);
+        }
+    }
     if op=="commit_options" { return crate::commit_workflows::write(&p,detail); }
     if op=="restore_revision_files" { return crate::revision_review::restore(&p,detail); }
     let mut args:Vec<String>=match op {
