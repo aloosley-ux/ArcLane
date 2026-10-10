@@ -15,6 +15,7 @@ export default function InteractiveRebase({path,base,onApply,onClose}:{
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [confirmed,setConfirmed]=useState(false);
+ useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"&&!busy){e.preventDefault();onClose();}};document.addEventListener("keydown",onKey);return()=>document.removeEventListener("keydown",onKey);},[busy,onClose]);
  useEffect(()=>{
   let current=true;
   setLoading(true);
