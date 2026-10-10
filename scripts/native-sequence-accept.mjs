@@ -13,7 +13,11 @@ try{
  await cp('Cherry-pick a sequence');
  let dialog=page.getByRole('dialog',{name:'Cherry-pick a commit sequence'});
  await expect(dialog).toBeVisible();
-  const available=dialog.getByRole('list',{name:'Available commits'});
+ await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
+ if(git('rev-parse','HEAD')!==base)throw Error('Escape changed repository state');
+ checks.push('Cherry-pick editor Escape closes without modifying HEAD');
+ await cp('Cherry-pick a sequence');dialog=page.getByRole('dialog',{name:'Cherry-pick a commit sequence'});
+ const available=dialog.getByRole('list',{name:'Available commits'});
  await available.getByRole('button').filter({hasText:'Topic one'}).click();
  await available.getByRole('button').filter({hasText:'Topic two'}).click();
  await expect(dialog.getByText('2/32')).toBeVisible();
