@@ -26,13 +26,13 @@ try{
  await expect(page.locator('.identity-tracking .ahead')).toContainText('↑ 1');
  await expect(page.locator('.identity-tracking .behind')).toContainText('↓ 1');
  checks.push('018 packaged tracking shows exact independent left/right rev-list counts (1 ahead, 1 behind)');
- await page.locator('.workspace-tabs').getByRole('button',{name:'Worktrees'}).click();
+ await page.locator('.workspace-tabs').getByRole('button',{name:'Worktrees',exact:true}).click();
  const cards=page.locator('.worktree-grid .worktree-card');
  await expect(cards).toHaveCount(2);
  await expect(cards.filter({hasText:'feature/work'})).toContainText(linkedPath.replaceAll('\\','/').split('/').at(-1));
  await expect(cards.filter({hasText:'main'})).toContainText('MAIN');
  checks.push('032 native worktree list shows main/linked checkout, exact branch and disk path');
- await page.getByRole('button',{name:'Create a worktree'}).click();
+ await page.locator('.new-worktree-card').filter({hasText:'Create a worktree'}).click();
  const dialog=page.getByRole('dialog',{name:'New worktree'});
  await dialog.getByRole('textbox').fill('feature/from-ui');
  await dialog.getByRole('button',{name:'Create worktree'}).click();
