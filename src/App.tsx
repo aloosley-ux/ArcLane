@@ -23,6 +23,7 @@ import StashReview from "./StashReview";
 import ContextMenu,{type ContextState,type MenuAction} from "./ContextMenu";
 import RevisionReviewPanel from "./RevisionReview";
 import CommitOptions from "./CommitOptions";
+import CherryPickSeries from "./CherryPickSeries";
 import Collaboration from "./Collaboration";
 import {buildGraph,graphPalette}from "./graph";
 import type{WorkspaceState,RepositoryTab,ChangedFile,Commit,DiffHunk,FileComparison,ProviderPr,ProviderRun,Ref,Repository,Worktree}from "./types";
@@ -105,6 +106,7 @@ export default function App(){
  const[commitBody,setCommitBody]=useState("");
  const[pullOptions,setPullOptions]=useState(false);
  const[stashReview,setStashReview]=useState<string|null>(null);
+ const[pickSeries,setPickSeries]=useState<string|null>(null);
  const[contextMenu,setContextMenu]=useState<ContextState|null>(null);
  const[collabRefresh,setCollabRefresh]=useState(0);
  const[toolsSection,setToolsSection]=useState<"remotes"|"reflog">("remotes");
@@ -319,6 +321,7 @@ export default function App(){
   {name:"Compare selected commit with a branch or revision",icon:ArrowLeftRight,perform:()=>currentCommit&&setRevisionReview({to:currentCommit.sha})},
   {name:"Amend and commit author options",icon:GitCommitHorizontal,perform:()=>setCommitOptions(true)},
   {name:"Cherry-pick selected commit",icon:GitCommitHorizontal,perform:()=>currentCommit&&guardedOperation("cherry_pick",currentCommit.sha,"Cherry-pick commit","Apply this commit onto the current branch.",short(currentCommit.sha))},
+  {name:"Cherry-pick a sequence",icon:GitCommitHorizontal,perform:()=>{setOperationsOpen(false);setPickSeries(currentCommit?.sha||"");}},
   {name:"Revert selected commit",icon:Undo2,perform:()=>currentCommit&&guardedOperation("revert",currentCommit.sha,"Revert commit","Create a new commit reversing the selected commit.",short(currentCommit.sha))},
   {name:"Stash changes including untracked",icon:Layers3,perform:()=>askOperation("stash","Stash working changes","Temporarily store current tracked and untracked changes.", "Stash message","Work in progress","Stash changes")},
   {name:"Continue conflicted operation",icon:Check,perform:()=>void runAction(operationKind+"_continue")},
@@ -396,6 +399,7 @@ export default function App(){
   {success&&<div className="toast success-toast"><Check size={17}/>{success}</div>}
   {contextMenu&&<ContextMenu menu={contextMenu} onClose={()=>setContextMenu(null)}/>}
   {pullOptions&&<PullOptions key={path} upstream={repo?.upstream} dirty={!!repo?.files.length} busy={!!busy} onPull={strategy=>runAction(strategy)} onClose={()=>setPullOptions(false)}/>}
+  {pickSeries!==null&&repo&&!repo.sequencer.active&&<CherryPickSeries key={path+pickSeries} head={repo.head} commits={commits} initial={pickSeries} onApply={items=>runAction("cherry_pick_series",null,JSON.stringify({expectedHead:repo.head,commits:items}))} onClose={()=>setPickSeries(null)}/>
   {stashReview&&<StashReview key={path+stashReview} path={path} id={stashReview} busy={!!busy} onAction={(op,sha,id)=>runAction(op,sha,id)} onClose={()=>setStashReview(null)}/>}
   {revisionReview&&<RevisionReviewPanel key={path+revisionReview.to+(revisionReview.from||"")} path={path} to={revisionReview.to} from={revisionReview.from} refs={refs} commits={commits} busy={!!busy} onSave={input=>runAction("restore_revision_files",null,input)} onClose={()=>setRevisionReview(null)}/>}
   {commitOptions&&<CommitOptions key={path} path={path} message={commitText.trim()+(commitBody.trim()?"\n\n"+commitBody.trim():"")} busy={!!busy} onSave={input=>runAction("commit_options",null,input)} onClose={()=>setCommitOptions(false)}/>}
