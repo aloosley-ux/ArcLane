@@ -13,8 +13,7 @@ try{
  await cp('Cherry-pick a sequence');
  let dialog=page.getByRole('dialog',{name:'Cherry-pick a commit sequence'});
  await expect(dialog).toBeVisible();
- await dialog.getByRole('button',{name:'Add',exact:true}).first().isVisible();
- const available=dialog.getByRole('list',{name:'Available commits'});
+  const available=dialog.getByRole('list',{name:'Available commits'});
  await available.getByRole('button').filter({hasText:'Topic one'}).click();
  await available.getByRole('button').filter({hasText:'Topic two'}).click();
  await expect(dialog.getByText('2/32')).toBeVisible();
@@ -30,7 +29,7 @@ try{
  await page.locator(`.commit-row[data-commit="${base}"]`).click({button:'right'});
  await page.getByRole('menuitem',{name:'Interactive rebase after this commit'}).click();
  dialog=page.getByRole('dialog',{name:'Interactive rebase'});
- await expect(dialog).toContainText('Sequence base');
+ await expect(dialog).toContainText(base.slice(0,10));
  await expect(dialog.locator('.sequence-step')).toHaveCount(2);
  await dialog.locator('.sequence-step').nth(1).getByRole('combobox').selectOption('reword');
  await dialog.getByLabel(/New message for/).fill('Native reworded');
