@@ -1,0 +1,11 @@
+export type ChangedFile={path:string;original?:string;x:string;y:string;staged:boolean;unstaged:boolean;untracked:boolean;conflict:boolean};
+export type Ref={full:string;name:string;sha:string;current:boolean;kind:"local"|"remote"|"tag"};
+export type Worktree={path:string;branch:string;head:string;main:boolean;locked:boolean};
+export type Stash={id:string;title:string};
+export type Repository={path:string;name:string;branch:string;head:string;upstream?:string;origin?:string;ahead:number;behind:number;files:ChangedFile[];refs:Ref[];stashes:Stash[];worktrees:Worktree[];stats:{staged:number;modified:number;untracked:number;conflicts:number;total:number}};
+export type Commit={sha:string;subject:string;author:string;date:string;parents:string[]};
+export type HistoryPage={commits:Commit[];limit:number;skip:number;has_more:boolean};
+export type DiffResult={file:string;text:string;staged:boolean};
+export type ActionResult={ok:boolean;command:string;output:string};
+export type ProviderPr={number:number;title:string;headRefName:string;baseRefName:string;url:string;updatedAt:string;isDraft:boolean;reviewDecision?:string};
+export type ProviderRun={databaseId:number;workflowName:string;displayTitle:string;status:string;conclusion:string;headBranch:string;url:string};
