@@ -6,7 +6,7 @@ const session=await launch(repo,'native-sequence-dark',9453),{page}=session;
 try{
  await page.getByRole('button',{name:'Preferences',exact:true}).click();
  await page.getByRole('button',{name:'Dark',exact:true}).click();
- await page.getByRole('button',{name:'History',exact:true}).click();
+ await page.getByRole('button',{name:'Commit graph',exact:true}).click();
  await page.locator(`.commit-row[data-commit="${base}"]`).click({button:'right'});
  await page.getByRole('menuitem',{name:'Interactive rebase after this commit'}).click();
  const rebase=page.getByRole('dialog',{name:'Interactive rebase'});
