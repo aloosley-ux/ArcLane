@@ -80,8 +80,9 @@ with tempfile.TemporaryDirectory(prefix="arclane-rebase-accept-") as tmp:
     action(conflict,"rebase_interactive",reversed_plan,ok=False)
     (conflict/"common.txt").write_bytes(b"resolved\\n")
     git(conflict,"add","--","common.txt")
-    action(conflict,"rebase_continue")
-    assert (conflict/"common.txt").read_bytes()==b"first\\n" or (conflict/".git"/"rebase-merge").exists()
+    action(conflict,"rebase_continue",ok=False)
+    assert (conflict/"common.txt").read_bytes()==b"resolved\\n"
+    assert (conflict/".git"/"rebase-merge").exists()
     if (conflict/".git"/"rebase-merge").exists():
         (conflict/"common.txt").write_bytes(b"first\\n")
         git(conflict,"add","--","common.txt")
