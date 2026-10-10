@@ -1,5 +1,7 @@
 # ArcLane feature sprint — verified checkpoint
 
+The later [read-only GitHub bonus checkpoint](GITHUB_LIVE_CHECKPOINT_2026-10-10.md) supersedes the release hash and aggregate coverage counts below, adds scoped live public-provider evidence, and records the targeted diagnostic fix/regressions. The full-suite results below describe the preceding release.
+
 Development stayed in `C:\AI\REA\Experiments\Arclane-Features` on `feature/gitkraken-parity`, beginning at `af2f816`. No push, new worktree, live GitHub write or destructive acceptance against a real project was performed. The protected main checkout's branch remains `af2f816677ea6fd3c7a2ba39c81c81fe75ab1912` and its tracked working tree is clean. An early inherited backend test wrote an ignored acceptance JSON in the protected checkout before its hardcoded evidence path was corrected; no protected source or Git ref changed. That evidence was preserved.
 
 ## Completed batches

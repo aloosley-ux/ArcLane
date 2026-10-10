@@ -13,7 +13,7 @@ def call(kind,id=None,ok=True):
  return json.loads(p.stdout if ok else p.stderr)
 assert 'retries = 3' in call('pr_diff','13')['result']['patch'];assert call('run','101')['result']['jobs'][0]['steps'][1]['conclusion']=='failure'
 print('PASS offline PR patch and CI job/step details')
-for text,advice in [('HTTP 401 authentication failed ghp_secret','gh auth login'),('HTTP 429 rate limit exceeded','rate limit'),('network connection failed','Check your connection'),('HTTP 404 repository not found','repository access')]:
+for text,advice in [('HTTP 401 authentication failed ghp_secret','gh auth login'),('HTTP 429 rate limit exceeded','rate limit'),('network connection failed','Check your connection'),('HTTP 404 repository not found','repository access'),("GraphQL: Could not resolve to a Repository with the name 'cli/missing'. (repository)",'repository access'),('HTTP 504: 504 Gateway Timeout','temporarily unavailable'),('HTTP 502: Bad Gateway','temporarily unavailable'),('HTTP 503: Service Unavailable','temporarily unavailable')]:
  (data/'error.txt').write_text(text);error=call('prs',ok=False)['error'];assert advice in error and 'ghp_secret' not in error
 (data/'error.txt').unlink();print('PASS actionable auth/rate-limit/network/access errors with token redaction')
 (data/'oversize').write_text('1');assert 'exceeded 3 MB' in call('prs',ok=False)['error'];(data/'oversize').unlink();print('PASS output limit stops provider output before unbounded accumulation')

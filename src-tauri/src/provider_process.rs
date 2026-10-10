@@ -86,6 +86,8 @@ pub fn run(repo:&Path,args:Vec<String>,request:Option<&str>)->Result<String,Stri
  let advice=if lower.contains("auth")||lower.contains("login")||lower.contains("401"){"Sign in with gh auth login, then retry."}
   else if lower.contains("rate limit")||lower.contains("429"){"GitHub rate limit reached; wait before retrying."}
   else if lower.contains("resolve host")||lower.contains("network")||lower.contains("connection"){"Check your connection; local Git workflows remain available."}
-  else if lower.contains("403")||lower.contains("404")||lower.contains("not found"){"Check repository access and the configured GitHub remote."}else{"Review the CLI diagnostic and retry manually."};
+  else if lower.contains("403")||lower.contains("404")||lower.contains("not found")||lower.contains("could not resolve to a repository"){"Check repository access and the configured GitHub remote."}
+  else if lower.contains("502")||lower.contains("503")||lower.contains("504")||lower.contains("gateway timeout")||lower.contains("service unavailable"){"GitHub service is temporarily unavailable. Retry reads later; inspect GitHub before retrying remote actions."}
+  else{"Review the CLI diagnostic and retry manually."};
  Err(format!("GitHub CLI failed ({status}). {advice} {diagnostic}"))
 }
