@@ -2,10 +2,11 @@ import {useEffect,useMemo,useState} from "react";
 import {ArrowDown,ArrowUp,Check,GitFork,LoaderCircle,ShieldAlert,X} from "lucide-react";
 import {client} from "./api";
 import type {RebasePreview,RebaseStep} from "./types";
+import "./cherry-pick-series.css";
 import "./interactive-rebase.css";
 
 export default function InteractiveRebase({path,base,onApply,onClose}:{
- path:string;clamp?:never;base:string;
+ path:string;base:string;
  onApply:(base:string,head:string,steps:RebaseStep[])=>Promise<boolean>;
  onClose:()=>void;
 }){
