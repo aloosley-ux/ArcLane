@@ -17,6 +17,7 @@ try{
  await available.getByRole('button').filter({hasText:'Topic one'}).click();
  await available.getByRole('button').filter({hasText:'Topic two'}).click();
  await expect(dialog.getByText('2/32')).toBeVisible();
+ await page.screenshot({path:path.join(session.profile,'cherry-pick-sequence.png')});
  await expect(dialog.getByRole('button',{name:/Cherry-pick 2 commits/})).toBeDisabled();
  await dialog.getByLabel('I have reviewed the commits and their exact order.').check();
  await dialog.getByRole('button',{name:'Cherry-pick 2 commits'}).click();
@@ -31,6 +32,7 @@ try{
  dialog=page.getByRole('dialog',{name:'Interactive rebase'});
  await expect(dialog).toContainText(base.slice(0,10));
  await expect(dialog.locator('.sequence-step')).toHaveCount(2);
+ await page.screenshot({path:path.join(session.profile,'interactive-rebase.png')});
  await dialog.locator('.sequence-step').nth(1).getByRole('combobox').selectOption('reword');
  await dialog.getByLabel(/New message for/).fill('Native reworded');
  await dialog.getByLabel('I have reviewed the complete rebase plan and the history rewrite.').check();
