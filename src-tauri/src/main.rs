@@ -15,6 +15,7 @@ mod workspace;
 mod commit_workflows;
 mod revision_review;
 mod rebase_workflows;
+mod git_runtime;
 use tauri::Manager;
 use serde_json::Value;
 use tauri::async_runtime::spawn_blocking;
@@ -106,8 +107,12 @@ async fn file_diff(path:String,file:String,staged:bool,commit:Option<String>)->R
     spawn_blocking(move||git::diff(&path,&file,staged,commit.as_deref())).await.map_err(|e|e.to_string())?
 }
 #[tauri::command]
-async fn git_action(path:String,op:String,file:Option<String>,input:Option<String>)->Result<Value,String>{
-    spawn_blocking(move||git::action(&path,&op,file.as_deref(),input.as_deref())).await.map_err(|e|e.to_string())?
+async fn git_action(path:String,op:String,file:Option<String>,input:Option<String>,request_id:Option<String>)->Result<Value,String>{
+    spawn_blocking(move||git::action_with_request(&path,&op,file.as_deref(),input.as_deref(),request_id.as_deref())).await.map_err(|e|e.to_string())?
+}
+#[tauri::command]
+async fn cancel_git_action(path:String,request_id:String)->Result<bool,String>{
+    spawn_blocking(move||git_runtime::cancel(&git::root(&path)?,&request_id)).await.map_err(|e|e.to_string())?
 }
 #[tauri::command]
 async fn github_query(path:String,kind:String)->Result<Value,String>{
@@ -165,6 +170,6 @@ fn main(){
     tauri::Builder::default()
     .manage(terminal::TerminalManager::default())
     .on_window_event(|window,event|{if let tauri::WindowEvent::Destroyed=event {window.app_handle().state::<terminal::TerminalManager>().shutdown();}})
-    .invoke_handler(tauri::generate_handler![rebase_preview,load_workspace,save_workspace,cancel_provider_read,inspect_stash,review_revisions,commit_context,snapshot,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
+    .invoke_handler(tauri::generate_handler![cancel_git_action,rebase_preview,load_workspace,save_workspace,cancel_provider_read,inspect_stash,review_revisions,commit_context,snapshot,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
     .run(tauri::generate_context!()).expect("Unable to run Forge");
 }
