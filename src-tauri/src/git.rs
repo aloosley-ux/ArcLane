@@ -5,6 +5,48 @@ use std::{path::{Path,PathBuf},process::{Command,Stdio},collections::HashSet,syn
 use std::os::windows::process::CommandExt;
 
 static ACTIVE_MUTATIONS: OnceLock<Mutex<HashSet<PathBuf>>> = OnceLock::new();
+#[cfg(windows)]
+struct ProcessWriteLease(windows_sys::Win32::Foundation::HANDLE);
+#[cfg(windows)]
+impl ProcessWriteLease {
+    fn acquire(path:&Path)->Result<Self,String>{
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::System::Threading::{CreateMutexW,WaitForSingleObject};
+        use windows_sys::Win32::Foundation::{WAIT_OBJECT_0,WAIT_ABANDONED,WAIT_TIMEOUT};
+        use std::hash::Hasher;
+        // Stable cross-binary name, keyed by the canonical Git common directory.
+        let mut h=StableHasher(0xcbf29ce484222325);
+        h.write(path.to_string_lossy().replace('\\',"/").to_lowercase().as_bytes());
+        let name=format!("Local\\ArcLaneGitWrite-{:016x}",h.finish());
+        let wide:Vec<u16>=std::ffi::OsStr::new(&name).encode_wide().chain(std::iter::once(0)).collect();
+        unsafe{
+            let handle=CreateMutexW(std::ptr::null(),0,wide.as_ptr());
+            if handle.is_null(){return Err(format!("Unable to create Git writer mutex: {}",std::io::Error::last_os_error()));}
+            match WaitForSingleObject(handle,0){
+                WAIT_OBJECT_0|WAIT_ABANDONED=>Ok(Self(handle)),
+                WAIT_TIMEOUT=>{windows_sys::Win32::Foundation::CloseHandle(handle);
+                    Err("Another ArcLane process is changing this Git repository. Wait and retry.".into())},
+                _=>{windows_sys::Win32::Foundation::CloseHandle(handle);
+                    Err(format!("Unable to acquire Git writer mutex: {}",std::io::Error::last_os_error()))}
+            }
+        }
+    }
+}
+#[cfg(windows)]
+struct StableHasher(u64);
+#[cfg(windows)]
+impl std::hash::Hasher for StableHasher{
+    fn finish(&self)->u64{self.0}
+    fn write(&mut self,bytes:&[u8]){for b in bytes{self.0^=*b as u64;self.0=self.0.wrapping_mul(0x100000001b3);}}
+}
+#[cfg(windows)]
+impl Drop for ProcessWriteLease{
+    fn drop(&mut self){unsafe{
+        windows_sys::Win32::System::Threading::ReleaseMutex(self.0);
+        windows_sys::Win32::Foundation::CloseHandle(self.0);
+    }}
+}
+
 
 /// One in-process writer per Git common directory, including linked worktrees.
 /// A lease is released even when the Git operation fails or unwinds.
@@ -28,7 +70,10 @@ pub fn with_write_guard<T>(path:&Path, operation:impl FnOnce()->Result<T,String>
             }
         }
     }
-    let _lease=Lease(key);
+    let _lease=Lease(key.clone());
+    // Windows named mutexes are released by the OS on crash, unlike lock files.
+    // Linked worktrees map to the same mutex; unrelated repositories do not.
+    #[cfg(windows)]let _process_lease=ProcessWriteLease::acquire(&key)?;
     operation()
 }
 
