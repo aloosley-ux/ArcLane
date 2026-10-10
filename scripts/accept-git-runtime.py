@@ -73,6 +73,26 @@ with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
         print("PASS lock releases after successful slow Git operation")
     finally:
         if running.poll() is None:running.kill();running.wait(timeout=3)
+    crash=parent/"crashed"
+    before=setup(crash)
+    (crash/"README.txt").write_bytes(b"staged-on-crash\n")
+    git(crash,"add","--all")
+    index=git(crash,"write-tree")
+    slow_hook(crash,10)
+    dying=launch(crash)
+    try:
+        await_marker(crash,dying)
+        dying.kill()
+        dying.communicate(timeout=5)
+        time.sleep(.25)
+        unlocked=call(crash,"stage_all",expected=True)
+        assert unlocked.returncode==0
+        assert git(crash,"rev-parse","HEAD")==before
+        assert git(crash,"write-tree")==index
+        assert (crash/"README.txt").read_bytes()==b"staged-on-crash\n"
+        print("PASS OS releases writer lease after CLI process crash")
+    finally:
+        if dying.poll() is None:dying.kill();dying.wait(timeout=3)
     timeout_repo=parent/"timeout"
     start=setup(timeout_repo)
     (timeout_repo/"README.txt").write_bytes(b"staged-before-timeout\n")
@@ -93,4 +113,4 @@ with tempfile.TemporaryDirectory(prefix="arclane-git-runtime-") as tmp:
     assert git(timeout_repo,"rev-parse","HEAD")!=start
     assert git(timeout_repo,"write-tree")==git(timeout_repo,"rev-parse","HEAD^{tree}")
     print("PASS fresh Git operation resumes after timeout without manual lock deletion")
-print("PASS 5 grouped core Git runtime checks")
+print("PASS 6 grouped core Git runtime checks")
