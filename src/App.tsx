@@ -216,7 +216,7 @@ export default function App(){
   const owner=repositoryVersion.current;setBusy(op);setError("");
   try{
    const res=await client.action(path,op,file,input);if(owner!==repositoryVersion.current)return false;
-   showToast(res.output||"Git "+op.replaceAll("_"," ")+" completed");return !!await refresh(path,refScope);
+   showToast(op==="rebase_interactive"?"Interactive rebase completed":op==="cherry_pick_series"?"Cherry-pick sequence completed":res.output||"Git "+op.replaceAll("_"," ")+" completed");return !!await refresh(path,refScope);
   }catch(e){
    if(owner!==repositoryVersion.current)return false;
    const message=e instanceof Error?e.message:String(e);await refresh(path,refScope);
