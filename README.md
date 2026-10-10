@@ -25,10 +25,10 @@ The aim is ambitious. The current build is usable for many local Git workflows, 
 | **Repository workspace** | Open, initialise and clone repositories; switch between persistent repo tabs, aliases and recent tabs; inspect branches, refs, stashes and worktrees |
 | **History and graph** | Browse/search a virtualised commit graph, inspect commits, compare two commits/refs and review historical changes |
 | **Changes and commits** | Stage/unstage whole files or individual hunks; compare file snapshots; create commits, amend messages, override authors and add co-authors |
-| **Advanced Git** | Branch/tag operations, fetch/push, pull with fast-forward/merge/rebase strategies, cherry-pick, revert, soft/mixed reset and reflog inspection |
+| **Advanced Git** | Branch/tag operations, fetch/push, pull strategies, guarded ordered cherry-pick (up to 32 commits), linear interactive rebase (pick/reword/squash/drop), revert, soft/mixed reset and reflog inspection |
 | **Stash and recovery** | Review stash patches, restore index state, guard against stale stash selections; resume or abort paused merge/rebase/cherry-pick/revert after restarting the app |
 | **File inspection** | Side-by-side and patch diffs, word highlights, whitespace controls, per-file history, blame and three-way text conflict resolution |
-| **Local development** | Worktree tools and embedded on-demand PowerShell terminals via Windows ConPTY |
+| **Local development** | New/existing-branch and detached worktree tools, Gitflow feature finish, and on-demand PowerShell terminals via Windows ConPTY |
 | **GitHub** | On-demand PR, patch and CI details via your existing `gh` authentication; scoped cancellation, timeouts and actionable errors for provider reads |
 
 ![ArcLane side-by-side diff review in its dark interface](docs/media/arclane-diff-review.png)
@@ -50,7 +50,7 @@ Exact evidence and limitations: [feature sprint](docs/FEATURE_SPRINT_2026-10-10.
 
 ## The honest limitations
 
-The biggest unfinished areas include interactive rebase and multi-commit cherry-pick, core Git cancellation and cross-operation serialisation, deeper worktree/agent-session workflows, stacked PRs, rich/binary/image conflict tooling, additional Git providers, full LFS/submodule lifecycles, signing, accessibility and large-repository performance. Private/enterprise GitHub and live provider writes are not accepted.
+The biggest unfinished areas include rebase of merge-heavy or shared/published histories, core Git cancellation and cross-process serialisation, deeper worktree/agent-session workflows, Gitflow release/hotfix completion, stacked PRs, rich/binary/image conflict tooling, additional Git providers, full LFS/submodule lifecycles, signing, accessibility and large-repository performance. Private/enterprise GitHub and live provider writes are not accepted.
 
 This is a Windows-first alpha. **The standalone EXE is unsigned**, so Windows may warn before running it. It requires WebView2 and a local Git installation. GitHub features require `gh` installed and authenticated. It has **not** completed clean-machine installer acceptance.
 
