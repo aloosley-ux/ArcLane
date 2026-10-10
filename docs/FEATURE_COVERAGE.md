@@ -42,9 +42,9 @@
 | 036 | Files and commits | Inline and side-by-side textual diffs | partial — verified UTF-8 paired snapshots, virtual scroll, wide view; syntax highlighting and binary/image diffs remain | Whitespace/line endings and syntax highlighting |
 | 037 | Files and commits | Binary/image/file-type diffs | not verified | Image preview, safe fallback for binaries |
 | 038 | Files and commits | Diff search, word diff, whitespace controls | not verified | Diff settings do not mutate repository |
-| 039 | Files and commits | Commit summary+description and co-authors | not verified | Headers validated with git show |
+| 039 | Files and commits | Commit summary+description and co-authors | accepted for local index commits — packaged commit editor verifies multiline message, author override and Co-authored-by trailers against git show | Headers validated with git show |
 | 040 | Files and commits | Commit staged contents and push option | backend-tested | Only staged bytes committed and upstream checked |
-| 041 | Files and commits | Amend previous commit with safeguard | not verified | Hash changed, file state correct, shared warning |
+| 041 | Files and commits | Amend previous commit with safeguard | accepted for local amend — message-only amend, remote-tracking sharing warning, explicit rewrite acknowledgement and stale-HEAD refusal backend/native verified; remote publishing excluded | Hash changed, file state correct, shared warning |
 | 042 | Files and commits | Revert previous published commit | not verified | New reversing commit, history preserved |
 | 043 | Files and commits | Reset mixed/soft/hard with previews | not verified | Each mode produces correct state, hard guarded |
 | 044 | Files and commits | Restore single or multiple historical files | not verified | Worktree/index bytes independently verified |
@@ -123,5 +123,7 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**Feature sprint, batch 1 (2026-10-10):** `accept-commit-options.py` passed five groups; `native-commit-options-accept.mjs` passed four packaged Windows checks. Existing advanced Git (20 groups) and literal paths (10 groups) regressions passed. The options editor leaves hooks enabled, never stages implicitly, checks the opened HEAD, and keeps original author on amend unless overridden. Source and screenshots use Review Bench semantic tokens. Existing acceptance scripts now locate evidence/mock resources relative to their active worktree. Remote-tracking reachability is a warning signal, not proof a commit is unpublished.
 
 **2026-10-10 local agent handoff:** scopes 050, 052, 053, 063–065, 067, 069–077, 081 and 103 were updated with evidence labels. Provider-specific write paths remain *mock-only*, not production-accepted. See LOCAL_AGENT_HANDOFF_2026-10-10.md.

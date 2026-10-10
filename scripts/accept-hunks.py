@@ -51,4 +51,4 @@ print("PASS reverse selected staged hunk; exact index restored")
 print("PASS out-of-range, traversal and flag paths refused")
 print("PASS Unicode/space/apostrophe/dollar filenames")
 result={"passed":6,"repo":str(repo),"first_fixture_hunks":3,"tests":["separate hunks","selected staged index","unselected hunks","reverse staging","invalid argument rejection","Unicode paths"]}
-a=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\hunk-acceptance.json");a.parent.mkdir(exist_ok=True);a.write_text(json.dumps(result,indent=2))
+a=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"hunk-acceptance.json";a.parent.mkdir(exist_ok=True);a.write_text(json.dumps(result,indent=2))

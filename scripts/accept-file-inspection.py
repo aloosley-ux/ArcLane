@@ -39,5 +39,5 @@ print("PASS reject unsafe path inputs for history and blame")
 binary=repo/"binary.dat";binary.write_bytes(b"\0hello")
 client("file_blame","binary.dat",False)
 print("PASS refuse untracked/binary file blame")
-outfile=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\file-inspection-acceptance.json")
+outfile=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"file-inspection-acceptance.json"
 outfile.write_text(json.dumps({"passed":4,"repo":str(repo),"latest_sha":second,"initial_sha":first},indent=2),encoding="utf-8")

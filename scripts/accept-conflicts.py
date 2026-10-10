@@ -61,6 +61,6 @@ call("resolve_conflict",{"file":file.name,"choice":"ours"},False)
 passed.append("reject resolution when no conflict remains")
 print(*("PASS "+v for v in passed[3:]),sep="\n")
 result={"passed":len(passed),"checks":passed,"last_fixture":str(root)}
-out=Path(r"C:\AI\REA\Experiments\Arclane\artifacts\conflicts-acceptance.json")
+out=Path(__file__).resolve().parents[1]/"artifacts"/"conflicts-acceptance.json"
 out.write_text(json.dumps(result,indent=2),encoding="utf-8")
 print("ACCEPTED",len(passed),"conflict checks")

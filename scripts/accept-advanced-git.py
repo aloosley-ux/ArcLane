@@ -115,7 +115,7 @@ test("Tracked file discard and untracked protection",discard)
 test("No-operation abort guarded",lambda:(cmd("merge_abort",expect=False),cmd("rebase_abort",expect=False),cmd("cherry_pick_abort",expect=False)))
 test("Submodule inventory",lambda:cmd("submodule_status"))
 out={"passed":len(passes),"checks":passes,"repository":str(repo),"linked_removed":not wt.exists()}
-dest=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\advanced-git-acceptance.json")
+dest=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"advanced-git-acceptance.json"
 dest.parent.mkdir(exist_ok=True)
 dest.write_text(json.dumps(out,indent=2))
 print("ACCEPTED",len(passes),"grouped checks",str(dest),flush=True)

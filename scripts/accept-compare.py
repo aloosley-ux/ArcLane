@@ -55,6 +55,6 @@ print("PASS",checks[-1])
 (repo/"binary.dat").write_bytes(b"ok\x00unsafe")
 api("binary.dat",expect=False)
 checks.append("Binary text comparison rejected");print("PASS",checks[-1])
-out=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\compare-acceptance.json")
+out=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"compare-acceptance.json"
 out.write_text(json.dumps({"passed":len(checks),"tests":checks,"repo":str(repo)},indent=2),encoding="utf-8")
 print("ACCEPTED",len(checks),"checks")

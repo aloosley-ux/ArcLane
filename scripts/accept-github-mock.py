@@ -1,6 +1,6 @@
 """Hermetic GitHub CLI bridge contract tests. The only gh executable on PATH is a local mock."""
 import json,os,subprocess,tempfile,pathlib
-base=pathlib.Path(r"C:\AI\REA\Experiments\Arclane")
+base=pathlib.Path(__file__).resolve().parents[1]
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-github-mock-",dir=r"C:\AI\REA\Experiments\Forge-Testbed"))
 cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
 subprocess.run(["git","-C",str(repo),"init","-q","-b","main"],check=True)

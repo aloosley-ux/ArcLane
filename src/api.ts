@@ -1,6 +1,7 @@
 import{invoke}from "@tauri-apps/api/core";
 import type{Repository,HistoryPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
 export const client={
+  commitContext:(path:string,sha:string|null=null)=>invoke<import("./types").CommitDetails|import("./types").CommitDefaults>("commit_context",{path,sha}),
   recent:()=>invoke<string[]>("repositories"),
   setRecent:(paths:string[])=>invoke<string[]>("set_repositories",{paths}),
   pick:()=>invoke<string|null>("pick_repository"),

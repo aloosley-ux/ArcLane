@@ -98,6 +98,6 @@ passed("Restore selected tracked file from old commit, preserve staging index")
 for path in ("../outside.txt","--upload-pack=evil",r"C:\Windows\win.ini"):
  task("restore_commit_file",base,path,False)
 passed("Reject restore file path traversal/absolute/argument injection")
-out=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\toolbox-acceptance.json")
+out=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"toolbox-acceptance.json"
 out.write_text(json.dumps({"passed":len(checks),"checks":checks,"repo":str(repo),"remote":str(remote)},indent=2),encoding="utf-8")
 print("ACCEPTED",len(checks),"toolbox groups")

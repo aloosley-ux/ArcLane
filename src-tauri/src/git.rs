@@ -161,6 +161,7 @@ pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Va
     let p=root(path)?;
     let filename=file.unwrap_or("");
     let detail=input.unwrap_or("").trim();
+    if op=="commit_options" { return crate::commit_workflows::write(&p,detail); }
     let mut args:Vec<String>=match op {
         "stage"=>{valid_file_path(filename)?;vec!["add".into(),"--".into(),filename.into()]},
         "unstage"=>{valid_file_path(filename)?;vec!["restore".into(),"--staged".into(),"--".into(),filename.into()]},

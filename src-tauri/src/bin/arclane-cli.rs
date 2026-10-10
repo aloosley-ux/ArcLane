@@ -7,6 +7,7 @@
 #[path="../file_inspection.rs"] mod file_inspection;
 #[path="../toolbox.rs"] mod toolbox;
 #[path="../provider.rs"] mod provider;
+#[path="../commit_workflows.rs"] mod commit_workflows;
 use serde_json::{json,Value};
 fn main(){
  let input:Vec<String>=std::env::args().collect();
@@ -16,6 +17,7 @@ fn main(){
    let field=|k:&str|opts.get(k).and_then(|x|x.as_str());
    match input[1].as_str(){
     "inspect"=>git::inspect(&input[2]),
+    "commit_context"=>{let root=git::root(&input[2])?;match field("sha"){Some(s)=>commit_workflows::details(&root,s),None=>commit_workflows::defaults(&root)}},
     "history"=>git::history(&input[2],opts["limit"].as_u64().unwrap_or(150) as usize,field("reference"),opts["skip"].as_u64().unwrap_or(0) as usize),
     "diff"=>git::diff(&input[2],field("file").unwrap_or(""),opts["staged"]==true,field("commit")),
     "hunks"=>hunks::list(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true),

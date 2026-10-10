@@ -42,5 +42,5 @@ call("init",nested,expect=False)
 call("init",initial,expect=False)
 print("PASS Reject nested or duplicate repository initialization")
 result={"passed":5,"source":str(src),"clone":str(cloned),"initialized":str(initial)}
-out=pathlib.Path(r"C:\AI\REA\Experiments\Arclane\artifacts\repository-acceptance.json")
+out=pathlib.Path(__file__).resolve().parents[1]/"artifacts"/"repository-acceptance.json"
 out.write_text(json.dumps(result,indent=2))
