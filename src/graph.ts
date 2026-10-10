@@ -1,7 +1,7 @@
 import type{Commit}from "./types";
 export type Segment={start:number;end:number;type:"through"|"parent"};
 export type GraphRow=Commit&{lane:number;edges:Segment[]};
-export const graphPalette=["#71d7d0","#b1a1ff","#f3ad7e","#8ec9fb","#dc95c8","#a8cf8f","#efce78","#8ec7ae"];
+export const graphPalette=["var(--lane-1)","var(--lane-2)","var(--lane-3)","var(--lane-4)","var(--lane-5)","var(--lane-6)","var(--lane-7)","var(--lane-8)"];
 export function buildGraph(commits:Commit[]):GraphRow[]{
   const active:(string|null)[]=[];
   const free=()=>{const i=active.indexOf(null);return i<0?active.length:i;};

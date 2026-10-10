@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import{spawn,execFileSync}from "node:child_process";
 import{chromium}from "playwright";
-const base="C:\\AI\\REA\\Experiments\\Arclane";
+const base=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
 const fixtures="C:\\AI\\REA\\Experiments\\Forge-Testbed";
 const root=fs.mkdtempSync(path.join(fixtures,"arclane-toolbox-ui-"));
 const repo=path.join(root,"repository");const bare=path.join(root,"remote.git");fs.mkdirSync(repo);

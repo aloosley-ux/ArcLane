@@ -1,0 +1,31 @@
+/* Review bench style contract. Layout consumes roles, never palette literals.
+   A future style can replace these roles without changing Git presentation. */
+:root {
+ color-scheme:light;
+ --font-ui:'Segoe UI Variable Text','Segoe UI',sans-serif;
+ --font-code:'Cascadia Mono',Consolas,monospace;
+ --bg:#E9EDF3; --chrome:#202938; --chrome-text:#FFFFFF; --chrome-muted:#BBC7D8;
+ --pane:#F3F5F8; --pane-hi:#E9EDF3; --canvas:#FFFFFF; --canvas-hi:#F5F7FA;
+ --line:#D9DFE8; --soft-line:#E8ECF2; --text:#263244; --muted:#526075; --quiet:#657287;
+ --accent:#275ED2; --accent-hover:#194CAF; --on-accent:#FFFFFF;
+ --selection:#EBF1FF; --selection-line:#A9BFF0;
+ --purple:#7854AD; --warm:#946322; --good:#24704B; --danger:#AA3546;
+ --added-bg:#E6F4EC; --removed-bg:#FBECEE; --warning-bg:#FFF2DA;
+ --scrim:rgba(20,29,43,.55); --shadow:0 16px 60px rgba(20,29,43,.2);
+ --radius-control:4px; --radius-overlay:8px;
+ --height-command:30px; --height-row:36px;
+ --lane-1:#426AC5; --lane-2:#8766BA; --lane-3:#A77836; --lane-4:#337F96;
+ --lane-5:#AD5C86; --lane-6:#66863D; --lane-7:#9B7929; --lane-8:#357D67;
+}
+:root[data-theme='dark'] {
+ color-scheme:dark;
+ --bg:#20252D; --pane:#272E39; --pane-hi:#303A48; --canvas:#20252D; --canvas-hi:#252C36;
+ --line:#3E495B; --soft-line:#323C4B; --text:#E7EDF7; --muted:#B7C5D9; --quiet:#A4B1C5;
+ --accent:#94B8FF; --accent-hover:#AEC9FF; --on-accent:#152440;
+ --selection:#354B72; --selection-line:#6589C9;
+ --purple:#C1A9EB; --warm:#E4BC80; --good:#97D6B6; --danger:#F0A4B2;
+ --added-bg:#203F38; --removed-bg:#492F3B; --warning-bg:#473D2A;
+ --scrim:rgba(10,15,24,.72); --shadow:0 16px 60px rgba(0,0,0,.4);
+ --lane-1:#89ABF4; --lane-2:#C1A9EB; --lane-3:#D6AE78; --lane-4:#86C9DF;
+ --lane-5:#E3A5C5; --lane-6:#B1CC8D; --lane-7:#DBC27A; --lane-8:#91CBB7;
+}

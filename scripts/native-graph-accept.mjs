@@ -1,5 +1,5 @@
 import fs from "node:fs";import path from "node:path";import{spawn,execFileSync}from "node:child_process";import{chromium}from "playwright";
-const base="C:\\AI\\REA\\Experiments\\Arclane";
+const base=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
 const repo="C:\\AI\\REA\\Experiments\\Forge-Testbed\\forge-history-pages-dhdxjlfk";
 const exe=path.join(base,"Build","Arclane.exe");
 const profile=path.join(base,"artifacts","history-native-profile");

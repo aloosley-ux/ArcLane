@@ -54,7 +54,7 @@ export default function TerminalDock({request,onClose}:{request:TerminalRequest|
      if(!mounted.current){await client.terminalClose(meta.id);return;}
      const xterm=new XTerm({cursorBlink:true,convertEol:false,scrollback:3500,
        fontSize:12,fontFamily:"Cascadia Mono,Consolas,monospace",letterSpacing:0,
-       theme:{background:"#101823",foreground:"#dce9f1",cursor:"#86dcd1",selectionBackground:"#6e999b80",
+       theme:{background:"#202938",foreground:"#dce9f1",cursor:"#86dcd1",selectionBackground:"#6e999b80",
           black:"#1b2631",red:"#e38f93",green:"#8cdbb0",yellow:"#edc38d",blue:"#8cafef",
           magenta:"#c8a3e9",cyan:"#8ad5d6",white:"#cbd7e3"}});
      const fit=new FitAddon();xterm.loadAddon(fit);

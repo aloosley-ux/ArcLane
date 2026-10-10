@@ -1,7 +1,7 @@
 import fs from "node:fs";import path from "node:path";
 import{spawn,execFileSync}from "node:child_process";
 import{chromium}from "playwright";
-const base="C:\\AI\\REA\\Experiments\\Arclane";
+const base=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
 const repo=fs.mkdtempSync("C:\\AI\\REA\\Experiments\\Forge-Testbed\\arclane-native-provider-");
 const profile=fs.mkdtempSync(path.join(base,"artifacts","native-provider-profile-"));
 const data=path.join(profile,"github-fixtures");fs.mkdirSync(data);

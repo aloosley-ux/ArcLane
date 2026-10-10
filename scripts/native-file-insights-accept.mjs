@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {spawn,execFileSync} from "node:child_process";
 import {chromium} from "playwright";
-const base="C:\\AI\\REA\\Experiments\\Arclane";
+const base=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
 const repo=fs.mkdtempSync("C:\\AI\\REA\\Experiments\\Forge-Testbed\\arclane-blame-native-");
 const profile=path.join(base,"artifacts","blame-ui-profile");
 const exe=path.join(base,"Build","Arclane.exe");
