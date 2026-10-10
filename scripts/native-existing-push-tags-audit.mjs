@@ -43,7 +43,7 @@ try{
  await pushForm.getByRole('textbox',{name:'Tag name'}).fill('v-ui-annotated');
  await pushForm.getByRole('button',{name:'Delete remote tag'}).click();
  await confirm('Delete remote tag','DELETE');
- const probe=execFileSync('git',['--git-dir',bare,'show-ref','--tags'],{encoding:'utf8'}).trim();
+ const probe=(()=>{try{return execFileSync('git',['--git-dir',bare,'show-ref','--tags'],{encoding:'utf8'}).trim()}catch(e){if(e.status===1)return '';throw e}})();
  if(probe.includes('v-ui-annotated')||git('cat-file','-t','refs/tags/v-ui-annotated')!=='tag')throw Error('Remote tag deletion affected wrong refs');
  checks.push('052 native remote tag delete preserves local annotated tag');
  await page.keyboard.press('Control+p');
