@@ -15,7 +15,7 @@ export async function launch(repo,name,port,environment={},existingProfile=null)
  fs.mkdirSync(path.join(base,'artifacts'),{recursive:true});
  const profile=existingProfile||fs.mkdtempSync(path.join(base,'artifacts',name+'-profile-'));
  if(!existingProfile)fs.writeFileSync(path.join(profile,'repos.json'),JSON.stringify([repo]));
- const child=spawn(path.join(base,'Build','Arclane.exe'),[],{cwd:base,env:{...process.env,...environment,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`},stdio:'ignore'});
+ const child=spawn(path.join(base,'Build','Arclane.exe'),[],{cwd:base,env:{...process.env,...environment,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,'webview2'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`},stdio:'ignore'});
  fs.writeFileSync(path.join(profile,'launch.json'),JSON.stringify({pid:child.pid,port,repo}));
  let browser,page;const errors=[];
  const close=async()=>{await browser?.close().catch(()=>{});if(child.exitCode===null)try{execFileSync('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore'})}catch{}};
