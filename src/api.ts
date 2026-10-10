@@ -3,6 +3,7 @@ import type{Repository,HistoryPage,DiffResult,HunkResponse,FileComparison,FileHi
 export const client={
   workspace:()=>invoke<import("./types").WorkspaceState>("load_workspace"),
   saveWorkspace:(state:import("./types").WorkspaceState)=>invoke<import("./types").WorkspaceState>("save_workspace",{state}),
+  rebasePreview:(path:string,base:string)=>invoke<import("./types").RebasePreview>("rebase_preview",{path,base}),
   inspectStash:(path:string,id:string)=>invoke<import("./types").StashDetails>("inspect_stash",{path,id}),
   reviewRevisions:(path:string,from:string|null,to:string,file:string|null=null)=>invoke<import("./types").RevisionReview>("review_revisions",{path,from,to,file}),
   commitContext:(path:string,sha:string|null=null)=>invoke<import("./types").CommitDetails|import("./types").CommitDefaults>("commit_context",{path,sha}),
