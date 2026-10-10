@@ -105,7 +105,7 @@
 | 099 | Quality and recovery | No destructive real-repo acceptance writes | partial — regression Git writes use fresh Forge-Testbed fixtures; source/evidence review confirms no live GitHub writes; this is test-scope evidence, not a runtime repository sandbox | All mutations limited to disposable fixture repos |
 | 100 | Quality and recovery | Reproducible Windows installer, cleanup, update | not verified | Fresh install and uninstall test |
 | 101 | Quality and recovery | Startup and idle resource budget | not verified | Measure cold start CPU/RAM and quiet idle |
-| 102 | Quality and recovery | Original visual language, no proprietary assets | partial — original Review Bench themes and semantic tokens retained; new sequence editors reuse workflow.css/modal controls, packaged light-theme pixels reviewed. Full license/asset audit and broader DPI/theme matrix outstanding | Independent assets/code and tracked license audit |
+| 102 | Quality and recovery | Original visual language, no proprietary assets | partial — original Review Bench themes and semantic tokens retained; new sequence editors reuse workflow.css/modal controls, packaged light/dark-theme screenshots inspected and native theme/token checks passed. Full license/asset audit and broader DPI/theme matrix outstanding | Independent assets/code and tracked license audit |
 
 ## Completion rule
 
