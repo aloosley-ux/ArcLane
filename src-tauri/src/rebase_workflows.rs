@@ -24,7 +24,7 @@ fn run(path:&Path,command:&[&str],plan:Option<&Path>)->Result<String,String>{
         child.env("GIT_EDITOR","true");
     }
     #[cfg(windows)]child.creation_flags(0x08000000);
-    let result=child.output().map_err(|e|format!("Unable to run Git rebase: {e}"))?;
+    let result=crate::git_runtime::output(child).map_err(|e|format!("Unable to run Git rebase: {e}"))?;
     let output=String::from_utf8_lossy(&result.stdout).trim().to_string();
     if result.status.success(){Ok(output)}
     else{
