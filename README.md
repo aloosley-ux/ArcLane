@@ -22,7 +22,7 @@ The aim is ambitious. The current build is usable for many local Git workflows, 
 
 | Area | Current behaviour |
 | --- | --- |
-| **Repository workspace** | Open, initialise and clone repositories; switch between persistent repo tabs, aliases and recent tabs; inspect branches, refs, stashes and worktrees |
+| **Repository workspace** | Open, initialise and clone repositories; searchable pinned/recent repos, persistent tabs and aliases; inspect branches, refs, stashes and worktrees |
 | **History and graph** | Browse/search a virtualised commit graph, inspect commits, compare two commits/refs and review historical changes |
 | **Changes and commits** | Stage/unstage whole files or individual hunks; compare file snapshots; create commits, amend messages, override authors and add co-authors |
 | **Advanced Git** | Branch/tag operations, fetch/push, pull strategies, guarded ordered cherry-pick (up to 32 commits), linear interactive rebase (pick/reword/squash/drop), revert, soft/mixed reset and reflog inspection |
@@ -45,7 +45,7 @@ The development record is unusually explicit because it matters:
 - Mutating Git tests use fresh disposable repositories and inspect the resulting refs, index and working files. The UI tests drive the **actual packaged Tauri/WebView2 executable**, not just browser mock-ups.
 - The graph has been tested against an 811-commit fixture. **10,000+ commit scalability is not yet established.**
 
-The [full 104-obligation ledger](docs/FEATURE_COVERAGE.md) currently reports **14 accepted local scopes, 51 partial, 5 partial/mock-only, 4 backend-only and 30 unverified**. *Accepted scope* does not mean unlimited production readiness.
+The [full 104-obligation ledger](docs/FEATURE_COVERAGE.md) currently reports **15 accepted local scopes, 51 partial, 5 partial/mock-only, 4 backend-only and 29 unverified**. *Accepted scope* does not mean unlimited production readiness.
 
 Exact evidence and limitations: [feature sprint](docs/FEATURE_SPRINT_2026-10-10.md) · [live GitHub checkpoint](docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md).
 
@@ -70,6 +70,12 @@ ArcLane is built with **AI-assisted software development**. The product directio
 | Verification | Rust/CLI fixture checks, packaged native UI acceptance and independent Git state assertions |
 
 **REA** research helped catalogue observable workflows and build an evidence-backed checklist. **ReAgent** is available in the broader local tooling for differential evaluation, but it is *not* a prerequisite or embedded dependency of ArcLane. No proprietary GitKraken implementation, assets or extracted research are included in this repository.
+
+## Current feature-branch preview
+
+The newer working preview is currently built and tested on the development branch. It adds persistent repository favourites, first-launch checks, and the previously verified Git workflows. It has **not** replaced the public `main` release. The portable build and NSIS installer were verified locally on Windows, with an isolated app profile.
+
+For repeatable development-preview deployment, use `scripts/install-portable-preview.ps1` with a previously verified packaged executable. It checks the copied file's SHA-256, preserves the previous version and refuses to overwrite a running app. No GitHub Actions or self-hosted runner is required.
 
 ## Download and build
 
