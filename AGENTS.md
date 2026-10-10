@@ -1,39 +1,36 @@
-# Arclane — instructions for local coding agents
+# ArcLane — development and verification rules
 
-Before changing code read:
-- docs/LOCAL_AGENT_HANDOFF_2026-10-10.md
-- docs/FEATURE_COVERAGE.md (104 product obligations; NOT 104 accepted features)
-- docs/GITKRAKEN_AUDIT.md
+## Where we are
 
-## Product goals
-A polished, information-dense, responsive **Windows Git desktop application**, at least matching the broad daily workflow of GitKraken 12.6. Distinctive original UI, not a generic web dashboard. Rust + Tauri 2 + React/TypeScript; minimal CPU/memory, no routine background polling, no background AI model. The user is very demanding about actual rendered UI quality; inspect packaged pixels, not just source or visual mockups.
+ArcLane is a Windows-first Rust/Tauri Git desktop client. The Review Bench interface is the current baseline. Public GitHub repository: https://github.com/aloosley-ux/ArcLane. The 104-item scope is documented in `docs/FEATURE_COVERAGE.md`; implementation status there is authoritative for claims, not a promise of full GitKraken parity.
 
-## Boundaries
-- Current feature sprint: work only in C:\AI\REA\Experiments\Arclane-Features on feature/gitkraken-parity. C:\AI\REA\Experiments\Arclane is the protected main checkout; do not modify it, switch branches, create worktrees or push.
-- The only authorised destructive Git testing location is a NEW test fixture in C:\AI\REA\Experiments\Forge-Testbed.
-- Never modify Cortana, SDS, Nostalgia, other real project repositories, installed GitKraken assets, or existing user work.
-- No live GitHub PR/issue/review/merge/push writes during development tests. Use scripts/mock-gh.rs and scripts/github-fixtures for offline mock tests. Obtain explicit approval before any real remote mutation.
-- Do not import, redistribute, or reuse proprietary GitKraken sources/assets from local REA research.
-- Never run git reset --hard, git clean -fd, force push, kill all Node processes or delete unknown directories as cleanup shortcuts.
+Start with: `README.md`, `docs/FEATURE_COVERAGE.md`, `docs/FEATURE_SPRINT_2026-10-10.md`, and `docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md`. Consult historical audit/research only when necessary for a concrete missing behaviour.
 
-## Building a real release
-~~~powershell
-Set-Location 'C:\AI\REA\Experiments\Arclane-Features'
-npm run build
-$env:CARGO_TARGET_DIR='C:\AI\REA\Experiments\Forge\src-tauri\target'
-npx tauri build --no-bundle
-Copy-Item 'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane.exe' '.\Build\Arclane.exe' -Force
-~~~
+## Repo-first working model
 
-Important: standalone cargo build --release does NOT package frontend assets and can create an executable looking for a localhost Vite dev server. Run Tauri's build, then test the packaged WebView2 application.
+- `main` is the integrated, tested public baseline. Develop on a feature branch and preserve commit history.
+- No unrelated repository changes, no destructive cleanup, no force pushing, and no history rewrites of published branches.
+- Prefer source edits, normal Git commands and reproducible repo scripts. Use desktop remote control only for essential native Windows tasks.
+- Commit coherent verified batches with concise messages and updated coverage evidence. Do not claim tests were run unless they were actually executed.
+- Remote GitHub reads may be useful; **never** perform live issue/PR/merge/review writes or destructive remote Git operations during tests without explicit approval.
+- Never copy proprietary GitKraken code, icons, art, bundles, internal styles or extracted source from REA research into ArcLane.
 
-Build/, dist/ and artifacts/ are ignored generated outputs. Source files, scripts and docs should be committed. No Git remote is currently configured.
+## Git safety
 
-## Testing, checkpointing
-- Run relevant scripts/accept-*.py on fresh disposable Git repos. Check resulting Git index, refs and working files independently.
-- Run scripts/native-*-accept.mjs against a *packaged* Windows EXE; native UI acceptance is required before marking a complete workflow accepted.
-- New this handoff: python scripts/accept-toolbox.py; node scripts/native-toolbox-accept.mjs; python scripts/accept-github-mock.py; node scripts/native-collab-mock-accept.mjs.
-- Mock GitHub tests require ignored artifacts/mock-gh/gh.exe. Build with rustc --edition 2021 scripts/mock-gh.rs -o artifacts/mock-gh/gh.exe. These prepend the mock to PATH; never silently remove that guard.
-- Keep docs/FEATURE_COVERAGE.md truthful. Mock test pass is not acceptance against real GitHub. User expects all 104 obligations eventually, not selective feature reductions.
-- Commit each coherent milestone with clean git status and actionable summary. Preserve existing branch/main history. Do not push without instruction.
-- Latest sprint architecture, verified scopes and remaining priorities: docs/FEATURE_SPRINT_2026-10-10.md. Complete regressions: powershell -NoProfile -File scripts/verify-sprint.ps1 (14 backend suites, 16 packaged UI suites); native launch smoke remains scripts/native-accept.ps1. Provider suites are strictly offline mock acceptance.
+All mutating Git acceptance tests must use **new disposable fixture repositories**, never real development/user repos. On the original dev machine the isolated fixture root is `C:\AI\REA\Experiments\Forge-Testbed`. Some inherited scripts assume that environment; make them portable gradually, without redirecting destructive tests at real repositories.
+
+Do not use `git reset --hard`, `git clean -fd`, force push, or mass-kill process commands as cleanup shortcuts. Preserve unknown data. Verify HEAD, refs, index and file bytes independently for state-changing operations. Do not extract or log credentials.
+
+## Testing: fast, focused, and honest
+
+- During implementation, run the relevant `scripts/accept-*.py` backend fixture checks and `scripts/native-*-accept.mjs` packaged UI tests.
+- Before integrating or releasing, use `powershell -NoProfile -File scripts/verify-sprint.ps1` with configured Windows dependencies. Targeted `-Phase backend` or `-Phase native` is supported.
+- Build the release with `npx tauri build --no-bundle`, not standalone `cargo build --release`. Native acceptance must exercise the embedded Tauri/WebView2 production executable.
+- Provider mock tests do not count as live provider acceptance. The live GitHub read-only suite is explicitly opt-in and has no remote writes.
+- Keep test output compact on success; retain full logs/evidence to inspect only when failures arise. REA can provide evidence-driven native UI inspection; use ReAgent's differential harness only when appropriate.
+- Update `docs/FEATURE_COVERAGE.md` accurately; accepted local scopes, mock-only evidence and unverified features are different classifications.
+- Protect the original design and responsive behaviour. Inspect actual pixels whenever changing UI.
+
+## AI development boundaries
+
+AI contributions are welcome, but claims must match evidence. Preserve low idle resource usage and on-demand processes. Never introduce background AI, telemetry, always-on polling or cloud dependence without user approval. Favour completion, independent verification and clean handoffs over speculative redesigns.

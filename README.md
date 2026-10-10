@@ -1,78 +1,110 @@
-# Arclane — Windows Git desktop client (working name)
+# ArcLane
 
-**Status: exploratory v0.1, NOT GitKraken feature parity.** Original user-facing design and source. Full product target: complete GitKraken 12.6 workflow coverage with a distinct visual system, a Rust-native Git/process backend, on-demand GitHub integrations, agent/worktree operations and low idle overhead.
+**Git should be powerful. The desktop app around it shouldn't get in your way.**
 
-## Run and build
+A real, local-first Git desktop client for Windows. Built with Rust, Tauri and a lot of testing — plus a healthy amount of AI-assisted development.
 
-- Production frontend: `npm install && npm run build`.
-- **Production Windows build:** `npx tauri build --no-bundle`. This invokes the frontend build and packages its output inside the actual native EXE. **Do not use standalone `cargo build --release` for distribution**: that binary may load the Vite dev server (`127.0.0.1:1422`) instead of embedded assets. For this checkout, share the existing Rust target cache with `$env:CARGO_TARGET_DIR = "C:\\AI\\REA\\Experiments\\Forge\\src-tauri\\target"` and copy the resulting `target/release/arclane.exe` to local `Build/Arclane.exe`.
-- Desktop dev mode: `npm run desktop` (uses Vite + Tauri).
-- Functional UI capture without touching real repos: `node scripts/visual-accept.mjs`; it injects recorded **real Git output** from the disposable `Forge-Testbed/forge-visual-benchmark` into a short-lived local browser. This test mock is never shipped in the production app.
+**Current release: v0.1.0 · public alpha · not GitKraken feature parity.**
 
-## Current working slices
+[**Download the Windows alpha**](https://github.com/aloosley-ux/ArcLane/releases/tag/v0.1.0-alpha.1) · [See the 104-feature checklist](docs/FEATURE_COVERAGE.md) · [Read the technical checkpoint](docs/FEATURE_SPRINT_2026-10-10.md)
 
-- Persistent repository tabs, aliases, ordering, active selection and closed-tab history; recent repositories and open folder picker. Right-click a tab for its actions; Ctrl+W closes a tab and Ctrl+Shift+T reopens it. Tabs survive a full application restart.
-- References sidebar (local, remote, tags, stashes, worktrees); graph history across refs, search and manual pagination.
-- Real staged/unstaged status and **selective hunk staging/unstaging**; read-only native side-by-side UTF-8 diff including expanded full-file view; **three-way text conflict resolution** with ours/theirs/manual decisions; file history and line blame; commits, branch/tag maintenance, merge/rebase/cherry-pick/revert (including conflict detection/continue/abort), stash apply/pop/drop, worktree create/lock/unlock/remove, soft/mixed reset, fetch, fast-forward pull, push.
-- Explicit clone and repository initialization with folder selection and Rust-side destination/transport validation.
-- Guarded commit amend with full message, author and co-author controls; remote-tracking sharing warnings; exact two-commit/ref comparisons, commit metadata and confirmed multi-file historical restore that preserves the index.
-- Context menus for commits and references; merge/rebase/fast-forward pull choices; stash patch review including untracked content and index restoration; detection and continue/abort of Git-paused merge/rebase/cherry-pick/revert operations when opening a repository.
-- Searchable patch and side-by-side diffs, word highlights, visible/ignored whitespace and persistent diff preferences. UTF-8 text is supported; patch views show at most 1,400 lines and search those displayed lines.
-- On-demand GitHub PR/issue/CI integration via existing `gh` login, including PR patches and CI job/step detail. Provider reads support scoped cancellation, bounded output, deadlines and Windows helper-process cleanup. **Public GitHub PR/patch/CI reads, cancellation and missing-repository retry are live verified; private/enterprise coverage remains unverified.** Existing confirmed provider write controls have mock contract tests only.
-- Agent worktree organisation, **multiple live on-demand ConPTY PowerShell terminal tabs** and external editor integration. ConPTY processes terminate with their tabs or when the app closes. Does **not** represent real agent status until an integration exists.
-- Native process model: Git CLI processes are short-lived, with no repo polling, model inference or embedded server required during ordinary native use.
+![ArcLane Review Bench with commit graph, inspection and history](docs/media/arclane-review-bench.png)
 
-## Reference and evidence
+## Why ArcLane exists
 
-- Latest installed source reference: GitKraken `12.6.0`, `%LOCALAPPDATA%/gitkraken/app-12.6.0/resources/app.asar`. The archival extraction uses REA's installed local ASAR library, with 340 code/resources entries **individually SHA-256 integrity checked, zero mismatches**, in `C:/AI/REA/Experiments/Forge/artifacts/gitkraken-12.6-app-code` (locally ignored, proprietary, not copied to Arclane).
-- REA 6.2.0 completed the 12.6 application architecture scan; an attempt to request only summary keys returned an empty filtered result. It is **not** legitimate to infer coverage from that output. Complete 12.5 REA static evidence and known limitations remain at `C:/AI/REA/Experiments/Forge/docs/GITKRAKEN_AUDIT.md`.
-- GitKraken 12.6 adds **stacked pull requests** (branch-to-branch PR chains and graph/list status) and **multiple terminal tabs per worktree/repo**. Stacked PR chains remain **unimplemented**; multiple embedded terminal tabs are implemented and validated in a packaged native Windows application. See official 12.6 release notes: https://gitkraken.com/blog/break-up-that-monster-pr-whats-new-in-gitkraken-desktop-12-6
-- The complete **104-obligation** ledger is in [docs/FEATURE_COVERAGE.md](docs/FEATURE_COVERAGE.md). Every accepted scope requires native interactive acceptance, not static labels or screenshot appearance.
+I wanted a capable Git client that felt like a proper desktop tool: a clear graph, straightforward everyday operations, good diff inspection, worktrees, useful terminals and no background AI or subscription service just to manage a local repository.
 
-## Boundaries
+GitKraken is one of the benchmarks for *what a mature Git client lets people do*. ArcLane is an independent implementation with its own design and code, not a fork, reskin or affiliated product.
 
-- Existing Forge and installed GitKraken remain untouched and separately usable.
-- Tests may mutate only disposable repositories under `C:/AI/REA/Experiments/Forge-Testbed`.
-- No tests mutate Cortana, SDS, Nostalgia or any other live repository; real repos were **not tested for writes**.
-- No extraction of proprietary product source, bundled icons, proprietary styles or internal names into tracked Arclane implementation.
-- A successful compile or visual screenshot is **not evidence** of full UI acceptance; future evaluations should explicitly grade native behaviour, Git correctness and resource usage.
+The aim is ambitious. The current build is usable for many local Git workflows, but **there is a lot still to build and validate**. I'd rather tell you precisely what works than dress a prototype up as a finished replacement.
 
-## Known gaps — major
+## What you can do today
 
-Side-by-side diff and text conflict resolver lack syntax highlighting, rich per-word editing, image/binary conflicts, complex three-way merge automation and very large file scalability. Interactive rebase, general undo/redo and core Git process cancellation are outstanding; recovery currently offers non-destructive reflog-to-new-branch rescue. Gitflow starts and basic LFS/submodule tools exist, but their complete lifecycles remain unfinished. Complete provider workflows, signing, complete stacked PR workflows, agent permission requests, worktree tab grouping and installer acceptance remain outstanding. The graph has been tested through 811 commits, not 10k+ or octopus-merge complexity. Repository tabs persist; terminal processes do not survive app restart.
+| Area | Current behaviour |
+| --- | --- |
+| **Repository workspace** | Open, initialise and clone repositories; switch between persistent repo tabs, aliases and recent tabs; inspect branches, refs, stashes and worktrees |
+| **History and graph** | Browse/search a virtualised commit graph, inspect commits, compare two commits/refs and review historical changes |
+| **Changes and commits** | Stage/unstage whole files or individual hunks; compare file snapshots; create commits, amend messages, override authors and add co-authors |
+| **Advanced Git** | Branch/tag operations, fetch/push, pull with fast-forward/merge/rebase strategies, cherry-pick, revert, soft/mixed reset and reflog inspection |
+| **Stash and recovery** | Review stash patches, restore index state, guard against stale stash selections; resume or abort paused merge/rebase/cherry-pick/revert after restarting the app |
+| **File inspection** | Side-by-side and patch diffs, word highlights, whitespace controls, per-file history, blame and three-way text conflict resolution |
+| **Local development** | Worktree tools and embedded on-demand PowerShell terminals via Windows ConPTY |
+| **GitHub** | On-demand PR, patch and CI details via your existing `gh` authentication; scoped cancellation, timeouts and actionable errors for provider reads |
 
-## Feature sprint checkpoint
+![ArcLane side-by-side diff review in its dark interface](docs/media/arclane-diff-review.png)
 
-Latest: [read-only GitHub verification](docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md) covers real public PR patches/CI detail, cancellation and actionable errors, with the final executable hash. Live writes remain untested and unperformed.
+These are **working slices**, not claims that every edge case or every GitKraken feature is supported. Some provider write screens have *mock-only* tests, and many advanced workflows are incomplete. Nothing secretly runs an AI model behind your back.
 
-Six completed feature batches retain the Review Bench design. See [the sprint technical checkpoint](docs/FEATURE_SPRINT_2026-10-10.md) for commit hashes, implementation boundaries and final acceptance evidence. Build the executable with Tauri, then run `powershell -NoProfile -File scripts/verify-sprint.ps1` for all backend and packaged native regressions. Use `-Phase backend` or `-Phase native` for targeted runs. The backend tests use the shared release CLI at `C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe`; build that CLI from this checkout before running them. All Git mutation fixtures live under `Forge-Testbed`; provider suites use the local mock executable.
+## What is actually verified?
 
-## Verified preview acceptance
+The development record is unusually explicit because it matters:
 
-- Frontend `npm run build`: passed, 1,746 modules transformed and no TypeScript errors.
-- Testbed GUI `node scripts/visual-accept.mjs`: loaded all **109** genuine commits from the isolated `forge-visual-benchmark` fixture in the live custom interface, with **zero JavaScript page errors**. Evidence: ignored `artifacts/arclane-visual-acceptance.json` and `arclane-visual-1600.png`.
-- Rust release executable: `Build/Arclane.exe` (locally ignored); passed `scripts/native-accept.ps1` Windows window launch and process-idle check. At that checkpoint, **main process only** measured 32.2 MB working set and 0 ms additional CPU over 8 seconds; **WebView2 processes are not included**. This is not total footprint or large-repo performance.
-- No GitHub remote writes or destructive live-repo operations were performed.
+- The last complete sprint regression passed **14 backend suites (120 grouped checks)** and **16 packaged Windows UI suites**, with a native launch/idle check.
+- A later, smaller live GitHub checkpoint passed **6 backend and 8 packaged UI checks** against real public repositories, plus focused provider regressions. It performed **no remote writes**.
+- Mutating Git tests use fresh disposable repositories and inspect the resulting refs, index and working files. The UI tests drive the **actual packaged Tauri/WebView2 executable**, not just browser mock-ups.
+- The graph has been tested against an 811-commit fixture. **10,000+ commit scalability is not yet established.**
 
-## October 10 independent acceptance expansion
+The [full 104-obligation ledger](docs/FEATURE_COVERAGE.md) currently reports **14 accepted local scopes, 49 partial, 5 partial/mock-only, 4 backend-only and 32 unverified**. *Accepted scope* does not mean unlimited production readiness.
 
-- `python scripts/accept-advanced-git.py`: 20 grouped backend workflows passed in disposable repositories, including merge-conflict abort, rebase, cherry-pick, revert, safe worktree removal, stash and dangerous input rejection.
-- `python scripts/accept-hunks.py`: six checks passed for selective index patching, including a three-hunk file, exact reverse unstage, Unicode paths and invalid path refusal.
-- `node scripts/native-ui-accept.mjs`: ten checks passed against **the actual packaged native EXE** with WebView2 CDP and independent Git state verification (five diff/hunk checks and five pseudo-terminal lifecycle checks); zero JavaScript errors.
-- `python scripts/accept-repositories.py`: five tests passed for clone/initialize, SHA/content identity, overwrite refusal and unsafe URL rejection.
-- The first native launch test exposed an incorrectly built development-only EXE. That failure is documented and the release build was corrected to use `npx tauri build --no-bundle`. Native CDP verified the production page is `http://tauri.localhost/`, with no Vite listener required.
-- Idle CPU/memory measurement remains incomplete for the **full** WebView2 process tree. No claimed total RAM budget until measured.
+Exact evidence and limitations: [feature sprint](docs/FEATURE_SPRINT_2026-10-10.md) · [live GitHub checkpoint](docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md).
 
-- Native 811-commit graph acceptance: 350, 700 and 811 loaded commits each mounted 37 rows or fewer; oldest commit reachable; no renderer exceptions. See ignored artifacts/graph-native-acceptance.json.
-- Full idle process-tree measurement on the same 811-commit fixture (8-second window): 1 Arclane process + 6 WebView2 processes; 201.0 MB summed private memory; 413.1 MB summed working sets (shared pages potentially double-counted); 47 ms total CPU across 8 seconds. This is not a typical fresh-install footprint, GPU metric or long-duration benchmark. See scripts/measure-resources.ps1 and artifacts/resource-measurement.json.
+## The honest limitations
 
-## Verified file-inspection and merge milestone — 2026-10-10
+The biggest unfinished areas include interactive rebase and multi-commit cherry-pick, core Git cancellation and cross-operation serialisation, deeper worktree/agent-session workflows, stacked PRs, rich/binary/image conflict tooling, additional Git providers, full LFS/submodule lifecycles, signing, accessibility and large-repository performance. Private/enterprise GitHub and live provider writes are not accepted.
 
-- Rust conflict engine: 6 isolated backend checks covering base/ours/theirs extraction, exact ours/theirs/manual staging, Unicode file paths and rejected invalid or stale targets (`scripts/accept-conflicts.py`).
-- Native conflict resolver: 6 actual packaged Windows application acceptance checks against **two real simultaneous conflicts**; one incoming-version resolution, one manual reconciliation, independent Git index verification, and successful two-parent merge completion (`scripts/native-conflict-accept.mjs`).
-- Paired file comparison: 9 Rust command acceptance checks for HEAD/index/worktree contents, partially staged files, added/deleted files, historical commit parent snapshots, Unicode and invalid/binary paths (`scripts/accept-compare.py`). Read-only side-by-side UI aligns changed lines and virtualises both small/expanded views.
-- File history and blame: 4 isolated Rust checks across commits by different authors (`scripts/accept-file-inspection.py`), and 6 packaged Windows UI checks for three commit records, historical diff, correct per-line authorship, search and no Git mutations (`scripts/native-file-insights-accept.mjs`).
-- Latest packaged native regression: **12** Git/hunk/side-by-side/terminal checks, **6** conflict checks and **5** virtualised graph checks all pass independently, with no JavaScript renderer exceptions. All state-changing tests use disposable `Forge-Testbed` descendants.
-- The full product ledger remains at **104 target workflows**. Specific verified slices have been updated in `docs/FEATURE_COVERAGE.md`, while whole-feature parity remains unclaimed. Unfinished major areas include provider PR reviews and mutations, stacked PRs, interactive rebase, multi-provider CI, LFS/submodules, signing, agent integrations, high-volume graph tests and installer distribution acceptance.
+This is a Windows-first alpha. **The standalone EXE is unsigned**, so Windows may warn before running it. It requires WebView2 and a local Git installation. GitHub features require `gh` installed and authenticated. It has **not** completed clean-machine installer acceptance.
 
-**Latest provisional idle measurement:** packaged Arclane with 811 loaded commits, 10-second warm-up, 8-second observation: seven processes (one Arclane, six WebView2), **230 MB total private memory**, **426 MB summed working sets** (shared pages can be counted repeatedly), and **437 ms accumulated CPU** across the process tree. A shorter three-second warm-up measured 258 MB private and 1,079 ms CPU during its eight-second sample, so results vary with startup settling. These are measurements, not a validated lifetime resource budget.
+For important repositories, keep an established Git tool available while ArcLane gains real-world usage. Back up work before trying advanced operations — Git safety is about outcomes, not the presence of a confirmation dialog.
+
+## How it's made
+
+ArcLane is built with **AI-assisted software development**. The product direction, constraints, acceptance criteria and review come from a human; AI coding agents have contributed implementation, investigation, tests and iteration. I'm not claiming it was hand-coded line by line, nor that an AI-generated screenshot proves a working product.
+
+| Layer | Technology |
+| --- | --- |
+| Desktop | Tauri 2 + Windows WebView2 |
+| Git/process logic | Rust backend invoking real local Git and `gh` |
+| Interface | React 19, TypeScript, Vite and an original Review Bench design |
+| Terminals | Rust portable-pty + Windows ConPTY |
+| Verification | Rust/CLI fixture checks, packaged native UI acceptance and independent Git state assertions |
+
+**REA** research helped catalogue observable workflows and build an evidence-backed checklist. **ReAgent** is available in the broader local tooling for differential evaluation, but it is *not* a prerequisite or embedded dependency of ArcLane. No proprietary GitKraken implementation, assets or extracted research are included in this repository.
+
+## Download and build
+
+Get the **Windows portable executable** from [GitHub Releases](https://github.com/aloosley-ux/ArcLane/releases/tag/v0.1.0-alpha.1). This is an alpha build, **not an installer**. Nothing is silently installed as a service.
+
+To build from source on Windows, install Node.js/npm, Rust/MSVC with the Visual Studio C++ build tools, and WebView2:
+
+```powershell
+git clone https://github.com/aloosley-ux/ArcLane.git
+cd ArcLane
+npm ci
+npx tauri build --no-bundle
+```
+
+For the development app:
+
+```powershell
+npm run desktop
+```
+
+**Important:** use the Tauri build for a distributable executable. A standalone Rust `cargo build --release` may still point at the Vite development server rather than embedding frontend assets.
+
+For development verification, see [CONTRIBUTING.md](CONTRIBUTING.md). The full native acceptance suite requires a Windows machine, test dependencies and *disposable* Git fixtures; some inherited scripts still expect the original development environment.
+
+## Local-first by design
+
+ArcLane needs no ArcLane account, cloud service, subscription, background repository scanner or background AI model. It reads and writes the repositories you choose. Git remote operations and GitHub queries use their normal external connections **only when requested**.
+
+Commands run with your Windows user's permissions; ArcLane isn't a sandbox. Application and repository settings are local. No telemetry is implemented.
+
+## Where this goes next
+
+The goal is a polished, fast, trustworthy Git client — and ultimately broader workflow coverage. Development tracks actual acceptance rather than pretending the application is finished. See [the feature ledger](docs/FEATURE_COVERAGE.md) for the precise roadmap.
+
+Contributions, bug reports and ideas are welcome. For now, source is publicly visible but **no open-source redistribution licence has been selected**. Please don't assume public visibility grants reuse rights; this will be clarified before opening up licensed contributions.
+
+---
+
+*An independent Git client. Human-directed, AI-assisted, tested against real Git, and still very much in development.*
