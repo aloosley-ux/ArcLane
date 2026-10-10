@@ -1,6 +1,6 @@
 use serde_json::{json, Value};
 use crate::advanced;
-use std::{path::{Path,PathBuf},process::{Command,Stdio}};
+use std::{path::{Path,PathBuf},process::{Command,Stdio},collections::HashSet,sync::{Mutex,OnceLock}};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
@@ -159,6 +159,9 @@ pub fn diff(path:&str,file:&str,staged:bool,commit:Option<&str>)->Result<Value,S
 }
 pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Value,String>{
     let p=root(path)?;
+    with_write_guard(&p,|| action_unlocked(&p,op,file,input))
+}
+fn action_unlocked(p:&Path,op:&str,file:Option<&str>,input:Option<&str>)->Result<Value,String>{
     let filename=file.unwrap_or("");
     let detail=input.unwrap_or("").trim();
     if op=="commit_options" { return crate::commit_workflows::write(&p,detail); }
