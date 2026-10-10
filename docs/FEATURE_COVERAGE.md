@@ -53,10 +53,10 @@
 | 047 | Files and commits | Git hooks, skip hooks and GPG signing | not verified | Configured hook and signed commit tests |
 | 048 | Files and commits | Commit templates, trailers and editor settings | not verified | Template and multiline messages |
 | 049 | Files and commits | Safe discard and undo changed files | not verified | Explicit preview and recover path |
-| 050 | Git operations | Clone/init/open URL and SSH support | not verified | Local origin clone and invalid credentials |
+| 050 | Git operations | Clone/init/open URL and SSH support | partial — clone/init tested previously; this checkpoint adds validated remote-management tools; live SSH/account handling incomplete | Local origin clone and invalid credentials |
 | 051 | Git operations | Local/remote branch create/switch/rename/delete | partial | Branches match git show-ref |
-| 052 | Git operations | Tags annotated/lightweight and push/delete | not verified | Refs and tag content verified |
-| 053 | Git operations | Fetch from multiple remotes | not verified | Remote refs and fetched object state |
+| 052 | Git operations | Tags annotated/lightweight and push/delete | partial — annotated tag creation and remote tag pushes/deletes passed local fixtures; native basic create tested | Refs and tag content verified |
+| 053 | Git operations | Fetch from multiple remotes | partial — single remote explicit fetch available; multi-remote coverage remains untested | Remote refs and fetched object state |
 | 054 | Git operations | Pull merge/rebase/ff-only and abort | not verified | Diverged/dirty worktree guarded |
 | 055 | Git operations | Push, set upstream, reject non-fast-forward | backend-tested | Local bare remote verifies push |
 | 056 | Git operations | Force push only with exact explicit confirmation | not verified | Blocked without confirmation, never automatic |
@@ -66,25 +66,25 @@
 | 060 | Git operations | Cherry pick single/multiple and conflict resume | not verified | Expected tree diff and parent relationship |
 | 061 | Git operations | Stash list/create/apply/pop/drop | partial | Tracked and untracked preserved |
 | 062 | Git operations | Worktree create/open/lock/unlock/remove/prune | partial | Disk, branch, lock and refs validated |
-| 063 | Git operations | Submodules sync/add/update | not verified | Gitlink and nested refs validated |
-| 064 | Git operations | Git LFS status/track/lock | not verified | Objects and pointers validated |
-| 065 | Git operations | Gitflow workflow | not verified | Branches established per repo config |
+| 063 | Git operations | Submodules sync/add/update | partial — submodule status/sync/update controls exist; native sync acceptance only; add/removal lifecycle unverified | Gitlink and nested refs validated |
+| 064 | Git operations | Git LFS status/track/lock | partial — LFS detection and track/untrack verified using installed git-lfs; live server lock/unlock not accepted | Objects and pointers validated |
+| 065 | Git operations | Gitflow workflow | partial — Gitflow feature/release/hotfix starts verified in local Git fixtures; finishing/merge lifecycle not implemented | Branches established per repo config |
 | 066 | Git operations | Patch generate/apply and reject | not verified | Resulting diff content verified |
-| 067 | Git operations | Undo/recover destructive operations | not verified | Recoverable reflog-backed operations |
+| 067 | Git operations | Undo/recover destructive operations | partial — reflog list and SHA-to-new-branch rescue tested; general undo/redo absent | Recoverable reflog-backed operations |
 | 068 | Git operations | Error, cancellation and in-progress state handling | not verified | Git sequencer conflicts and abort actions |
-| 069 | Provider collaboration | GitHub auth with existing gh credential | not verified | No key read/exfiltration; login detection |
+| 069 | Provider collaboration | GitHub auth with existing gh credential | partial/mock only — gh delegated auth; live auth states untested; no token storage | No key read/exfiltration; login detection |
 | 070 | Provider collaboration | GitHub orgs/repos and SSH configuration | not verified | Discover and open authenticated repo |
-| 071 | Provider collaboration | GitHub pull request listing and metadata | not verified | Real PR title/base/head and status |
-| 072 | Provider collaboration | Create pull request with template/draft | not verified | PR created only with explicit confirmation |
-| 073 | Provider collaboration | PR base/head diff in native panels | not verified | Files/commits match provider |
-| 074 | Provider collaboration | PR reviews/comments/suggestions/merge | not verified | Permissions and actions verified |
-| 075 | Provider collaboration | GitHub Issues read/filter/assign/close | not verified | Issue metadata and mutations confirmed |
-| 076 | Provider collaboration | Issue -> branch/worktree workflow | not verified | Issue ID/reference carries to branch |
-| 077 | Provider collaboration | GitHub Actions/CI checks display | not verified | Published job state, failure link, refreshing user-driven |
+| 071 | Provider collaboration | GitHub pull request listing and metadata | partial/mock only — PR list/detail fixture and native UI passed; live GitHub not verified | Real PR title/base/head and status |
+| 072 | Provider collaboration | Create pull request with template/draft | partial/mock only — create PR form with confirmation; CLI argument contract mocked; no real create acceptance | PR created only with explicit confirmation |
+| 073 | Provider collaboration | PR base/head diff in native panels | partial/mock only — changed files shown in fixture; no full native PR diff/review | Files/commits match provider |
+| 074 | Provider collaboration | PR reviews/comments/suggestions/merge | partial/mock only — review/comment/merge confirmations and mock commands; live actions not verified | Permissions and actions verified |
+| 075 | Provider collaboration | GitHub Issues read/filter/assign/close | partial/mock only — issues list/details/action forms; live assign/close/comment not verified | Issue metadata and mutations confirmed |
+| 076 | Provider collaboration | Issue -> branch/worktree workflow | partial — issue-to-worktree UI drafted; native Git workflow not verified | Issue ID/reference carries to branch |
+| 077 | Provider collaboration | GitHub Actions/CI checks display | partial/mock only — CI runs shown in native fixture; no live GitHub CI acceptance | Published job state, failure link, refreshing user-driven |
 | 078 | Provider collaboration | GitLab, Bitbucket, Azure DevOps adapters | not verified | Provider-specific verified read/write operations |
 | 079 | Provider collaboration | Links and fallback to external web | not verified | Unsupported native actions open exact URLs |
 | 080 | Provider collaboration | Jira/Trello and provider integration settings | not verified | No integrations run without consent |
-| 081 | Provider collaboration | Launchpad cross-repo issues/PRs/attention | not verified | Cross-repo list/filter and detail |
+| 081 | Provider collaboration | Launchpad cross-repo issues/PRs/attention | partial/mock only — on-demand GitHub PRs/issues/CI list; no cross-repo aggregations verified | Cross-repo list/filter and detail |
 | 082 | Agent and terminal | Worktree-centred Agent Sessions mode | not verified | Same worktrees in List and Agents views |
 | 083 | Agent and terminal | External agent CLI detection/config | not verified | Detect local executables without side effects |
 | 084 | Agent and terminal | Create branch+worktree+agent session | not verified | Named worktree and child process verified |
@@ -119,7 +119,9 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 
 | # | Domain | User-visible obligation | Current evidence | Acceptance condition |
 |---|---|---|---|---|
-| 103 | Remote collaboration | Stacked PR chains, PR-on-PR branch bases, stack numbers/dependencies/merged state in sidebar, graph and PR panel | not implemented | GitHub-connected disposable PR fixture has exact chain order and cross-panel consistency; explicit user approval required for creation |
+| 103 | Remote collaboration | Stacked PR chains, PR-on-PR branch bases, stack numbers/dependencies/merged state in sidebar, graph and PR panel | partial/mock only — head/base branch dependencies shown as a 3-level stack; no restack/retarget/cascade operations | GitHub-connected disposable PR fixture has exact chain order and cross-panel consistency; explicit user approval required for creation |
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**2026-10-10 local agent handoff:** scopes 050, 052, 053, 063–065, 067, 069–077, 081 and 103 were updated with evidence labels. Provider-specific write paths remain *mock-only*, not production-accepted. See LOCAL_AGENT_HANDOFF_2026-10-10.md.

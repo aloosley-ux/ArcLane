@@ -1,0 +1,12 @@
+[
+  {
+    "databaseId": 101,
+    "displayTitle": "Build and test",
+    "workflowName": "Validation",
+    "status": "completed",
+    "conclusion": "success",
+    "headBranch": "main",
+    "updatedAt": "2026-10-10T18:00:00Z",
+    "url": "https://github.com/fixture/fixture/actions/runs/101"
+  }
+]

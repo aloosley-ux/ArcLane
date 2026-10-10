@@ -5,6 +5,8 @@
 #[path="../conflicts.rs"] mod conflicts;
 #[path="../comparison.rs"] mod comparison;
 #[path="../file_inspection.rs"] mod file_inspection;
+#[path="../toolbox.rs"] mod toolbox;
+#[path="../provider.rs"] mod provider;
 use serde_json::{json,Value};
 fn main(){
  let input:Vec<String>=std::env::args().collect();
@@ -19,6 +21,10 @@ fn main(){
     "hunks"=>hunks::list(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true),
     "apply_hunk"=>hunks::apply(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,opts["index"].as_u64().ok_or("Missing index")? as usize),
     "action"=>git::action(&input[2],field("op").ok_or("Missing action op")?,field("file"),field("input")),
+    "collab"=>provider::query(&git::root(&input[2])?,field("kind").ok_or("Missing kind")?,field("id")),
+    "collab_action"=>provider::mutate(&git::root(&input[2])?,field("operation").ok_or("Missing op")?,field("target").unwrap_or(""),&opts["detail"]),
+    "tools"=>toolbox::inspect(&git::root(&input[2])?,field("section").ok_or("Missing section")?),
+    "tool_action"=>toolbox::perform(&git::root(&input[2])?,field("op").ok_or("Missing op")?,field("file").unwrap_or(""),field("input").unwrap_or("")),
     "file_history"=>file_inspection::history(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
     "file_blame"=>file_inspection::blame(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
     "compare"=>comparison::compare(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,field("commit")),

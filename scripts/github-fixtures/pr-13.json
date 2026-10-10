@@ -1,0 +1,55 @@
+{
+  "number": 13,
+  "title": "Payment integration",
+  "headRefName": "feat/payments",
+  "baseRefName": "feat/auth",
+  "state": "OPEN",
+  "isDraft": true,
+  "url": "https://github.com/fixture/fixture/pull/13",
+  "updatedAt": "2026-10-10T18:05:00Z",
+  "reviewDecision": "REVIEW_REQUIRED",
+  "mergeable": "MERGEABLE",
+  "mergeStateStatus": "CLEAN",
+  "statusCheckRollup": [
+    {
+      "name": "CI",
+      "status": "COMPLETED",
+      "conclusion": "FAILURE"
+    }
+  ],
+  "author": {
+    "login": "bob"
+  },
+  "labels": [],
+  "body": "Depends on auth",
+  "files": [
+    {
+      "path": "src/payments.ts",
+      "additions": 30,
+      "deletions": 2
+    }
+  ],
+  "commits": [
+    {
+      "oid": "abcdef123456",
+      "messageHeadline": "Add payments"
+    }
+  ],
+  "reviews": [
+    {
+      "author": {
+        "login": "reviewer"
+      },
+      "body": "Needs a test",
+      "state": "CHANGES_REQUESTED"
+    }
+  ],
+  "comments": [
+    {
+      "author": {
+        "login": "alice"
+      },
+      "body": "Following up"
+    }
+  ]
+}

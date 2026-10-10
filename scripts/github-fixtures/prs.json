@@ -1,0 +1,82 @@
+[
+  {
+    "number": 12,
+    "title": "Authentication foundation",
+    "headRefName": "feat/auth",
+    "baseRefName": "main",
+    "state": "OPEN",
+    "isDraft": false,
+    "url": "https://github.com/fixture/fixture/pull/12",
+    "updatedAt": "2026-10-10T18:00:00Z",
+    "reviewDecision": "REVIEW_REQUIRED",
+    "statusCheckRollup": [
+      {
+        "name": "unit tests",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "author": {
+      "login": "alice"
+    },
+    "labels": [],
+    "body": "Base work"
+  },
+  {
+    "number": 13,
+    "title": "Payment integration",
+    "headRefName": "feat/payments",
+    "baseRefName": "feat/auth",
+    "state": "OPEN",
+    "isDraft": true,
+    "url": "https://github.com/fixture/fixture/pull/13",
+    "updatedAt": "2026-10-10T18:05:00Z",
+    "reviewDecision": "REVIEW_REQUIRED",
+    "statusCheckRollup": [
+      {
+        "name": "CI",
+        "status": "COMPLETED",
+        "conclusion": "FAILURE"
+      }
+    ],
+    "author": {
+      "login": "bob"
+    },
+    "labels": [],
+    "body": "Depends on auth"
+  },
+  {
+    "number": 14,
+    "title": "Reporting integration",
+    "headRefName": "feat/reports",
+    "baseRefName": "feat/payments",
+    "state": "OPEN",
+    "isDraft": false,
+    "url": "https://github.com/fixture/fixture/pull/14",
+    "updatedAt": "2026-10-10T18:10:00Z",
+    "reviewDecision": "APPROVED",
+    "statusCheckRollup": [],
+    "author": {
+      "login": "carol"
+    },
+    "labels": [],
+    "body": "Depends on payments"
+  },
+  {
+    "number": 15,
+    "title": "Critical hotfix",
+    "headRefName": "fix/critical",
+    "baseRefName": "main",
+    "state": "MERGED",
+    "isDraft": false,
+    "url": "https://github.com/fixture/fixture/pull/15",
+    "updatedAt": "2026-10-10T18:16:00Z",
+    "reviewDecision": "APPROVED",
+    "statusCheckRollup": [],
+    "author": {
+      "login": "alice"
+    },
+    "labels": [],
+    "body": "Standalone"
+  }
+]

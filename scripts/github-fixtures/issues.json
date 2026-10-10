@@ -1,0 +1,19 @@
+[
+  {
+    "number": 42,
+    "title": "Improve payment retries",
+    "state": "OPEN",
+    "url": "https://github.com/fixture/fixture/issues/42",
+    "updatedAt": "2026-10-10T18:00:00Z",
+    "author": {
+      "login": "alice"
+    },
+    "labels": [],
+    "assignees": [
+      {
+        "login": "bob"
+      }
+    ],
+    "body": "Retry failures"
+  }
+]
