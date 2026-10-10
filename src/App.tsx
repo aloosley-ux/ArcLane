@@ -24,6 +24,7 @@ import ContextMenu,{type ContextState,type MenuAction} from "./ContextMenu";
 import RevisionReviewPanel from "./RevisionReview";
 import CommitOptions from "./CommitOptions";
 import CherryPickSeries from "./CherryPickSeries";
+import InteractiveRebase from "./InteractiveRebase";
 import Collaboration from "./Collaboration";
 import {buildGraph,graphPalette}from "./graph";
 import type{WorkspaceState,RepositoryTab,ChangedFile,Commit,DiffHunk,FileComparison,ProviderPr,ProviderRun,Ref,Repository,Worktree}from "./types";
@@ -107,6 +108,7 @@ export default function App(){
  const[pullOptions,setPullOptions]=useState(false);
  const[stashReview,setStashReview]=useState<string|null>(null);
  const[pickSeries,setPickSeries]=useState<string|null>(null);
+ const[rebaseBase,setRebaseBase]=useState<string|null>(null);
  const[contextMenu,setContextMenu]=useState<ContextState|null>(null);
  const[collabRefresh,setCollabRefresh]=useState(0);
  const[toolsSection,setToolsSection]=useState<"remotes"|"reflog">("remotes");
@@ -259,6 +261,7 @@ export default function App(){
   {name:"Copy commit SHA",icon:Copy,perform:()=>void navigator.clipboard.writeText(commit.sha).catch(fail)},
   {name:"Create branch here",icon:GitBranch,enabled:canMutate,perform:()=>askOperation("branch_from_commit","Create branch at commit","Create and switch to a branch at "+short(commit.sha)+". Git protects conflicting local changes.","Branch name","feature/from-history","Create branch",commit.sha)},
   {name:"Cherry-pick commit",icon:GitCommitHorizontal,enabled:canMutate&&commit.parents.length<2,perform:()=>guardedOperation("cherry_pick",commit.sha,"Cherry-pick commit","Apply this commit onto the current branch.",short(commit.sha))},
+  {name:"Interactive rebase after this commit",icon:GitFork,enabled:canMutate&&commit.sha!==repo?.head,perform:()=>setRebaseBase(commit.sha)},
   {name:"Revert commit",icon:Undo2,enabled:canMutate&&commit.parents.length<2,perform:()=>guardedOperation("revert",commit.sha,"Revert commit","Create a new reversing commit; preserve history.",short(commit.sha))},
   {name:"Reset soft to commit",icon:Undo2,enabled:canMutate,perform:()=>guardedOperation("reset_soft",commit.sha,"Soft reset","Move the current branch pointer; keep staged and working files.",short(commit.sha))},
   {name:"Reset mixed to commit",icon:Undo2,enabled:canMutate,perform:()=>guardedOperation("reset_mixed",commit.sha,"Mixed reset","Move the branch pointer and reset the index; keep working files.",short(commit.sha))}
@@ -319,6 +322,7 @@ export default function App(){
   {name:"Delete tag",icon:Trash2,perform:()=>askOperation("tag_delete","Delete Git tag","Delete a local tag. Existing remote tags are not changed.","Tag name","v1.0.0","Delete tag",null,true)},
   {name:"Merge branch into current",icon:GitMerge,perform:()=>askOperation("merge","Merge branch","Merge an existing local branch into the checked-out branch. Git will stop safely if conflicts need resolution.","Branch to merge","feature/ready","Merge branch")},
   {name:"Rebase current branch onto another",icon:GitFork,perform:()=>askOperation("rebase","Rebase branch","Rebase current commits onto another local branch. This rewrites commit hashes. Avoid rebasing published shared history.","Target branch","main","Rebase current branch",null,true)},
+  {name:"Interactive rebase from selected commit",icon:GitFork,perform:()=>{if(currentCommit){setOperationsOpen(false);setRebaseBase(currentCommit.sha);}}},
   {name:"Inspect selected commit files and metadata",icon:FileDiff,perform:()=>currentCommit&&setRevisionReview({to:currentCommit.sha})},
   {name:"Compare selected commit with a branch or revision",icon:ArrowLeftRight,perform:()=>currentCommit&&setRevisionReview({to:currentCommit.sha})},
   {name:"Amend and commit author options",icon:GitCommitHorizontal,perform:()=>setCommitOptions(true)},
@@ -401,6 +405,7 @@ export default function App(){
   {success&&<div className="toast success-toast"><Check size={17}/>{success}</div>}
   {contextMenu&&<ContextMenu menu={contextMenu} onClose={()=>setContextMenu(null)}/>}
   {pullOptions&&<PullOptions key={path} upstream={repo?.upstream} dirty={!!repo?.files.length} busy={!!busy} onPull={strategy=>runAction(strategy)} onClose={()=>setPullOptions(false)}/>}
+  {rebaseBase&&repo&&!repo.sequencer.active&&<InteractiveRebase key={path+rebaseBase} path={path} base={rebaseBase} onApply={(base,expectedHead,steps)=>runAction("rebase_interactive",null,JSON.stringify({base,expectedHead,steps}))} onClose={()=>setRebaseBase(null)}/>}
   {pickSeries!==null&&repo&&!repo.sequencer.active&&<CherryPickSeries key={path+pickSeries} head={repo.head} commits={commits} initial={pickSeries} onApply={items=>runAction("cherry_pick_series",null,JSON.stringify({expectedHead:repo.head,commits:items}))} onClose={()=>setPickSeries(null)}/>}
   {stashReview&&<StashReview key={path+stashReview} path={path} id={stashReview} busy={!!busy} onAction={(op,sha,id)=>runAction(op,sha,id)} onClose={()=>setStashReview(null)}/>}
   {revisionReview&&<RevisionReviewPanel key={path+revisionReview.to+(revisionReview.from||"")} path={path} to={revisionReview.to} from={revisionReview.from} refs={refs} commits={commits} busy={!!busy} onSave={input=>runAction("restore_revision_files",null,input)} onClose={()=>setRevisionReview(null)}/>}
