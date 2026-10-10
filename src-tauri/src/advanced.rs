@@ -13,7 +13,7 @@
        .env("GIT_OPTIONAL_LOCKS","0").stdout(Stdio::piped()).stderr(Stdio::piped());
     cmd.env("GIT_EDITOR","true");
     #[cfg(windows)] cmd.creation_flags(0x08000000);
-    let output=cmd.output().map_err(|e|format!("Unable to launch Git: {e}"))?;
+    let output=crate::git_runtime::output(cmd).map_err(|e|format!("Unable to launch Git: {e}"))?;
     if output.status.success(){Ok(String::from_utf8_lossy(&output.stdout).trim().into())}
     else{
         let error=String::from_utf8_lossy(&output.stderr).trim().to_string();
