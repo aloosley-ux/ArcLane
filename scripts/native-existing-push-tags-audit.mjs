@@ -47,7 +47,7 @@ try{
  if(probe.includes('v-ui-annotated')||git('cat-file','-t','refs/tags/v-ui-annotated')!=='tag')throw Error('Remote tag deletion affected wrong refs');
  checks.push('052 native remote tag delete preserves local annotated tag');
  await page.keyboard.press('Control+p');
- const palette=page.getByRole('dialog',{name:'Command palette'});await palette.locator('input').fill('Create lightweight tag');await page.keyboard.press('Enter');
+ const palette=page.getByRole('dialog',{name:'Command palette'});await palette.locator('input').fill('Create lightweight tag');await palette.getByRole('button',{name:'Create lightweight tag'}).click();
  const create=page.getByRole('dialog',{name:'Create Git tag'});
  await create.getByRole('textbox',{name:'Tag name'}).fill('v-ui-light');
  await create.getByRole('button',{name:'Create tag'}).click();
@@ -56,7 +56,7 @@ try{
  checks.push('052 palette native lightweight tag resolves directly to exact commit');
  await page.locator('.workspace-tabs').getByRole('button',{name:'Commit graph'}).click();
  await page.keyboard.press('Control+p');const pp=page.getByRole('dialog',{name:'Command palette'});
- await pp.locator('input').fill('Delete tag');await page.keyboard.press('Enter');
+ await pp.locator('input').fill('Delete tag');await pp.getByRole('button',{name:'Delete tag',exact:true}).click();
  const remove=page.getByRole('dialog',{name:'Delete Git tag'});
  await remove.getByRole('textbox',{name:'Tag name'}).fill('v-ui-light');
  await remove.getByRole('button',{name:'Delete tag'}).click();
