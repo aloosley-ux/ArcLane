@@ -76,7 +76,7 @@ with tempfile.TemporaryDirectory(prefix="arclane-pick-series-") as temp:
     start_tree = git(repo, "write-tree")
     invoke(repo, "cherry_pick_series", plan([source_conflict, trailing], start), ok=False)
     assert git(repo, "rev-parse", "HEAD") == start
-    assert "UU collision.txt" in git(repo, "status", "--porcelain")
+    assert "AA collision.txt" in git(repo, "status", "--porcelain")
     assert (repo / ".git" / "CHERRY_PICK_HEAD").exists()
     invoke(repo, "cherry_pick_abort")
     assert git(repo, "rev-parse", "HEAD") == start
