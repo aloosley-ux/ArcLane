@@ -30,6 +30,7 @@ Do not use `git reset --hard`, `git clean -fd`, force push, or mass-kill process
 - Keep test output compact on success; retain full logs/evidence to inspect only when failures arise. REA can provide evidence-driven native UI inspection; use ReAgent's differential harness only when appropriate.
 - Update `docs/FEATURE_COVERAGE.md` accurately; accepted local scopes, mock-only evidence and unverified features are different classifications.
 - Protect the original design and responsive behaviour. Inspect actual pixels whenever changing UI.
+- Extend existing Review Bench components and `src/workflow.css`/shared design tokens for new Git workflows. Do not introduce parallel theme systems or one-off visual stylesheets where established modal, button, warning, keyboard and layout patterns fit. Validate both light and dark packaged pixels before claiming UI completion.
 
 ## AI development boundaries
 
