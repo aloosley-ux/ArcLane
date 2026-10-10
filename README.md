@@ -53,3 +53,6 @@ No production-grade side-by-side diff editor or visual merge conflict resolver; 
 - `python scripts/accept-repositories.py`: five tests passed for clone/initialize, SHA/content identity, overwrite refusal and unsafe URL rejection.
 - The first native launch test exposed an incorrectly built development-only EXE. That failure is documented and the release build was corrected to use `npx tauri build --no-bundle`. Native CDP verified the production page is `http://tauri.localhost/`, with no Vite listener required.
 - Idle CPU/memory measurement remains incomplete for the **full** WebView2 process tree. No claimed total RAM budget until measured.
+
+- Native 811-commit graph acceptance: 350, 700 and 811 loaded commits each mounted 37 rows or fewer; oldest commit reachable; no renderer exceptions. See ignored artifacts/graph-native-acceptance.json.
+- Full idle process-tree measurement on the same 811-commit fixture (8-second window): 1 Arclane process + 6 WebView2 processes; 201.0 MB summed private memory; 413.1 MB summed working sets (shared pages potentially double-counted); 47 ms total CPU across 8 seconds. This is not a typical fresh-install footprint, GPU metric or long-duration benchmark. See scripts/measure-resources.ps1 and artifacts/resource-measurement.json.
