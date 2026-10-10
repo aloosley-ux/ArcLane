@@ -8,6 +8,7 @@
 #[path="../toolbox.rs"] mod toolbox;
 #[path="../provider.rs"] mod provider;
 #[path="../provider_process.rs"] mod provider_process;
+#[path="../workspace.rs"] mod workspace;
 #[path="../commit_workflows.rs"] mod commit_workflows;
 #[path="../revision_review.rs"] mod revision_review;
 use serde_json::{json,Value};
@@ -19,6 +20,8 @@ fn main(){
    let field=|k:&str|opts.get(k).and_then(|x|x.as_str());
    match input[1].as_str(){
     "inspect"=>git::inspect(&input[2]),
+    "workspace"=>serde_json::to_value(workspace::load()?).map_err(|e|e.to_string()),
+    "save_workspace"=>serde_json::to_value(workspace::save(serde_json::from_value(opts).map_err(|e|e.to_string())?)?).map_err(|e|e.to_string()),
     "inspect_stash"=>advanced::inspect_stash(&git::root(&input[2])?,field("id").ok_or("Missing stash selector")?),
     "commit_context"=>{let root=git::root(&input[2])?;match field("sha"){Some(s)=>commit_workflows::details(&root,s),None=>commit_workflows::defaults(&root)}},
     "review_revisions"=>revision_review::view(&git::root(&input[2])?,field("from"),field("to").ok_or("Missing target")?,field("file")),

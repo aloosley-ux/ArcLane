@@ -25,7 +25,7 @@ import RevisionReviewPanel from "./RevisionReview";
 import CommitOptions from "./CommitOptions";
 import Collaboration from "./Collaboration";
 import {buildGraph,graphPalette}from "./graph";
-import type{ChangedFile,Commit,DiffHunk,FileComparison,ProviderPr,ProviderRun,Ref,Repository,Worktree}from "./types";
+import type{WorkspaceState,RepositoryTab,ChangedFile,Commit,DiffHunk,FileComparison,ProviderPr,ProviderRun,Ref,Repository,Worktree}from "./types";
 
 type Route="history"|"worktrees"|"launchpad"|"agents"|"tools"|"settings";
 type ActionDialog={title:string;description:string;label:string;placeholder?:string;defaultValue?:string;confirmText:string;danger?:boolean;onConfirm:(value:string)=>void};
@@ -57,6 +57,18 @@ function Empty({onOpen,onClone,onInitialize,onChoose,recent}:{onOpen:()=>void;on
 function BlankRoute({icon:Icon,title,body}:{icon:LucideIcon;title:string;body:string}){return <div className="blank-route"><div className="blank-icon"><Icon size={28}/></div><h2>{title}</h2><p>{body}</p></div>;}
 
 export default function App(){
+ const[workspace,setWorkspace]=useState<WorkspaceState>({tabs:[],active:null,closed:[]});
+ const workspaceState=useRef<WorkspaceState|null>(null);
+ const workspaceSave=useRef<Promise<unknown>>(Promise.resolve());
+ const persistWorkspace=useCallback((next:WorkspaceState)=>{
+  workspaceState.current=next;setWorkspace(next);
+  workspaceSave.current=workspaceSave.current.catch(()=>{}).then(()=>client.saveWorkspace(next)).catch(e=>setError(String(e)));
+ },[]);
+ const rememberTab=useCallback((next:string)=>{
+  const state=workspaceState.current;if(!state)return;
+  const tabs=state.tabs.some(t=>repositoryKey(t.path)===repositoryKey(next))?state.tabs:[...state.tabs,{path:next,alias:""}];
+  persistWorkspace({...state,tabs,active:next,closed:state.closed.filter(t=>repositoryKey(t.path)!==repositoryKey(next))});
+ },[persistWorkspace]);
  const[recent,setRecent]=useState<string[]>([]);
  const[path,setPath]=useState("");
  const[repo,setRepo]=useState<Repository|null>(null);
@@ -153,13 +165,13 @@ export default function App(){
  },[clearInspection]);
  const loadPath=useCallback(async(next:string)=>{
    if(!next)return;
-   activePath.current=next;++repositoryVersion.current;
+   rememberTab(next);activePath.current=next;++repositoryVersion.current;
    setPath(next);setRoute("history");setRefScope("all");setCommitText("");setCommitBody("");setRepo(null);setCommits([]);setHasMore(false);
    setBusy(pendingGit.current.get(repositoryKey(next))||"");setSuccess("");setCommitOptions(false);setRevisionReview(null);setPullOptions(false);setStashReview(null);setContextMenu(null);setToolsSection("remotes");setDialog(null);setOperationsOpen(false);setConflictFile(null);setInsightsFile(null);setPrs([]);setRuns([]);setProviderLoading(false);
    await refresh(next);
- },[refresh]);
+ },[refresh,rememberTab]);
  useEffect(()=>{let gone=false;if(!hasTauri()){setError("Open the Arclane desktop application to connect to Git. The standalone browser view does not access local repositories.");return;}
-   client.recent().then(paths=>{if(gone)return;setRecent(paths);if(paths.length)void loadPath(paths[0]);}).catch(fail);return()=>{gone=true;};},[loadPath]);
+   Promise.all([client.recent(),client.workspace()]).then(([paths,state])=>{if(gone)return;setRecent(paths);workspaceState.current=state;setWorkspace(state);if(state.active)void loadPath(state.active);}).catch(fail);return()=>{gone=true;};},[loadPath]);
  useEffect(()=>{localStorage.setItem("arclane-review-theme",theme);document.documentElement.dataset.theme=theme;},[theme]);
  const openRepo=async()=>{try{const next=await client.pick();if(!next)return;const paths=[next,...recent.filter(x=>x.toLowerCase()!==next.toLowerCase())];await client.setRecent(paths);setRecent(paths);void loadPath(next);}catch(e){fail(e);}};
  const chooseRepo=(next:string)=>{void loadPath(next);setRecent(all=>{const arr=[next,...all.filter(x=>x!==next)];void client.setRecent(arr);return arr;});};
@@ -227,6 +239,7 @@ export default function App(){
  const canMutate=!!repo&&!busy&&!loading&&!repo.sequencer.active;
  const operationKind=repo?.sequencer.merge?"merge":repo?.sequencer.rebase?"rebase":repo?.sequencer.cherry_pick?"cherry_pick":"revert";
  const actionEnabled=(name:string)=>{
+  if(name==="Reopen closed repository tab")return workspace.closed.length>0;
   if(["Open repository","Clone repository","Initialize a repository","Preferences"].includes(name))return true;
   if(!repo||loading)return false;
   if(name.includes("selected commit"))return !!currentCommit&&(!/Cherry|Revert|Reset/.test(name)||canMutate);
@@ -260,6 +273,24 @@ export default function App(){
    {name:"Create tracking branch",icon:GitBranch,enabled:canMutate&&!r.full.endsWith("/HEAD"),perform:()=>askOperation("branch_track_remote","Create tracking branch","Create and switch to a local branch tracking "+r.name+".","Local branch name",r.name.split("/").slice(1).join("/"),"Create tracking branch",r.full)}
   ]:[{name:"Delete local tag",icon:Trash2,enabled:canMutate,perform:()=>guardedOperation("tag_delete",r.name,"Delete local tag","Remove this local tag. Remote tags remain untouched.",r.name)}])
  ];
+ const closeTab=(target:string)=>{
+  const state=workspaceState.current;if(!state)return;const closed=state.tabs.find(t=>repositoryKey(t.path)===repositoryKey(target));if(!closed)return;
+  const tabs=state.tabs.filter(t=>repositoryKey(t.path)!==repositoryKey(target));const active=repositoryKey(path)===repositoryKey(target)?tabs[Math.min(state.tabs.indexOf(closed),tabs.length-1)]?.path||null:path;
+  persistWorkspace({tabs,active,closed:[closed,...state.closed.filter(t=>repositoryKey(t.path)!==repositoryKey(target))].slice(0,30)});
+  if(repositoryKey(path)!==repositoryKey(target))return;
+  if(active){void loadPath(active);return;}
+  activePath.current="";++repositoryVersion.current;++version.current;setPath("");setRepo(null);setCommits([]);setHasMore(false);setLoading(false);setHistLoading(false);setBusy("");setError("");setSuccess("");clearInspection();setDialog(null);setCommitOptions(false);setRevisionReview(null);setPullOptions(false);setStashReview(null);setContextMenu(null);setConflictFile(null);setInsightsFile(null);
+ };
+ const reopenTab=()=>{const tab=workspaceState.current?.closed[0];if(!tab)return;const state=workspaceState.current!;persistWorkspace({...state,tabs:[...state.tabs,tab],closed:state.closed.slice(1)});chooseRepo(tab.path)};
+ const moveTab=(target:string,direction:number)=>{const state=workspaceState.current;if(!state)return;const tabs=[...state.tabs],index=tabs.findIndex(t=>repositoryKey(t.path)===repositoryKey(target));const destination=index+direction;if(index<0||destination<0||destination>=tabs.length)return;[tabs[index],tabs[destination]]=[tabs[destination],tabs[index]];persistWorkspace({...state,tabs})};
+ const tabMenu=(tab:RepositoryTab):MenuAction[]=>[
+  {name:"Rename tab alias",icon:FolderGit2,perform:()=>setDialog({title:"Rename tab alias",description:"Set a local display name. Repository folders and branches remain unchanged.",label:"Tab alias",defaultValue:tab.alias||first(tab.path),confirmText:"Save alias",onConfirm:value=>{const state=workspaceState.current!;persistWorkspace({...state,tabs:state.tabs.map(t=>t.path===tab.path?{...t,alias:value}:t)})}})},
+  {name:"Clear tab alias",icon:X,enabled:!!tab.alias,perform:()=>{const state=workspaceState.current!;persistWorkspace({...state,tabs:state.tabs.map(t=>t.path===tab.path?{...t,alias:""}:t)})}},
+  {name:"Move tab left",icon:ArrowLeftRight,enabled:workspace.tabs.indexOf(tab)>0,perform:()=>moveTab(tab.path,-1)},
+  {name:"Move tab right",icon:ArrowLeftRight,enabled:workspace.tabs.indexOf(tab)<workspace.tabs.length-1,perform:()=>moveTab(tab.path,1)},
+  {name:"Close repository tab",icon:X,perform:()=>closeTab(tab.path)},
+  {name:"Reopen closed repository tab",icon:Undo2,enabled:workspace.closed.length>0,perform:reopenTab}
+ ];
  const openContext=(e:React.MouseEvent,label:string,actions:MenuAction[])=>{e.preventDefault();setContextMenu({x:e.clientX,y:e.clientY,label,actions})};
  const graphKey=(e:React.KeyboardEvent,commit:Commit)=>{
   if(e.key==="Enter"){void inspectCommit(commit);return}
@@ -271,6 +302,8 @@ export default function App(){
  };
  const actions:MenuAction[]=[
   {name:"Open repository",icon:FolderGit2,shortcut:"Ctrl+O",perform:()=>void openRepo()},
+  {name:"Reopen closed repository tab",icon:Undo2,shortcut:"Ctrl+Shift+T",perform:reopenTab},
+  {name:"Close current repository tab",icon:X,shortcut:"Ctrl+W",perform:()=>closeTab(path)},
   {name:"Clone repository",icon:CloudDownload,perform:cloneRepository},
   {name:"Initialize a repository",icon:FolderGit2,perform:()=>void initializeRepository()},
   {name:"Refresh repository",icon:RefreshCw,shortcut:"F5",perform:()=>path&&void refresh(path,refScope)},
@@ -307,7 +340,7 @@ export default function App(){
   {name:"Open repository in VS Code",icon:Code2,perform:()=>path&&void client.openPath(path,"editor").catch(fail)},
   {name:"Open embedded terminal tab",icon:Terminal,perform:()=>showTerminal(path)}
  ].map(a=>({...a,enabled:actionEnabled(a.name)}));
- useEffect(()=>{const handler=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&["p","k"].includes(e.key.toLowerCase())){e.preventDefault();setPaletteOpen(s=>!s);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="o"){e.preventDefault();void openRepo();}if(e.key==="F5"){e.preventDefault();if(path)void refresh(path,refScope);}if(e.key==="Escape"){setPaletteOpen(false);setDialog(null);}};document.addEventListener("keydown",handler);return()=>document.removeEventListener("keydown",handler);});
+ useEffect(()=>{const handler=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==="t"){e.preventDefault();reopenTab();return}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="w"&&!dialog&&!commitOptions&&!revisionReview&&!stashReview&&!pullOptions){e.preventDefault();if(path)closeTab(path);return}if((e.ctrlKey||e.metaKey)&&["p","k"].includes(e.key.toLowerCase())){e.preventDefault();setPaletteOpen(s=>!s);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="o"){e.preventDefault();void openRepo();}if(e.key==="F5"){e.preventDefault();if(path)void refresh(path,refScope);}if(e.key==="Escape"){setPaletteOpen(false);setDialog(null);}};document.addEventListener("keydown",handler);return()=>document.removeEventListener("keydown",handler);});
  const renderFiles=(files:ChangedFile[],isStaged:boolean)=><div className="change-list">{files.map(file=><div key={file.path} className={"change-row"+(selectedFile===file.path+(isStaged?"#staged":"")?" selected":"")}><button className="change-select" onClick={()=>file.conflict?setConflictFile(file.path):void inspectFile(file,isStaged)}><span className={"file-flag "+iconFor(file)}>{statusCode(file)}</span><span className="file-label"><span className="file-name">{first(file.path)}</span><span className="file-folder">{file.path.includes("/")?file.path.slice(0,file.path.lastIndexOf("/")):"Repository root"}</span></span></button>{file.conflict?<button className="change-resolve" onClick={()=>setConflictFile(file.path)}><GitMerge size={13}/>Resolve</button>:<button className="change-mini" aria-label={(isStaged?"Unstage ":"Stage ")+file.path} title={(isStaged?"Unstage ":"Stage ")+file.path} onClick={()=>void runAction(isStaged?"unstage":"stage",file.path)}>{isStaged?<Minus size={14}/>:<Plus size={14}/>}</button>}{!isStaged&&!file.untracked&&!file.conflict&&<button className="change-mini file-discard" aria-label={"Discard unstaged changes in "+file.path} title="Discard unstaged changes (confirmation required)" onClick={()=>guardedOperation("discard_file","","Discard file changes","This permanently discards unstaged changes in "+file.path+". Staged changes remain intact.","DISCARD",file.path)}><Trash2 size={13}/></button>}{!file.untracked&&<button className="change-mini" aria-label={"File history and blame "+file.path} title="File history and line-by-line blame" onClick={()=>setInsightsFile(file.path)}><FileClock size={14}/></button>}</div>)}{files.length===0&&<div className="list-zero">{isStaged?"No staged changes":"Working tree is clean"}</div>}</div>;
  const visibleRefs=(key:keyof typeof refsByGroup)=>refsByGroup[key].filter(r=>!refQuery||r.name.toLowerCase().includes(refQuery.toLowerCase()));
  const nav:{route:Route;icon:LucideIcon;label:string;title?:string}[]=[
@@ -322,7 +355,7 @@ export default function App(){
  return <div className="desktop">
   <header className="app-top">
    <div className="brand"><span className="brand-mark"><Mark size={23}/></span><span className="brand-name">ArcLane</span></div>
-   <div className="tab-area">{recent.slice(0,5).map((r)=><button key={r} className={"repo-tab"+(path===r?" chosen":"")} onClick={()=>chooseRepo(r)}><FolderGit2 size={14}/><span>{first(r)}</span>{path===r&&<span className="tab-dot"/>}</button>)}<IButton icon={Plus} label="Open another repository" onClick={()=>void openRepo()}/></div>
+   <div className="tab-area">{workspace.tabs.map(t=><div key={t.path} className="repository-tab-shell" onContextMenu={e=>openContext(e,t.alias||first(t.path),tabMenu(t))}><button title={t.path} className={"repo-tab"+(repositoryKey(path)===repositoryKey(t.path)?" chosen":"")} onClick={()=>chooseRepo(t.path)}><FolderGit2 size={14}/><span>{t.alias||first(t.path)}</span>{repositoryKey(path)===repositoryKey(t.path)&&<span className="tab-dot"/>}</button><button className="repository-tab-close" aria-label={"Close tab "+(t.alias||first(t.path))} onClick={()=>closeTab(t.path)}><X size={12}/></button></div>)}<IButton icon={Plus} label="Open another repository" onClick={()=>void openRepo()}/></div>
    <div className="app-top-end"><span className="top-system">Local workspace</span><span className="top-divider"/><IButton icon={Bell} label="Show status" onClick={()=>showToast("No background services. Refresh only when requested.")}/></div>
   </header>
   <div className="main-toolbar">

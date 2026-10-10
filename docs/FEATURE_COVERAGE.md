@@ -5,8 +5,8 @@
 | # | Domain | User-visible obligation | Current evidence | Acceptance condition |
 |---|---|---|---|---|
 | 001 | Application shell | Repository open/clone/init | partial | Fixture repo selection, clone+init verified in native UI |
-| 002 | Application shell | Multi-repository tabs and tab history | not verified | Open 3 repos; close/reopen app; tabs restored |
-| 003 | Application shell | Tab aliases, reordering, grouping worktrees | not verified | Persist aliases/order and group across restart |
+| 002 | Application shell | Multi-repository tabs and tab history | accepted for repository tabs — three disposable repos, active selection, close/reopen history and full packaged executable restart verified; tab operations preserve HEAD/index/files | Open 3 repos; close/reopen app; tabs restored |
+| 003 | Application shell | Tab aliases, reordering, grouping worktrees | partial — local aliases, left/right ordering and closed aliases survive full executable restart; worktree grouping remains outstanding | Persist aliases/order and group across restart |
 | 004 | Application shell | Repo favourites, recent repos and search | not verified | Open from favourite/recents without rescanning idle |
 | 005 | Application shell | Command palette with keyboard actions | not verified | Ctrl+P search and activate commands |
 | 006 | Application shell | Customisable toolbar and action states | not verified | Enabled state tracks actual repo state |
