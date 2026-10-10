@@ -62,7 +62,7 @@ async fn toolbox_view(path:String,section:String)->Result<Value,String>{
 }
 #[tauri::command]
 async fn toolbox_action(path:String,op:String,file:String,input:String)->Result<Value,String>{
- spawn_blocking(move||toolbox::perform(&git::root(&path)?,&op,&file,&input)).await.map_err(|e|e.to_string())?
+ spawn_blocking(move||{let root=git::root(&path)?;git::with_write_guard(&root,||toolbox::perform(&root,&op,&file,&input))}).await.map_err(|e|e.to_string())?
 }
 #[tauri::command]
 async fn inspect_file_history(path:String,file:String)->Result<Value,String>{
@@ -86,7 +86,7 @@ async fn inspect_conflict(path:String,file:String)->Result<Value,String>{
 }
 #[tauri::command]
 async fn resolve_conflict(path:String,file:String,choice:String,manual:Option<String>)->Result<Value,String>{
- spawn_blocking(move||conflicts::resolve(&git::root(&path)?,&file,&choice,manual.as_deref())).await.map_err(|e|e.to_string())?
+ spawn_blocking(move||{let root=git::root(&path)?;git::with_write_guard(&root,||conflicts::resolve(&root,&file,&choice,manual.as_deref()))}).await.map_err(|e|e.to_string())?
 }
 #[tauri::command]
 async fn get_hunks(path:String,file:String,staged:bool)->Result<Value,String>{
@@ -94,7 +94,7 @@ async fn get_hunks(path:String,file:String,staged:bool)->Result<Value,String>{
 }
 #[tauri::command]
 async fn apply_hunk(path:String,file:String,staged:bool,index:usize)->Result<Value,String>{
- spawn_blocking(move||hunks::apply(&git::root(&path)?,&file,staged,index)).await.map_err(|e|e.to_string())?
+ spawn_blocking(move||{let root=git::root(&path)?;git::with_write_guard(&root,||hunks::apply(&root,&file,staged,index))}).await.map_err(|e|e.to_string())?
 }
 #[tauri::command]
 async fn file_diff(path:String,file:String,staged:bool,commit:Option<String>)->Result<Value,String>{
