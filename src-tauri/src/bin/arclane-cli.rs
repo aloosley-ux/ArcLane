@@ -11,9 +11,15 @@
 #[path="../workspace.rs"] mod workspace;
 #[path="../commit_workflows.rs"] mod commit_workflows;
 #[path="../revision_review.rs"] mod revision_review;
+#[path="../rebase_workflows.rs"] mod rebase_workflows;
 use serde_json::{json,Value};
 fn main(){
  let input:Vec<String>=std::env::args().collect();
+ if input.get(1).is_some_and(|mode|mode=="--arclane-rebase-editor"||mode=="--arclane-message-editor"){
+   let mode=&input[1];let path=input.get(2).map(String::as_str).unwrap_or("");
+   if let Err(e)=rebase_workflows::edit_helper(mode,path){eprintln!("{e}");std::process::exit(1);}
+   return;
+ }
  let run=||->Result<Value,String>{
    if input.len()<3{return Err("arclane-cli <inspect|history|diff|action> <repo> [JSON]".into());}
    let opts:Value=if input.len()>3{serde_json::from_str(&input[3]).map_err(|e|e.to_string())?}else{json!({})};
@@ -22,7 +28,8 @@ fn main(){
     "inspect"=>git::inspect(&input[2]),
     "workspace"=>serde_json::to_value(workspace::load()?).map_err(|e|e.to_string()),
     "save_workspace"=>serde_json::to_value(workspace::save(serde_json::from_value(opts).map_err(|e|e.to_string())?)?).map_err(|e|e.to_string()),
-    "inspect_stash"=>advanced::inspect_stash(&git::root(&input[2])?,field("id").ok_or("Missing stash selector")?),
+    "rebase_preview"=>rebase_workflows::preview(&git::root(&input[2])?,field("base").ok_or("Missing base")?),
+     "inspect_stash"=>advanced::inspect_stash(&git::root(&input[2])?,field("id").ok_or("Missing stash selector")?),
     "commit_context"=>{let root=git::root(&input[2])?;match field("sha"){Some(s)=>commit_workflows::details(&root,s),None=>commit_workflows::defaults(&root)}},
     "review_revisions"=>revision_review::view(&git::root(&input[2])?,field("from"),field("to").ok_or("Missing target")?,field("file")),
     "history"=>git::history(&input[2],opts["limit"].as_u64().unwrap_or(150) as usize,field("reference"),opts["skip"].as_u64().unwrap_or(0) as usize),
