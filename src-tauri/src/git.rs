@@ -86,7 +86,7 @@ fn spawn(program: &str, args: &[String], cwd: Option<&Path>) -> Result<String,St
         .env("GCM_INTERACTIVE","never").env("GIT_OPTIONAL_LOCKS","0");
     if let Some(p) = cwd { cmd.current_dir(p); }
     #[cfg(windows)] { cmd.creation_flags(0x08000000); }
-    let out = cmd.output().map_err(|e| format!("Could not launch {program}: {e}"))?;
+    let out = crate::git_runtime::output(cmd).map_err(|e|format!("Could not launch {program}: {e}"))?;
     let stdout=String::from_utf8_lossy(&out.stdout).trim_end_matches(['\r','\n']).to_string();
     if out.status.success() { Ok(stdout) } else {
         let stderr=String::from_utf8_lossy(&out.stderr).trim().to_string();
@@ -231,8 +231,11 @@ pub fn diff(path:&str,file:&str,staged:bool,commit:Option<&str>)->Result<Value,S
     Ok(json!({"file":file,"staged":staged,"text":clipped(text)}))
 }
 pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Value,String>{
+    action_with_request(path,op,file,input,None)
+}
+pub fn action_with_request(path:&str,op:&str,file:Option<&str>,input:Option<&str>,request:Option<&str>)->Result<Value,String>{
     let p=root(path)?;
-    with_write_guard(&p,|| action_unlocked(&p,op,file,input))
+    with_write_guard(&p,||crate::git_runtime::scope(&p,request,matches!(op,"fetch"|"pull"|"pull_ff"|"pull_merge"|"pull_rebase"|"push"),||action_unlocked(&p,op,file,input)))
 }
 fn action_unlocked(p:&Path,op:&str,file:Option<&str>,input:Option<&str>)->Result<Value,String>{
     let filename=file.unwrap_or("");
