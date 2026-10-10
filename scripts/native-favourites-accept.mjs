@@ -21,6 +21,9 @@ try{
  await expect(p.getByRole('button',{name:'Add favourite '+path.basename(b.repo)})).toBeVisible();
  checks.push('Closing tabs reveals filtered pinned/recent lists without scanning repositories');
  await p.getByRole('textbox',{name:'Search repositories'}).fill('');
+ // Wait for the existing serialized workspace save queue before force-closing
+ // the test executable. A human closing the window normally leaves time for this.
+ await expect.poll(()=>{const file=path.join(profile,'workspace.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')).tabs.length:null;}).toBe(0);
  await s.close();
  s=await launch(a.repo,'native-favourite-restart',9462,{},profile);p=s.page;
  await expect(p.getByRole('heading',{name:'Pinned repositories'})).toBeVisible();
