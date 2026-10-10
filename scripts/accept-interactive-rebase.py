@@ -62,29 +62,31 @@ with tempfile.TemporaryDirectory(prefix="arclane-rebase-accept-") as tmp:
     git(conflict,"config","user.name","Rebase Fixture")
     git(conflict,"config","user.email","rebase@invalid.local")
     git(conflict,"config","core.autocrlf","false")
-    base=commit(conflict,"common.txt","original\n","Start")
-    git(conflict,"switch","-qc","upstream")
-    commit(conflict,"common.txt","upstream\n","Upstream")
-    git(conflict,"switch","-q","main")
-    first=commit(conflict,"common.txt","feature\n","Feature")
-    second=commit(conflict,"after.txt","after\n","After")
+    base=commit(conflict,"common.txt","original\\n","Start")
+    first=commit(conflict,"common.txt","first\\n","First")
+    second=commit(conflict,"common.txt","second\\n","Second")
     original=git(conflict,"rev-parse","HEAD")
     beforetree=git(conflict,"write-tree")
-    # Force a valid Git-native conflict by ordering a change so it cannot apply
-    # cleanly: the second commit from another branch may be picked first.
-    git(conflict,"switch","-qc","other",base)
-    foreign=commit(conflict,"common.txt","other\n","Other")
-    git(conflict,"switch","-q","main")
-    git(conflict,"cherry-pick","--no-commit",foreign,ok=False)
-    git(conflict,"cherry-pick","--abort")
-    # Leave a genuine rebase pause using a reorder that causes a content conflict.
-    # A duplicate modification picked before its parent cannot replay cleanly.
-    action(conflict,"rebase_interactive",plan(base,original,[second,first],[("pick",""),("pick","")]),ok=False)
-    assert git(conflict,"rev-parse","HEAD")==original or (conflict/".git"/"rebase-merge").exists()
+    reversed_plan=plan(base,original,[second,first],[("pick",""),("pick","")])
+    action(conflict,"rebase_interactive",reversed_plan,ok=False)
+    assert (conflict/".git"/"rebase-merge").exists()
+    assert (conflict/".git"/"arclane-rebase-plan.json").exists()
+    action(conflict,"rebase_abort")
+    assert git(conflict,"rev-parse","HEAD")==original
+    assert git(conflict,"write-tree")==beforetree
+    assert (conflict/"common.txt").read_bytes()==b"second\\n"
+    assert not (conflict/".git"/"arclane-rebase-plan.json").exists()
+    print("PASS paused rebase abort restores original index, refs, files")
+    action(conflict,"rebase_interactive",reversed_plan,ok=False)
+    (conflict/"common.txt").write_bytes(b"resolved\\n")
+    git(conflict,"add","--","common.txt")
+    action(conflict,"rebase_continue")
+    assert (conflict/"common.txt").read_bytes()==b"first\\n" or (conflict/".git"/"rebase-merge").exists()
     if (conflict/".git"/"rebase-merge").exists():
-        action(conflict,"rebase_abort")
-        assert git(conflict,"rev-parse","HEAD")==original
-        assert git(conflict,"write-tree")==beforetree
-        assert (conflict/"common.txt").read_bytes()==b"feature\n"
-        print("PASS paused operation aborted with exact original index and files")
+        (conflict/"common.txt").write_bytes(b"first\\n")
+        git(conflict,"add","--","common.txt")
+        action(conflict,"rebase_continue")
+    assert not (conflict/".git"/"rebase-merge").exists()
+    assert git(conflict,"write-tree")==git(conflict,"rev-parse","HEAD^{tree}")
+    print("PASS manual resolution and continuation of interrupted rebase")
 print("PASS interactive rebase acceptance")
