@@ -30,7 +30,7 @@
 | 024 | Reference navigator and history | Graph row virtualisation >10k commits | not verified | Bounded rows/memory, scroll position retained |
 | 025 | Reference navigator and history | Commit columns and rearrangement | not verified | Reorder, author/date/SHA and save widths |
 | 026 | Reference navigator and history | Ghost branch and ancestry highlight | not verified | Hover selections use real reachability |
-| 027 | Reference navigator and history | Commit/branch multi-selection and diff range | not verified | Select 2 commits/refs and compare |
+| 027 | Reference navigator and history | Commit/branch multi-selection and diff range | accepted for two-tree review — Control-click two graph commits or choose two local/remote/tag references, inspect exact changed files and swap comparison direction; larger selection sets excluded | Select 2 commits/refs and compare |
 | 028 | Reference navigator and history | Graph search/filter by author/ref/path | not verified | Independent git log query checks |
 | 029 | Reference navigator and history | Graph keyboard navigation and copy SHA | not verified | Selection and exact SHA copied |
 | 030 | Reference navigator and history | Commit context menus and shortcuts | not verified | Correct actions guarded by selection |
@@ -47,8 +47,8 @@
 | 041 | Files and commits | Amend previous commit with safeguard | accepted for local amend — message-only amend, remote-tracking sharing warning, explicit rewrite acknowledgement and stale-HEAD refusal backend/native verified; remote publishing excluded | Hash changed, file state correct, shared warning |
 | 042 | Files and commits | Revert previous published commit | not verified | New reversing commit, history preserved |
 | 043 | Files and commits | Reset mixed/soft/hard with previews | not verified | Each mode produces correct state, hard guarded |
-| 044 | Files and commits | Restore single or multiple historical files | not verified | Worktree/index bytes independently verified |
-| 045 | Files and commits | Commit metadata, parents and signatures | not verified | Author/email/date/hash accurate |
+| 044 | Files and commits | Restore single or multiple historical files | accepted for regular files — packaged confirmed multi-file historical restore preserves exact index, HEAD and neighbouring literal paths; source symlinks and deleted entries refused | Worktree/index bytes independently verified |
+| 045 | Files and commits | Commit metadata, parents and signatures | partial — full body, author/committer emails and ISO dates, parent navigation and Git signature status exposed; unsigned fixture native verified, signed-key scenarios unaccepted | Author/email/date/hash accurate |
 | 046 | Files and commits | File history and blame | accepted — native commit timeline, parent comparison, correct author attribution and search verified | Line origin matches git blame |
 | 047 | Files and commits | Git hooks, skip hooks and GPG signing | not verified | Configured hook and signed commit tests |
 | 048 | Files and commits | Commit templates, trailers and editor settings | not verified | Template and multiline messages |
@@ -123,6 +123,8 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**Feature sprint, batch 2 (2026-10-10):** `accept-revision-review.py` passed six groups; `native-revision-review-accept.mjs` passed four packaged Windows checks. Existing paired comparison (9) and Toolbox (17) regressions passed. Review supports first-parent comparison, root-to-empty-tree comparison, two SHA/ref trees, exact per-file snapshots and binary patch fallback. Historical restore requires confirmation and the opened HEAD, validates all selected paths before invoking one Git restore, and never modifies the index. Merge metadata uses the first-parent changed-file inventory. No hard reset or remote mutation was added.
 
 **Feature sprint, batch 1 (2026-10-10):** `accept-commit-options.py` passed five groups; `native-commit-options-accept.mjs` passed four packaged Windows checks. Existing advanced Git (20 groups) and literal paths (10 groups) regressions passed. The options editor leaves hooks enabled, never stages implicitly, checks the opened HEAD, and keeps original author on amend unless overridden. Source and screenshots use Review Bench semantic tokens. Existing acceptance scripts now locate evidence/mock resources relative to their active worktree. Remote-tracking reachability is a warning signal, not proof a commit is unpublished.
 

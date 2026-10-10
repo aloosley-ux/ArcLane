@@ -70,3 +70,13 @@ pub fn compare(root:&Path,file:&str,staged:bool,commit:Option<&str>)->Result<Val
     "beforeExists":before_exists,"afterExists":after_exists,
     "leftLabel":left,"rightLabel":right,"linesBefore":lines_before,"linesAfter":lines_after}))
 }
+pub fn between(root:&Path,file:&str,from:Option<&str>,to:&str)->Result<Value,String>{
+ validate_file(root,file)?;
+ let before=from.map(|s|oid_text(root,s,file)).transpose()?.flatten();
+ let after=oid_text(root,to,file)?;
+ let before_exists=before.is_some();let after_exists=after.is_some();
+ let before=before.unwrap_or_default();let after=after.unwrap_or_default();
+ Ok(json!({"file":file,"staged":false,"linesBefore":before.lines().count(),"linesAfter":after.lines().count(),
+  "before":before,"after":after,"beforeExists":before_exists,"afterExists":after_exists,
+  "leftLabel":from.map(|s|s[..8].to_string()).unwrap_or_else(||"Empty tree".into()),"rightLabel":to[..8].to_string()}))
+}

@@ -7,6 +7,7 @@ export type Repository={path:string;name:string;branch:string;head:string;upstre
 export type Commit={sha:string;subject:string;author:string;date:string;parents:string[]};
 export type CommitDetails={sha:string;parents:string[];author:string;authorEmail:string;authorDate:string;committer:string;committerEmail:string;committerDate:string;signature:string;message:string;remoteRefs:string[];files:{path:string;status:string}[]};
 export type CommitDefaults={head:string|null;last:CommitDetails|null;name:string;email:string};
+export type RevisionReview={from:string|null;to:string;details:CommitDetails;files:{path:string;status:string}[];patch:string;comparison:FileComparison|null;comparisonError:string|null};
 export type HistoryPage={commits:Commit[];limit:number;skip:number;has_more:boolean};
 export type DiffResult={file:string;text:string;staged:boolean};
 export type DiffHunk={index:number;header:string;added:number;removed:number;text:string};

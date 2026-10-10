@@ -11,6 +11,7 @@ mod file_inspection;
 mod toolbox;
 mod provider;
 mod commit_workflows;
+mod revision_review;
 use tauri::Manager;
 use serde_json::Value;
 use tauri::async_runtime::spawn_blocking;
@@ -18,6 +19,10 @@ use tauri::async_runtime::spawn_blocking;
 #[tauri::command]
 async fn commit_context(path:String,sha:Option<String>)->Result<Value,String>{
  spawn_blocking(move||{let root=git::root(&path)?;match sha {Some(s)=>commit_workflows::details(&root,&s),None=>commit_workflows::defaults(&root)}}).await.map_err(|e|e.to_string())?
+}
+#[tauri::command]
+async fn review_revisions(path:String,from:Option<String>,to:String,file:Option<String>)->Result<Value,String>{
+ spawn_blocking(move||revision_review::view(&git::root(&path)?,from.as_deref(),&to,file.as_deref())).await.map_err(|e|e.to_string())?
 }
 
 #[tauri::command]
@@ -131,6 +136,6 @@ fn main(){
     tauri::Builder::default()
     .manage(terminal::TerminalManager::default())
     .on_window_event(|window,event|{if let tauri::WindowEvent::Destroyed=event {window.app_handle().state::<terminal::TerminalManager>().shutdown();}})
-    .invoke_handler(tauri::generate_handler![commit_context,snapshot,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
+    .invoke_handler(tauri::generate_handler![review_revisions,commit_context,snapshot,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
     .run(tauri::generate_context!()).expect("Unable to run Forge");
 }

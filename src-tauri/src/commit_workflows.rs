@@ -27,7 +27,9 @@ pub fn details(root: &Path, sha: &str) -> Result<Value, String> {
     let metadata = git(root, &a(&["show", "-s", "--format=%H%x00%P%x00%an%x00%ae%x00%aI%x00%cn%x00%ce%x00%cI%x00%G?%x00%B", &oid]))?;
     let fields: Vec<_> = metadata.splitn(10, '\0').collect();
     if fields.len() != 10 { return Err("Invalid commit metadata".into()); }
-    let changes = git(root, &a(&["diff-tree", "--root", "--no-commit-id", "--name-status", "-r", "-z", "--no-renames", &oid]))?;
+    let changes = if let Some(parent)=fields[1].split_whitespace().next() {
+        git(root,&a(&["diff","--name-status","-z","--no-renames",parent,&oid]))?
+    } else {git(root, &a(&["diff-tree", "--root", "--no-commit-id", "--name-status", "-r", "-z", "--no-renames", &oid]))?};
     let mut files = vec![];
     let mut tokens = changes.split('\0').filter(|s| !s.is_empty());
     while let Some(status) = tokens.next() {
