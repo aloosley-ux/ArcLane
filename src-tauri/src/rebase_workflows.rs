@@ -127,17 +127,19 @@ pub fn execute(path:&Path,input:&str)->Result<Value,String>{
             else{format!("Interactive rebase failed without an active sequencer: {error}")})
     }
 }
-pub fn resume(path:&Path,abort:bool)->Result<Value,String>{
+pub fn resume(path:&Path,operation:&str)->Result<Value,String>{
+    if !["continue","abort","skip"].contains(&operation){return Err("Invalid rebase recovery action".into());}
     let file=plan_path(path)?;
     let state=state_dir(path)?;
     if !rebase_active(&state){return Err("No rebase is in progress".into());}
-    let outcome=run(path,if abort{&["rebase","--abort"]}else{&["rebase","--continue"]},
-        if !abort&&file.exists(){Some(file.as_path())}else{None});
+    let flag=match operation{"abort"=>"--abort","skip"=>"--skip",_=>"--continue"};
+    let outcome=run(path,&["rebase",flag],
+        if operation!="abort"&&file.exists(){Some(file.as_path())}else{None});
     if outcome.is_ok()&&!rebase_active(&state){
         if file.exists(){fs::remove_file(&file).map_err(|e|format!("Rebase finished but plan cleanup failed: {e}"))?;}
     }
     let output=outcome?;
-    Ok(json!({"ok":true,"command":if abort{"git rebase --abort"}else{"git rebase --continue"},"output":output}))
+    Ok(json!({"ok":true,"command":match operation{"abort"=>"git rebase --abort","skip"=>"git rebase --skip",_=>"git rebase --continue"},"output":output}))
 }
 /// Invoked as a short-lived child process by Git, before starting the Tauri UI.
 pub fn edit_helper(mode:&str,filename:&str)->Result<(),String>{
