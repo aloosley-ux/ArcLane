@@ -13,7 +13,7 @@
 
 - Repository tabs and recent repository persistence; open folder picker.
 - References sidebar (local, remote, tags, stashes, worktrees); graph history across refs, search and manual pagination.
-- Real staged/unstaged status and **selective hunk staging/unstaging**; previews, commits, branch/tag maintenance, merge/rebase/cherry-pick/revert (including conflict detection/continue/abort), stash apply/pop/drop, worktree create/lock/unlock/remove, soft/mixed reset, fetch, fast-forward pull, push.
+- Real staged/unstaged status and **selective hunk staging/unstaging**; read-only native side-by-side UTF-8 diff including expanded full-file view; **three-way text conflict resolution** with ours/theirs/manual decisions; file history and line blame; commits, branch/tag maintenance, merge/rebase/cherry-pick/revert (including conflict detection/continue/abort), stash apply/pop/drop, worktree create/lock/unlock/remove, soft/mixed reset, fetch, fast-forward pull, push.
 - Explicit clone and repository initialization with folder selection and Rust-side destination/transport validation.
 - GitHub PR and CI read-only integration via existing `gh` login, loaded **only on demand**.
 - Agent worktree organisation, **multiple live on-demand ConPTY PowerShell terminal tabs** and external editor integration. ConPTY processes terminate with their tabs or when the app closes. Does **not** represent real agent status until an integration exists.
@@ -36,7 +36,7 @@
 
 ## Known gaps — major
 
-No production-grade side-by-side diff editor or visual merge conflict resolver; no interactive rebase todo editor, full reflog recovery or robust undo; no complete multi-provider PR reviews/issues/CI workflow, Gitflow, LFS/submodule UX, signing, stacked PR visualisation, agent permission requests, or production installer acceptance. The custom commit graph has not yet been measured under 10k+ commits or octopus-merge complexity.
+Side-by-side diff and text conflict resolver are functional but still lack syntax highlighting, rich per-word editing, image/binary conflicts, complex three-way merge automation and very large file scalability; no interactive rebase todo editor, full reflog recovery or robust undo; no complete multi-provider PR reviews/issues/CI workflow, Gitflow, LFS/submodule UX, signing, stacked PR visualisation, agent permission requests, or production installer acceptance. The custom commit graph has not yet been measured under 10k+ commits or octopus-merge complexity.
 
 ## Verified preview acceptance
 
@@ -56,3 +56,14 @@ No production-grade side-by-side diff editor or visual merge conflict resolver; 
 
 - Native 811-commit graph acceptance: 350, 700 and 811 loaded commits each mounted 37 rows or fewer; oldest commit reachable; no renderer exceptions. See ignored artifacts/graph-native-acceptance.json.
 - Full idle process-tree measurement on the same 811-commit fixture (8-second window): 1 Arclane process + 6 WebView2 processes; 201.0 MB summed private memory; 413.1 MB summed working sets (shared pages potentially double-counted); 47 ms total CPU across 8 seconds. This is not a typical fresh-install footprint, GPU metric or long-duration benchmark. See scripts/measure-resources.ps1 and artifacts/resource-measurement.json.
+
+## Verified file-inspection and merge milestone — 2026-10-10
+
+- Rust conflict engine: 6 isolated backend checks covering base/ours/theirs extraction, exact ours/theirs/manual staging, Unicode file paths and rejected invalid or stale targets (`scripts/accept-conflicts.py`).
+- Native conflict resolver: 6 actual packaged Windows application acceptance checks against **two real simultaneous conflicts**; one incoming-version resolution, one manual reconciliation, independent Git index verification, and successful two-parent merge completion (`scripts/native-conflict-accept.mjs`).
+- Paired file comparison: 9 Rust command acceptance checks for HEAD/index/worktree contents, partially staged files, added/deleted files, historical commit parent snapshots, Unicode and invalid/binary paths (`scripts/accept-compare.py`). Read-only side-by-side UI aligns changed lines and virtualises both small/expanded views.
+- File history and blame: 4 isolated Rust checks across commits by different authors (`scripts/accept-file-inspection.py`), and 6 packaged Windows UI checks for three commit records, historical diff, correct per-line authorship, search and no Git mutations (`scripts/native-file-insights-accept.mjs`).
+- Latest packaged native regression: **12** Git/hunk/side-by-side/terminal checks, **6** conflict checks and **5** virtualised graph checks all pass independently, with no JavaScript renderer exceptions. All state-changing tests use disposable `Forge-Testbed` descendants.
+- The full product ledger remains at **104 target workflows**. Specific verified slices have been updated in `docs/FEATURE_COVERAGE.md`, while whole-feature parity remains unclaimed. Unfinished major areas include provider PR reviews and mutations, stacked PRs, interactive rebase, multi-provider CI, LFS/submodules, signing, agent integrations, high-volume graph tests and installer distribution acceptance.
+
+**Latest provisional idle measurement:** packaged Arclane with 811 loaded commits, 10-second warm-up, 8-second observation: seven processes (one Arclane, six WebView2), **230 MB total private memory**, **426 MB summed working sets** (shared pages can be counted repeatedly), and **437 ms accumulated CPU** across the process tree. A shorter three-second warm-up measured 258 MB private and 1,079 ms CPU during its eight-second sample, so results vary with startup settling. These are measurements, not a validated lifetime resource budget.

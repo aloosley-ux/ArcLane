@@ -1,5 +1,5 @@
 import{invoke}from "@tauri-apps/api/core";
-import type{Repository,HistoryPage,DiffResult,HunkResponse,ActionResult,ProviderPr,ProviderRun}from "./types";
+import type{Repository,HistoryPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
 export const client={
   recent:()=>invoke<string[]>("repositories"),
   setRecent:(paths:string[])=>invoke<string[]>("set_repositories",{paths}),
@@ -10,6 +10,12 @@ export const client={
   history:(path:string,limit=350,reference="all",skip=0)=>invoke<HistoryPage>("commits",{path,limit,reference,skip}),
   diff:(path:string,file="",staged=false,commit:string|null=null)=>invoke<DiffResult>("file_diff",{path,file,staged,commit}),
   hunks:(path:string,file:string,staged:boolean)=>invoke<HunkResponse>("get_hunks",{path,file,staged}),
+  compare:(path:string,file:string,staged:boolean,commit:string|null=null)=>invoke<FileComparison>("compare_file",{path,file,staged,commit}),
+  fileHistory:(path:string,file:string)=>invoke<FileHistory>("inspect_file_history",{path,file}),
+  fileBlame:(path:string,file:string)=>invoke<FileBlame>("inspect_file_blame",{path,file}),
+  conflicts:(path:string)=>invoke<ConflictSummary>("list_conflicts",{path}),
+  inspectConflict:(path:string,file:string)=>invoke<ConflictData>("inspect_conflict",{path,file}),
+  resolveConflict:(path:string,file:string,choice:"ours"|"theirs"|"manual",manual?:string)=>invoke<{ok:boolean;path:string;resolution:string;bytes:number}>("resolve_conflict",{path,file,choice,manual:choice==="manual"?manual:null}),
   applyHunk:(path:string,file:string,staged:boolean,index:number)=>invoke<ActionResult>("apply_hunk",{path,file,staged,index}),
   action:(path:string,op:string,file:string|null=null,input:string|null=null)=>invoke<ActionResult>("git_action",{path,op,file,input}),
   prs:(path:string)=>invoke<ProviderPr[]>("github_query",{path,kind:"prs"}),

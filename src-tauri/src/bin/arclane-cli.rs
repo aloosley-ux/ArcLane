@@ -2,6 +2,9 @@
 #[path="../advanced.rs"] mod advanced;
 #[path="../hunks.rs"] mod hunks;
 #[path="../repository.rs"] mod repository;
+#[path="../conflicts.rs"] mod conflicts;
+#[path="../comparison.rs"] mod comparison;
+#[path="../file_inspection.rs"] mod file_inspection;
 use serde_json::{json,Value};
 fn main(){
  let input:Vec<String>=std::env::args().collect();
@@ -16,6 +19,12 @@ fn main(){
     "hunks"=>hunks::list(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true),
     "apply_hunk"=>hunks::apply(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,opts["index"].as_u64().ok_or("Missing index")? as usize),
     "action"=>git::action(&input[2],field("op").ok_or("Missing action op")?,field("file"),field("input")),
+    "file_history"=>file_inspection::history(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
+    "file_blame"=>file_inspection::blame(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
+    "compare"=>comparison::compare(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,field("commit")),
+    "conflicts"=>conflicts::list(&git::root(&input[2])?),
+    "inspect_conflict"=>conflicts::inspect(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
+    "resolve_conflict"=>conflicts::resolve(&git::root(&input[2])?,field("file").ok_or("Missing file")?,field("choice").ok_or("Missing choice")?,field("manual")),
     "init"=>repository::initialize(&input[2]),
     "clone"=>repository::clone(&input[2],field("parent").ok_or("Missing parent")?),
     "github"=>git::github(&input[2],field("kind").unwrap_or("prs")),

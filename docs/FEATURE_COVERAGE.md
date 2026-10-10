@@ -37,9 +37,9 @@
 | 031 | Reference navigator and history | Detached HEAD and initial/empty repositories | not verified | Open and recover safely |
 | 032 | Reference navigator and history | Worktree lists and selectable shared history | backend-tested | Create worktree & visible in list |
 | 033 | Files and commits | Stage/unstage full files | backend-tested | Index changes independently verified |
-| 034 | Files and commits | Stage/unstage selected hunks | not verified | Index exact diff independently verified |
+| 034 | Files and commits | Stage/unstage selected hunks | accepted — index verified in packaged Windows UI including reverse unstage | Index exact diff independently verified |
 | 035 | Files and commits | Untracked, ignored, renamed and deleted files | partial | Mixed fixture correctly groups file states |
-| 036 | Files and commits | Inline and side-by-side textual diffs | not verified | Whitespace/line endings and syntax highlighting |
+| 036 | Files and commits | Inline and side-by-side textual diffs | partial — verified UTF-8 paired snapshots, virtual scroll, wide view; syntax highlighting and binary/image diffs remain | Whitespace/line endings and syntax highlighting |
 | 037 | Files and commits | Binary/image/file-type diffs | not verified | Image preview, safe fallback for binaries |
 | 038 | Files and commits | Diff search, word diff, whitespace controls | not verified | Diff settings do not mutate repository |
 | 039 | Files and commits | Commit summary+description and co-authors | not verified | Headers validated with git show |
@@ -49,7 +49,7 @@
 | 043 | Files and commits | Reset mixed/soft/hard with previews | not verified | Each mode produces correct state, hard guarded |
 | 044 | Files and commits | Restore single or multiple historical files | not verified | Worktree/index bytes independently verified |
 | 045 | Files and commits | Commit metadata, parents and signatures | not verified | Author/email/date/hash accurate |
-| 046 | Files and commits | File history and blame | not verified | Line origin matches git blame |
+| 046 | Files and commits | File history and blame | accepted — native commit timeline, parent comparison, correct author attribution and search verified | Line origin matches git blame |
 | 047 | Files and commits | Git hooks, skip hooks and GPG signing | not verified | Configured hook and signed commit tests |
 | 048 | Files and commits | Commit templates, trailers and editor settings | not verified | Template and multiline messages |
 | 049 | Files and commits | Safe discard and undo changed files | not verified | Explicit preview and recover path |
@@ -61,7 +61,7 @@
 | 055 | Git operations | Push, set upstream, reject non-fast-forward | backend-tested | Local bare remote verifies push |
 | 056 | Git operations | Force push only with exact explicit confirmation | not verified | Blocked without confirmation, never automatic |
 | 057 | Git operations | Merge fast-forward and non-FF, abort | not verified | Correct parents and working tree |
-| 058 | Git operations | Conflict detection, resolver and continue | backend-tested | Unmerged paths surface; safe resolve |
+| 058 | Git operations | Conflict detection, resolver and continue | accepted for text merges — native ours/theirs/manual resolution, clean staged index and merge continue verified | Unmerged paths surface; safe resolve |
 | 059 | Git operations | Rebase interactive pick/reword/squash/drop | not verified | Result SHA & commit order validated |
 | 060 | Git operations | Cherry pick single/multiple and conflict resume | not verified | Expected tree diff and parent relationship |
 | 061 | Git operations | Stash list/create/apply/pop/drop | partial | Tracked and untracked preserved |
@@ -120,6 +120,6 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | # | Domain | User-visible obligation | Current evidence | Acceptance condition |
 |---|---|---|---|---|
 | 103 | Remote collaboration | Stacked PR chains, PR-on-PR branch bases, stack numbers/dependencies/merged state in sidebar, graph and PR panel | not implemented | GitHub-connected disposable PR fixture has exact chain order and cross-panel consistency; explicit user approval required for creation |
-| 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | not implemented | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
+| 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.

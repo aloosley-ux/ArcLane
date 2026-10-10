@@ -1,0 +1,56 @@
+
+.merge-overlay{position:fixed;inset:0;z-index:30;background:#04070ddc;backdrop-filter:blur(9px);display:flex;align-items:stretch;justify-content:center;padding:24px;color:#e5edf4}
+.merge-frame{width:min(1420px,100%);height:100%;min-height:0;background:#151e2a;border:1px solid #43566b;border-radius:15px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 90px #000c}
+.merge-top{height:80px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 25px;background:#1a2532;border-bottom:1px solid #344353}
+.merge-breadcrumb{display:flex;align-items:center;gap:16px;min-width:0}
+.merge-breadcrumb>svg{color:#80d5cd;flex-shrink:0}
+.merge-breadcrumb>div{min-width:0}
+.merge-breadcrumb>div>span{display:block;font:700 9px 'Cascadia Code',Consolas,monospace;letter-spacing:.13em;color:#82cfc6}
+.merge-breadcrumb h2{font-size:22px;font-weight:750;letter-spacing:-.55px;margin:2px 0 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.merge-breadcrumb small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#8f9fb2;font:10px 'Cascadia Code',Consolas,monospace}
+.merge-top-actions{display:flex;align-items:center;gap:16px}
+.merge-stage-badge{display:flex;align-items:center;gap:6px;font:700 10px 'Cascadia Code',Consolas,monospace;color:#e5b77f;border:1px solid #7c684b;background:#4d4031;border-radius:5px;padding:7px 10px}
+.merge-close{width:34px;height:34px;display:grid;place-items:center;border:1px solid #3d4c5b;border-radius:8px;color:#a3b1be;background:#263544}
+.merge-close:hover{background:#493741;color:#f2b3b5}
+.merge-intro{display:flex;align-items:center;gap:14px;margin:18px 24px 16px;padding:12px 16px;border-radius:9px;background:linear-gradient(100deg,#2c514966,#272f4e66);border:1px solid #47676566;flex-shrink:0}
+.merge-intro-symbol{height:39px;width:39px;display:grid;place-items:center;color:#8bdcc6;border:1px solid #4d867d;border-radius:9px;background:#2b645b48}
+.merge-intro>div:nth-child(2){flex:1}.merge-intro strong{font-size:12px;color:#eef6fa}.merge-intro p{font-size:11px;margin:4px 0 0;color:#a1b0bd;line-height:1.55}
+.merge-intro>svg{color:#8dd8b7}
+.merge-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-height:170px;flex:1;max-height:43%;margin:0 24px 14px;overflow:hidden}
+.merge-source{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid #3a495c;border-radius:9px;background:#121b26;overflow:hidden}
+.merge-source-head{height:52px;flex-shrink:0;display:flex;align-items:center;gap:9px;padding:0 12px;background:#1f2b39;border-bottom:1px solid #3e4e60}
+.merge-source-head>span:nth-child(2){flex:1;min-width:0}
+.merge-source-head b{display:block;font-size:11.5px;white-space:nowrap}
+.merge-source-head small{display:block;color:#91a1b0;font:9px 'Cascadia Code',Consolas,monospace;margin-top:3px}
+.merge-source-glyph{height:26px;width:26px;display:grid;place-items:center;border:1px solid #586782;border-radius:6px;color:#aac5df}
+.our-version .merge-source-glyph{color:#8dd7bd;border-color:#547b6c;background:#264e4055}
+.their-version .merge-source-glyph{color:#c4b1fa;border-color:#736595;background:#52476a40}
+.merge-source-count{font:9px 'Cascadia Code',Consolas,monospace;color:#7b8da2;white-space:nowrap}
+.merge-source-code{flex:1;min-height:0;overflow:auto;padding:9px 0 13px;font:11px/1.65 'Cascadia Code',Consolas,monospace;white-space:pre}
+.merge-source-line{display:flex;gap:12px;min-height:18px;min-width:max-content;padding-right:12px}
+.merge-source-line>span{color:#61758d;min-width:34px;text-align:right;user-select:none}
+.merge-source-line code{color:#d9e4ee;white-space:pre}
+.merge-source-line:nth-child(even){background:#ffffff05}
+.merge-source-code>p{color:#d0ab7b;padding:6px 12px}
+.merge-source-empty{display:grid;place-items:center;text-align:center;flex:1;color:#a8a0a8;font-size:11px;line-height:1.5;padding:20px}
+.merge-editor{flex:1.13;min-height:170px;display:flex;flex-direction:column;overflow:hidden;margin:0 24px 12px;border:1px solid #4a6f73;border-radius:9px;background:#0f1924}
+.merge-editor-head{min-height:55px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:15px;background:#223a42;border-bottom:1px solid #547f7e;padding:8px 12px}
+.merge-editor-head>div:first-child{display:flex;align-items:center;gap:11px}
+.merge-edit-icon{display:grid;place-items:center;border-radius:7px;background:#32706b66;color:#a5e3d9;width:30px;height:30px}
+.merge-editor-head b{display:block;color:#e5faf6;font-size:12px}
+.merge-editor-head small{display:block;font-size:10px;color:#a9c3c3;margin-top:3px;line-height:1.5}
+.merge-choose{display:flex;gap:6px;flex-shrink:0}
+.merge-choose button{display:flex;align-items:center;gap:5px;border:1px solid #547181;border-radius:6px;background:#2b4250;color:#c3d5e3;padding:8px 11px;font-size:11px;font-weight:700}
+.merge-choose button:hover{background:#3e5962}.merge-choose button.selected{color:#bdffe1;border-color:#70bfa4;background:#35665788}.merge-choose button.selected.theirs{color:#d7cbff;border-color:#9c88df;background:#5a497788}
+.merge-editor-text{flex:1;min-height:0;width:100%;background:#111a27;color:#d9e7ee;padding:16px 19px;border:0;resize:none;outline:none;font:12px/1.65 'Cascadia Code',Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.merge-editor-text:focus{outline:2px solid #488d8c;outline-offset:-2px}
+.merge-editor-foot{height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#1a2b35;border-top:1px solid #2c4650;color:#94b7b9;font:9px 'Cascadia Code',Consolas,monospace;flex-shrink:0}
+.merge-error{display:flex;align-items:center;gap:9px;max-height:90px;overflow:auto;color:#ffd5c6;border:1px solid #9e5751;background:#603d3b;padding:10px 14px;border-radius:6px;margin:0 24px 9px;font-size:11px}
+.merge-bottom{height:69px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 24px;border-top:1px solid #3c4c5d;background:#1a2532}
+.merge-bottom>span{display:flex;align-items:center;gap:8px;color:#92a8ad;font-size:11px}.merge-bottom>span>svg{color:#86c6ac}
+.merge-bottom>div{display:flex;gap:9px}.merge-cancel,.merge-confirm{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:7px;font-size:12px;font-weight:750}
+.merge-cancel{border:1px solid #455566;background:#263647;color:#d7e4eb}.merge-cancel:hover{background:#30485c}
+.merge-confirm{border:1px solid #a7ead6;background:linear-gradient(110deg,#83d6be,#9acfe2);color:#17333a}.merge-confirm:disabled{opacity:.42}
+.merge-loading{flex:1;display:flex;align-items:center;justify-content:center;gap:14px;color:#a9bccb}.merge-failure{color:#e8a7a9}
+@media(max-width:1100px){.merge-overlay{padding:10px}.merge-intro{margin:10px}.merge-columns{margin:0 10px 10px;gap:6px}.merge-editor{margin:0 10px 8px}.merge-top,.merge-bottom{padding:0 12px}.merge-columns{max-height:37%}.merge-intro{padding:8px}.merge-bottom>span{display:none}}
+@media(max-height:790px){.merge-overlay{padding:8px}.merge-top{height:66px}.merge-intro{margin:8px 18px;padding:8px}.merge-columns{max-height:37%;min-height:125px}.merge-editor{min-height:130px}.merge-bottom{height:53px}}

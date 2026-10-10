@@ -31,7 +31,7 @@ try{
  $app=Start-Process $exe -PassThru
  for($i=0;$i -lt 50;$i++){Start-Sleep -Milliseconds 200;$app.Refresh();if($app.MainWindowHandle -ne [IntPtr]::Zero){break}}
  if($app.HasExited){throw 'Native Arclane exited'}
- Start-Sleep -Seconds 3
+ Start-Sleep -Seconds 10
  $before=TreeSnapshot $app.Id
  Start-Sleep -Seconds 8
  $after=TreeSnapshot $app.Id
@@ -43,6 +43,8 @@ try{
    privateMemoryMB=$after.privateMB
    sumWorkingSetMB=$after.workingMB
    eightSecondCpuMs=$cpuDelta
+   warmupSeconds=10
+   measurementSeconds=8
    method='All live descendant processes by Win32_Process parent PID; sums include WebView2 subprocesses, but process working sets can share pages.'
    fixture=$fixture
  }

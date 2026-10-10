@@ -51,6 +51,22 @@ try{
  result.tests.push("real commit history in native WebView2");
  const file=page.locator(".change-list .change-select").filter({hasText:"segments.txt"}).first();
  await file.click();
+ await page.locator(".comparison-row.changed").first().waitFor({timeout:12000});
+ if(await page.locator(".comparison-titles").innerText().then(s=>!s.includes("Staging area")||!s.includes("Working tree")))throw Error("Real index/worktree side-by-side titles not present");
+ const nearStart=await page.locator(".comparison-row.changed").allTextContents();
+ if(!nearStart.join(" ").includes("MODIFIED 005"))throw Error("First changed line missing from paired file comparison");
+ await page.locator(".right-diff .comparison-body").evaluate(node=>{node.scrollTop=65*23;node.dispatchEvent(new Event("scroll",{bubbles:true}));});
+ await page.locator(".right-diff .comparison-row.changed").filter({hasText:"MODIFIED 070"}).first().waitFor({timeout:8000});
+ result.tests.push("side-by-side virtualisation shows both changed lines by scrolling");
+ await page.getByRole("button",{name:"Expand diff"}).click();
+ const expanded=page.getByRole("dialog",{name:"Side-by-side comparison segments.txt"});
+ await expanded.waitFor({timeout:8000});
+ await expanded.locator(".comparison-row.changed").filter({hasText:"MODIFIED 005"}).first().waitFor({timeout:8000});
+ await expanded.locator(".comparison-body").evaluate(node=>{node.scrollTop=65*23;node.dispatchEvent(new Event("scroll",{bubbles:true}));});
+ await expanded.locator(".comparison-row.changed").filter({hasText:"MODIFIED 070"}).first().waitFor({timeout:8000});
+ await expanded.getByRole("button",{name:"Close expanded diff"}).click();
+ result.tests.push("large side-by-side modal navigates complete file");
+ await page.getByRole("button",{name:/Hunks/}).click();
  await page.locator(".hunk-card").first().waitFor({timeout:12000});
  if(await page.locator(".hunk-card").count()!==2)throw Error("Native diff inspector didn't display both independent hunks");
  result.tests.push("native hunk inspector displays separate code hunks");
@@ -63,6 +79,7 @@ try{
  result.tests.push("native partial staging did not alter working file bytes");
  const stagedFile=page.locator(".change-group-head.staged-head").locator("xpath=following-sibling::*[1]").locator(".change-select").filter({hasText:"segments.txt"}).first();
  await stagedFile.click({timeout:12000});
+ await page.getByRole("button",{name:/Hunks/}).click();
  await page.locator(".hunk-card .hunk-head button").first().click();
  for(let n=0;n<40;n++){await wait(160);if(!git("diff","--cached","--","segments.txt").trim())break;}
  if(git("diff","--cached","--","segments.txt").trim())throw Error("Native unstage hunk did not restore index");
