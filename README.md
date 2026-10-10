@@ -45,7 +45,7 @@ The development record is unusually explicit because it matters:
 - Mutating Git tests use fresh disposable repositories and inspect the resulting refs, index and working files. The UI tests drive the **actual packaged Tauri/WebView2 executable**, not just browser mock-ups.
 - The graph has been tested against an 811-commit fixture. **10,000+ commit scalability is not yet established.**
 
-The [full 104-obligation ledger](docs/FEATURE_COVERAGE.md) currently reports **22 accepted local scopes, 46 partial, 5 partial/mock-only, 2 backend-only and 29 unverified**. *Accepted scope* does not mean unlimited production readiness.
+The [full 104-obligation ledger](docs/FEATURE_COVERAGE.md) currently reports **24 accepted local scopes, 45 partial, 5 partial/mock-only, 1 backend-only and 29 unverified**. *Accepted scope* does not mean unlimited production readiness.
 
 Exact evidence and limitations: [feature sprint](docs/FEATURE_SPRINT_2026-10-10.md) · [live GitHub checkpoint](docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md).
 
