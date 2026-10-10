@@ -132,6 +132,8 @@ export default function App(){
  const repositoryVersion=useRef(0);
  const activePath=useRef("");
  const pendingGit=useRef(new Map<string,string>());
+ const activeGit=useRef<{path:string;id:string;op:string}|null>(null);
+ const gitRequestSeq=useRef(0);
  const currentCommit=commits.find(x=>x.sha===selection)||null;
  const graph=useMemo(()=>buildGraph(commits),[commits]);
  const refs=useMemo(()=>repo?.refs||[],[repo]);
@@ -213,15 +215,28 @@ export default function App(){
   if(!path||path!==activePath.current||busy)return false;
   const key=repositoryKey(path);if(pendingGit.current.has(key))return false;
   pendingGit.current.set(key,op);
+  const requestId="git-"+Date.now()+"-"+(++gitRequestSeq.current);
+  activeGit.current={path,id:requestId,op};
   const owner=repositoryVersion.current;setBusy(op);setError("");
   try{
-   const res=await client.action(path,op,file,input);if(owner!==repositoryVersion.current)return false;
+   const res=await client.action(path,op,file,input,requestId);if(owner!==repositoryVersion.current)return false;
    showToast(op==="rebase_interactive"?"Interactive rebase completed":op==="cherry_pick_series"?"Cherry-pick sequence completed":res.output||"Git "+op.replaceAll("_"," ")+" completed");return !!await refresh(path,refScope);
   }catch(e){
    if(owner!==repositoryVersion.current)return false;
    const message=e instanceof Error?e.message:String(e);await refresh(path,refScope);
    if(owner===repositoryVersion.current)setError(message);return false;
-  }finally{pendingGit.current.delete(key);if(repositoryKey(activePath.current)===key)setBusy("");}
+   }finally{
+    pendingGit.current.delete(key);
+    if(activeGit.current?.id===requestId)activeGit.current=null;
+    if(repositoryKey(activePath.current)===key)setBusy("");
+  }
+ };
+ const cancelCurrentGit=()=>{
+  const request=activeGit.current;
+  if(!request||repositoryKey(request.path)!==repositoryKey(path))return;
+  void client.cancelGitAction(request.path,request.id).then(accepted=>{
+    if(accepted&&activeGit.current?.id===request.id)showToast("Cancellation requested; Git state will be refreshed when the operation exits.");
+  }).catch(e=>fail(e));
  };
  const stageAll=()=>{if((repo?.stats.conflicts||0)>0){setError("Resolve all merge conflicts before staging all changes.");return;}void runAction("stage_all");};
  const commit=async()=>{if(!commitText.trim())return;const text=commitText.trim()+(commitBody.trim()?"\n\n"+commitBody.trim():"");if(await runAction("commit",null,text)){setCommitText("");setCommitBody("");}};
@@ -370,7 +385,7 @@ export default function App(){
   <div className="main-toolbar">
    <div className="repo-identity"><IButton icon={showLeft?PanelLeftClose:PanelLeftOpen} label="Toggle references" onClick={()=>setShowLeft(x=>!x)}/><span className="toolbar-sep"/>{repo?<><span className="identity-mark"><FolderGit2 size={18}/></span><span className="identity-text"><b>{repo.name}</b><small>{repo.branch||"Detached HEAD"}</small></span><span className="identity-tracking">{repo.ahead>0&&<span className="ahead">↑ {repo.ahead}</span>}{repo.behind>0&&<span className="behind">↓ {repo.behind}</span>}</span></>:<><span className="identity-mark muted"><FolderGit2 size={19}/></span><span className="identity-text"><b>No repository open</b><small>Local · Offline ready</small></span></>}</div>
    <button className="quick-search" onClick={()=>setPaletteOpen(true)}><Search size={15}/><span>Search commands…</span><kbd>Ctrl P</kbd></button>
-   <div className="toolbar-actions"><IButton icon={Undo2} label="Open reflog recovery" onClick={recover} disabled={!repo}/><span className="toolbar-sep"/><ActionButton icon={CloudDownload} label="Fetch" onClick={()=>void runAction("fetch")} disabled={!canMutate} busy={busy==="fetch"}/><ActionButton icon={ArrowDownLeft} label="Pull" onClick={()=>setPullOptions(true)} disabled={!canMutate} busy={busy==="pull"}/><ActionButton icon={ArrowUpRight} label="Push" onClick={()=>void runAction("push")} primary disabled={!canMutate} busy={busy==="push"}/><span className="toolbar-sep"/><IButton icon={MoreHorizontal} label="Repository operations" active={operationsOpen} onClick={()=>setOperationsOpen(v=>!v)}/></div>
+   <div className="toolbar-actions">{busy&&activeGit.current&&repositoryKey(activeGit.current.path)===repositoryKey(path)&&<ActionButton icon={X} label="Cancel Git" onClick={cancelCurrentGit}/>}<IButton icon={Undo2} label="Open reflog recovery" onClick={recover} disabled={!repo}/><span className="toolbar-sep"/><ActionButton icon={CloudDownload} label="Fetch" onClick={()=>void runAction("fetch")} disabled={!canMutate} busy={busy==="fetch"}/><ActionButton icon={ArrowDownLeft} label="Pull" onClick={()=>setPullOptions(true)} disabled={!canMutate} busy={busy==="pull"}/><ActionButton icon={ArrowUpRight} label="Push" onClick={()=>void runAction("push")} primary disabled={!canMutate} busy={busy==="push"}/><span className="toolbar-sep"/><IButton icon={MoreHorizontal} label="Repository operations" active={operationsOpen} onClick={()=>setOperationsOpen(v=>!v)}/></div>
   </div>
   {operationsOpen&&<div className="operations-menu" role="menu" aria-label="Repository operations"><div className="operations-heading"><GitMerge size={15}/> Git operations <IButton icon={X} label="Close menu" onClick={()=>setOperationsOpen(false)}/></div>{actions.filter(a=>!["Open repository","Refresh repository","History and commit graph","Pull requests and checks","Preferences","Open repository in VS Code","Open terminal in repository"].includes(a.name)).map(a=><button key={a.name} role="menuitem" disabled={a.enabled===false} onClick={()=>{a.perform();setOperationsOpen(false);}}><a.icon size={15}/>{a.name}</button>)}</div>}
   <div className="workspace-navigation"><WorkspaceTabs items={nav} selected={route} onSelect={changeRoute}/><IButton icon={Terminal} label="Open embedded terminal" disabled={!repo} onClick={()=>showTerminal(path)}/></div>
