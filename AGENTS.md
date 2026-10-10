@@ -6,6 +6,8 @@ ArcLane is a Windows-first Rust/Tauri Git desktop client. The Review Bench inter
 
 Start with: `README.md`, `docs/FEATURE_COVERAGE.md`, `docs/FEATURE_SPRINT_2026-10-10.md`, and `docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md`. Consult historical audit/research only when necessary for a concrete missing behaviour.
 
+**Active delivery plan:** `docs/DEVELOPMENT_PROGRAM_2026-10-11.md` maps every one of the 80 unaccepted scope IDs exactly once, sets batch dependencies, proper REA/ReAgent/Penpot/Model Testing roles, native gates and release criteria. For the isolated GPT-6 Luna (Maximum reasoning) test, read `docs/LUNA_MAX_PILOT_035.md` and work only in an independent topic checkout. Neither plan grants permission to modify `main`, invent UI styling, or treat mock provider writes as acceptance.
+
 ## Repo-first working model
 
 - `main` is the integrated, tested public baseline. Develop on a feature branch and preserve commit history.
