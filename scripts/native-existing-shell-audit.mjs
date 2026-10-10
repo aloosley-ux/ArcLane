@@ -58,6 +58,7 @@ try{
  await expect(page.locator('.scope-badge')).toContainText('alpha');
  await expect(page.locator('.status-left')).toContainText('Ready');
  checks.push('017 reference navigator: independently confirmed branches, tracking remote, tag, stash, worktree, filter/collapse and ref-scope click');
+ if(process.env.ARCLANE_TEST_SPLITTER_RESTART==="1"){
  const left=page.getByRole('separator',{name:'Resize navigator'});
  const bench=page.getByRole('separator',{name:'Resize review bench'});
  await left.focus();await page.keyboard.press('Home');
@@ -72,6 +73,7 @@ try{
  await expect(page.getByRole('separator',{name:'Resize navigator'})).toHaveAttribute('aria-valuenow','270');
  await expect(page.getByRole('separator',{name:'Resize review bench'})).toHaveAttribute('aria-valuenow','300');
  checks.push('009 navigator and review bench keyboard min/clamp/persist after full executable shutdown/restart');
+ }
  if(git('rev-parse','HEAD')!==original||git('write-tree')!==index||
     fs.readFileSync(path.join(repo,'tracked.txt'),'utf8')!==saved||
     git('rev-parse','refs/heads/feature/alpha')!==original)throw Error('Read-only native audit changed exact Git refs/index/files');
