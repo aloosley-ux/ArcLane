@@ -1,10 +1,11 @@
 import {fixture,launch,evidence,expect,fs,path,base,execFileSync} from './native-sprint-harness.mjs';
+import os from 'node:os';
 // Cold-start only with an empty independent app data profile. Never use user settings.
 const profile=fs.mkdtempSync(path.join(base,'artifacts','cold-start-profile-'));
 const {repo,git,write}=fixture('cold-start-source');
 write('initial.txt','Initial fixture\n');git('add','--all');git('commit','-qm','Seed local source');
 const original=git('rev-parse','HEAD'),index=git('write-tree');
-const parent=fs.mkdtempSync(path.join(base,'artifacts','cold-start-dest-'));
+const parent=fs.mkdtempSync(path.join(os.tmpdir(),'arclane-cold-start-'));
 let session=await launch(repo,'native-cold-start',9475,{},profile),page=session.page;
 const checks=[];
 try{
