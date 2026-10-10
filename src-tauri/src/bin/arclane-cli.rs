@@ -18,6 +18,7 @@ fn main(){
    let field=|k:&str|opts.get(k).and_then(|x|x.as_str());
    match input[1].as_str(){
     "inspect"=>git::inspect(&input[2]),
+    "inspect_stash"=>advanced::inspect_stash(&git::root(&input[2])?,field("id").ok_or("Missing stash selector")?),
     "commit_context"=>{let root=git::root(&input[2])?;match field("sha"){Some(s)=>commit_workflows::details(&root,s),None=>commit_workflows::defaults(&root)}},
     "review_revisions"=>revision_review::view(&git::root(&input[2])?,field("from"),field("to").ok_or("Missing target")?,field("file")),
     "history"=>git::history(&input[2],opts["limit"].as_u64().unwrap_or(150) as usize,field("reference"),opts["skip"].as_u64().unwrap_or(0) as usize),

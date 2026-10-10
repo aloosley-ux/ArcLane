@@ -32,8 +32,8 @@
 | 026 | Reference navigator and history | Ghost branch and ancestry highlight | not verified | Hover selections use real reachability |
 | 027 | Reference navigator and history | Commit/branch multi-selection and diff range | accepted for two-tree review — Control-click two graph commits or choose two local/remote/tag references, inspect exact changed files and swap comparison direction; larger selection sets excluded | Select 2 commits/refs and compare |
 | 028 | Reference navigator and history | Graph search/filter by author/ref/path | not verified | Independent git log query checks |
-| 029 | Reference navigator and history | Graph keyboard navigation and copy SHA | not verified | Selection and exact SHA copied |
-| 030 | Reference navigator and history | Commit context menus and shortcuts | not verified | Correct actions guarded by selection |
+| 029 | Reference navigator and history | Graph keyboard navigation and copy SHA | partial — Arrow/Home/End selection and Shift+F10 context navigation native verified; copy SHA command wired, clipboard acceptance remains | Selection and exact SHA copied |
+| 030 | Reference navigator and history | Commit context menus and shortcuts | accepted for explicit commit/reference context menus — native cherry-pick, revert, soft/mixed reset and branch switch independently verify refs/index/files; inactive operations disabled | Correct actions guarded by selection |
 | 031 | Reference navigator and history | Detached HEAD and initial/empty repositories | not verified | Open and recover safely |
 | 032 | Reference navigator and history | Worktree lists and selectable shared history | backend-tested | Create worktree & visible in list |
 | 033 | Files and commits | Stage/unstage full files | accepted for tracked text files — packaged native stage/unstage of bracket filename verified against exact index; neighbouring file unchanged | Index changes independently verified |
@@ -45,8 +45,8 @@
 | 039 | Files and commits | Commit summary+description and co-authors | accepted for local index commits — packaged commit editor verifies multiline message, author override and Co-authored-by trailers against git show | Headers validated with git show |
 | 040 | Files and commits | Commit staged contents and push option | backend-tested | Only staged bytes committed and upstream checked |
 | 041 | Files and commits | Amend previous commit with safeguard | accepted for local amend — message-only amend, remote-tracking sharing warning, explicit rewrite acknowledgement and stale-HEAD refusal backend/native verified; remote publishing excluded | Hash changed, file state correct, shared warning |
-| 042 | Files and commits | Revert previous published commit | not verified | New reversing commit, history preserved |
-| 043 | Files and commits | Reset mixed/soft/hard with previews | not verified | Each mode produces correct state, hard guarded |
+| 042 | Files and commits | Revert previous published commit | accepted for local reversing commits — packaged confirmation creates new reversing commit and preserves previous history; remote publication excluded | New reversing commit, history preserved |
+| 043 | Files and commits | Reset mixed/soft/hard with previews | partial — confirmed soft/mixed resets native verify target HEAD, exact index, retained working files and other branches; hard reset intentionally absent | Each mode produces correct state, hard guarded |
 | 044 | Files and commits | Restore single or multiple historical files | accepted for regular files — packaged confirmed multi-file historical restore preserves exact index, HEAD and neighbouring literal paths; source symlinks and deleted entries refused | Worktree/index bytes independently verified |
 | 045 | Files and commits | Commit metadata, parents and signatures | partial — full body, author/committer emails and ISO dates, parent navigation and Git signature status exposed; unsigned fixture native verified, signed-key scenarios unaccepted | Author/email/date/hash accurate |
 | 046 | Files and commits | File history and blame | accepted — native commit timeline, parent comparison, correct author attribution and search verified | Line origin matches git blame |
@@ -57,14 +57,14 @@
 | 051 | Git operations | Local/remote branch create/switch/rename/delete | partial | Branches match git show-ref |
 | 052 | Git operations | Tags annotated/lightweight and push/delete | partial — annotated tag creation and remote tag pushes/deletes passed local fixtures; native basic create tested | Refs and tag content verified |
 | 053 | Git operations | Fetch from multiple remotes | partial — single remote explicit fetch available; multi-remote coverage remains untested | Remote refs and fetched object state |
-| 054 | Git operations | Pull merge/rebase/ff-only and abort | not verified | Diverged/dirty worktree guarded |
+| 054 | Git operations | Pull merge/rebase/ff-only and abort | partial — all three strategies backend/native verified with local bare upstream, dirty states refused, strategy preference saved; sequencer abort covered by existing conflict workflows, live transport/auth unaccepted | Diverged/dirty worktree guarded |
 | 055 | Git operations | Push, set upstream, reject non-fast-forward | backend-tested | Local bare remote verifies push |
 | 056 | Git operations | Force push only with exact explicit confirmation | not verified | Blocked without confirmation, never automatic |
 | 057 | Git operations | Merge fast-forward and non-FF, abort | not verified | Correct parents and working tree |
 | 058 | Git operations | Conflict detection, resolver and continue | accepted for text merges — native ours/theirs/manual resolution, clean staged index and merge continue verified | Unmerged paths surface; safe resolve |
 | 059 | Git operations | Rebase interactive pick/reword/squash/drop | not verified | Result SHA & commit order validated |
-| 060 | Git operations | Cherry pick single/multiple and conflict resume | not verified | Expected tree diff and parent relationship |
-| 061 | Git operations | Stash list/create/apply/pop/drop | partial | Tracked and untracked preserved |
+| 060 | Git operations | Cherry pick single/multiple and conflict resume | partial — confirmed single-commit context action native verifies expected file tree and parent; merge commits disabled, multi-pick absent | Expected tree diff and parent relationship |
+| 061 | Git operations | Stash list/create/apply/pop/drop | accepted for local stash workflows — native create/review/apply with index restoration and retained stash; backend guarded pop/drop plus tracked/untracked checks; stale selector refuses mismatched stash SHA | Tracked and untracked preserved |
 | 062 | Git operations | Worktree create/open/lock/unlock/remove/prune | partial | Disk, branch, lock and refs validated |
 | 063 | Git operations | Submodules sync/add/update | partial — submodule status/sync/update controls exist; native sync acceptance only; add/removal lifecycle unverified | Gitlink and nested refs validated |
 | 064 | Git operations | Git LFS status/track/lock | partial — LFS detection and track/untrack verified using installed git-lfs; live server lock/unlock not accepted | Objects and pointers validated |
@@ -123,6 +123,8 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**Feature sprint, batch 3 (2026-10-10):** `accept-operation-workflows.py` passed 12 groups; `native-operation-workflows-accept.mjs` passed 9 Git-context/stash/recovery checks and 3 packaged pull checks. Advanced Git (20) and conflicts (6) regressions passed. Pull never autostashes and rejects dirty, detached, missing-upstream and active-sequencer states. Stash review includes saved untracked content and pins the reviewed SHA before apply/pop/drop. Reference menus expose switch/merge/rebase/rename/safe delete/local tracking; commit menus expose inspect/compare/create branch/pick/revert/soft/mixed reset. Graph arrows, Home/End and Shift+F10 work on loaded history. The old unavailable Undo toolbar now opens real non-destructive reflog recovery. Continue palette dispatch now includes revert; rebase skip is explicitly confirmed. No hard reset, force push or remote provider writes.
 
 **Feature sprint, batch 2 (2026-10-10):** `accept-revision-review.py` passed six groups; `native-revision-review-accept.mjs` passed four packaged Windows checks. Existing paired comparison (9) and Toolbox (17) regressions passed. Review supports first-parent comparison, root-to-empty-tree comparison, two SHA/ref trees, exact per-file snapshots and binary patch fallback. Historical restore requires confirmation and the opened HEAD, validates all selected paths before invoking one Git restore, and never modifies the index. Merge metadata uses the first-parent changed-file inventory. No hard reset or remote mutation was added.
 

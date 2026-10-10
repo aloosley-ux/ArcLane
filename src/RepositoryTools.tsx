@@ -19,8 +19,8 @@ const sections:{id:Section;title:string;icon:typeof GitBranch;description:string
  {id:"tags",title:"Tags",icon:Tag,description:"Release references"}
 ];
 const truncate=(s:string,n=12)=>s.length>n?s.slice(0,n)+"…":s;
-export default function RepositoryTools({path,branch,onUpdate}:{path:string;branch:string;onUpdate:()=>void}){
- const[section,setSection]=useState<Section>("remotes");
+export default function RepositoryTools({path,branch,onUpdate,initialSection="remotes"}:{path:string;branch:string;onUpdate:()=>void;initialSection?:Section}){
+ const[section,setSection]=useState<Section>(initialSection);
  const[data,setData]=useState<ToolData>({});
  const[loading,setLoading]=useState(false);
  const[busy,setBusy]=useState(false);

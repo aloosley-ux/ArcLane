@@ -1,6 +1,7 @@
 import{invoke}from "@tauri-apps/api/core";
 import type{Repository,HistoryPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
 export const client={
+  inspectStash:(path:string,id:string)=>invoke<import("./types").StashDetails>("inspect_stash",{path,id}),
   reviewRevisions:(path:string,from:string|null,to:string,file:string|null=null)=>invoke<import("./types").RevisionReview>("review_revisions",{path,from,to,file}),
   commitContext:(path:string,sha:string|null=null)=>invoke<import("./types").CommitDetails|import("./types").CommitDefaults>("commit_context",{path,sha}),
   recent:()=>invoke<string[]>("repositories"),

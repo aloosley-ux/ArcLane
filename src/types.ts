@@ -2,6 +2,7 @@ export type ChangedFile={path:string;original?:string;x:string;y:string;staged:b
 export type Ref={full:string;name:string;sha:string;current:boolean;kind:"local"|"remote"|"tag"};
 export type Worktree={path:string;branch:string;head:string;main:boolean;locked:boolean};
 export type Stash={id:string;title:string};
+export type StashDetails={id:string;sha:string;message:string;files:{status:string;path:string}[];patch:string};
 export type Sequencer={active:boolean;merge:boolean;rebase:boolean;cherry_pick:boolean;revert:boolean};
 export type Repository={path:string;name:string;branch:string;head:string;upstream?:string;origin?:string;ahead:number;behind:number;files:ChangedFile[];refs:Ref[];stashes:Stash[];worktrees:Worktree[];sequencer:Sequencer;stats:{staged:number;modified:number;untracked:number;conflicts:number;total:number}};
 export type Commit={sha:string;subject:string;author:string;date:string;parents:string[]};

@@ -11,6 +11,7 @@
     cmd.arg("-C").arg(path).arg("-c").arg("core.quotepath=false")
        .args(args).stdin(Stdio::null()).env("GIT_TERMINAL_PROMPT","0").env("GCM_INTERACTIVE","never")
        .env("GIT_OPTIONAL_LOCKS","0").stdout(Stdio::piped()).stderr(Stdio::piped());
+    cmd.env("GIT_EDITOR","true");
     #[cfg(windows)] cmd.creation_flags(0x08000000);
     let output=cmd.output().map_err(|e|format!("Unable to launch Git: {e}"))?;
     if output.status.success(){Ok(String::from_utf8_lossy(&output.stdout).trim().into())}
@@ -82,6 +83,12 @@
     let val=input.trim();
     let command:Vec<String>=match op{
        "branch_delete"=>{existing_branch(path,val)?;args(&["branch","-d",val])},
+       "branch_from_commit"=>{valid_commit(path,file)?;valid_branch(val)?;git(path,&args(&["check-ref-format","--branch",val]))?;args(&["switch","-c",val,file])},
+       "branch_track_remote"=>{
+          valid_branch(val)?;git(path,&args(&["check-ref-format","--branch",val]))?;
+          if !file.starts_with("refs/remotes/")||file.ends_with("/HEAD"){return Err("Choose a remote-tracking branch".into());}
+          git(path,&args(&["show-ref","--verify",file]))?;args(&["switch","-c",val,"--track",file])
+       },
        "branch_rename"=>{existing_branch(path,file)?;valid_branch(val)?;
           git(path,&args(&["check-ref-format","--branch",val]))?;
           args(&["branch","-m",file,val])
@@ -102,6 +109,14 @@
        "revert_abort"=>{require_in_progress(path,"REVERT_HEAD",Some("sequencer"))?;args(&["revert","--abort"])},
        "revert_continue"=>{require_in_progress(path,"REVERT_HEAD",Some("sequencer"))?;args(&["revert","--continue"])},
        "stash_apply"=>{stash_selector(val)?;args(&["stash","apply",val])},
+       "stash_apply_selected"|"stash_pop_selected"|"stash_apply_index"|"stash_pop_index"|"stash_drop_selected"=>{
+          stash_selector(val)?;valid_commit(path,file)?;
+          if git(path,&args(&["rev-parse","--verify",val]))?!=git(path,&args(&["rev-parse","--verify",file]))? {
+              return Err("Stash list changed. Reopen the stash before applying or dropping it.".into());
+          }
+          let action=if op=="stash_drop_selected"{"drop"}else if op.starts_with("stash_pop"){"pop"}else{"apply"};
+          let mut command=args(&["stash",action]);if op.ends_with("_index"){command.push("--index".into());}command.push(val.into());command
+       },
        "stash_drop"=>{stash_selector(val)?;args(&["stash","drop",val])},
        "worktree_remove"=>{let w=worktree(path,file)?;args(&["worktree","remove",w.to_string_lossy().as_ref()])},
        "worktree_lock"=>{let w=worktree(path,file)?;args(&["worktree","lock",w.to_string_lossy().as_ref()])},
@@ -134,4 +149,15 @@
    let cherry_pick=has("CHERRY_PICK_HEAD");let revert=has("REVERT_HEAD");
    json!({"merge":merge,"rebase":rebase,"cherry_pick":cherry_pick,"revert":revert,
           "active":merge||rebase||cherry_pick||revert})
+ }
+ pub fn inspect_stash(path:&Path,id:&str)->Result<Value,String>{
+   stash_selector(id)?;
+   let sha=git(path,&args(&["rev-parse","--verify",id]))?;
+   let mut patch=git(path,&args(&["stash","show","--include-untracked","--no-ext-diff","--no-textconv","--no-color","--patch",id]))?;
+   if patch.len()>650000 {let mut end=650000;while !patch.is_char_boundary(end){end-=1;}patch.truncate(end);patch.push_str("\n[ArcLane: stash patch truncated at 650 KB]");}
+   let files=git(path,&args(&["stash","show","--include-untracked","--no-renames","--name-status","-z",id]))?;
+   let mut fields=files.split('\0').filter(|s|!s.is_empty());let mut changes=vec![];
+   while let Some(status)=fields.next(){if let Some(file)=fields.next(){changes.push(json!({"status":status,"path":file}));}}
+   let message=git(path,&args(&["show","-s","--format=%s",&sha]))?;
+   Ok(json!({"id":id,"sha":sha,"message":message,"files":changes,"patch":patch}))
  }

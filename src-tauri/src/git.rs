@@ -182,7 +182,13 @@ pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Va
         "stash_pop"=>{if !detail.starts_with("stash@{")||!detail.ends_with('}')||!detail[7..detail.len()-1].chars().all(|c|c.is_ascii_digit()){return Err("Invalid stash selector".into());}
             vec!["stash".into(),"pop".into(),detail.into()]},
         "fetch"=>a(&["fetch","--prune","origin"]),
-        "pull"=>a(&["pull","--ff-only"]),
+        "pull"|"pull_ff"|"pull_merge"|"pull_rebase"=>{
+            if advanced::sequencer_status(&p)["active"]==true{return Err("Continue or abort the current Git operation before pulling".into());}
+            if !parse_status(&p)?.0.is_empty(){return Err("Commit or stash working changes before pulling; automatic stash is disabled".into());}
+            if git(&p,&["branch","--show-current"])?.is_empty(){return Err("Switch to a branch before pulling".into());}
+            git(&p,&["rev-parse","--verify","@{upstream}"]).map_err(|_|"Configure an upstream branch before pulling".to_string())?;
+            match op {"pull_merge"=>a(&["pull","--no-rebase","--no-edit","--no-autostash"]),"pull_rebase"=>a(&["pull","--rebase","--no-autostash"]),_=>a(&["pull","--ff-only","--no-autostash"])}
+        },
         "push"=>a(&["push"]),
         "worktree_add"=>{ // file=destination; input=new branch
             if filename.is_empty()||detail.is_empty(){return Err("Destination and new branch required".into());}
