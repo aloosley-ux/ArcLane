@@ -168,6 +168,10 @@ pub fn edit_helper(mode:&str,filename:&str)->Result<(),String>{
         let sha=last.split_whitespace().nth(1).ok_or("Cannot identify rebase commit")?;
         let step=steps.iter().find(|s|s["sha"].as_str().is_some_and(|v|v==sha))
             .ok_or("Rebase instruction is not in the approved plan")?;
+        // Git also invokes the message editor after a conflicted plain pick.
+        // A pick retains Git's generated message; only requested edits override it.
+        let action=step["action"].as_str().ok_or("Invalid rebase action")?;
+        if action=="pick"{return Ok(());}
         let message=step["message"].as_str().ok_or("Expected reword/squash message")?;
         if message.trim().is_empty(){return Err("Approved commit message is empty".into());}
         fs::write(filename,format!("{message}\n"))
