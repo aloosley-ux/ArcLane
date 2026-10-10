@@ -29,6 +29,7 @@ The aim is ambitious. The current build is usable for many local Git workflows, 
 | **Stash and recovery** | Review stash patches, restore index state, guard against stale stash selections; resume or abort paused merge/rebase/cherry-pick/revert after restarting the app |
 | **File inspection** | Side-by-side and patch diffs, word highlights, whitespace controls, per-file history, blame and three-way text conflict resolution |
 | **Local development** | New/existing-branch and detached worktree tools, Gitflow feature finish, and on-demand PowerShell terminals via Windows ConPTY |
+| **Git reliability** | On-demand Cancel Git control, bounded Git action deadlines and cross-process writer exclusion for ArcLane instances/linked worktrees in one Windows session; interrupted operations require state review |
 | **GitHub** | On-demand PR, patch and CI details via your existing `gh` authentication; scoped cancellation, timeouts and actionable errors for provider reads |
 
 ![ArcLane side-by-side diff review in its dark interface](docs/media/arclane-diff-review.png)
@@ -50,7 +51,7 @@ Exact evidence and limitations: [feature sprint](docs/FEATURE_SPRINT_2026-10-10.
 
 ## The honest limitations
 
-The biggest unfinished areas include rebase of merge-heavy or shared/published histories, core Git cancellation and cross-process serialisation, deeper worktree/agent-session workflows, Gitflow release/hotfix completion, stacked PRs, rich/binary/image conflict tooling, additional Git providers, full LFS/submodule lifecycles, signing, accessibility and large-repository performance. Private/enterprise GitHub and live provider writes are not accepted.
+The biggest unfinished areas include rebase of merge-heavy or shared/published histories, cancellation coverage beyond core Git actions and coordination with external Git clients, deeper worktree/agent-session workflows, Gitflow release/hotfix completion, stacked PRs, rich/binary/image conflict tooling, additional Git providers, full LFS/submodule lifecycles, signing, accessibility and large-repository performance. Private/enterprise GitHub and live provider writes are not accepted.
 
 This is a Windows-first alpha. **The standalone EXE is unsigned**, so Windows may warn before running it. It requires WebView2 and a local Git installation. GitHub features require `gh` installed and authenticated. It has **not** completed clean-machine installer acceptance.
 
