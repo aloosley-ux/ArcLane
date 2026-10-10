@@ -4,6 +4,34 @@ use std::{path::{Path,PathBuf},process::{Command,Stdio},collections::HashSet,syn
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
+static ACTIVE_MUTATIONS: OnceLock<Mutex<HashSet<PathBuf>>> = OnceLock::new();
+
+/// One in-process writer per Git common directory, including linked worktrees.
+/// A lease is released even when the Git operation fails or unwinds.
+pub fn with_write_guard<T>(path:&Path, operation:impl FnOnce()->Result<T,String>)->Result<T,String>{
+    let common=git(path,&["rev-parse","--git-common-dir"])?;
+    let raw=PathBuf::from(common);
+    let folder=if raw.is_absolute(){raw}else{path.join(raw)};
+    let key=folder.canonicalize().map_err(|e|format!("Cannot identify shared Git directory: {e}"))?;
+    let active=ACTIVE_MUTATIONS.get_or_init(||Mutex::new(HashSet::new()));
+    {
+        let mut writers=active.lock().map_err(|_|"Git operation lock is unavailable".to_string())?;
+        if !writers.insert(key.clone()){
+            return Err("Another Git change is running in this repository. Wait for it to finish before retrying.".into());
+        }
+    }
+    struct Lease(PathBuf);
+    impl Drop for Lease {
+        fn drop(&mut self){
+            if let Some(active)=ACTIVE_MUTATIONS.get(){
+                if let Ok(mut writers)=active.lock(){writers.remove(&self.0);}
+            }
+        }
+    }
+    let _lease=Lease(key);
+    operation()
+}
+
 fn spawn(program: &str, args: &[String], cwd: Option<&Path>) -> Result<String,String> {
     let mut cmd = Command::new(program);
     // UI path selections follow `--`. Scope literal mode to these commands:
