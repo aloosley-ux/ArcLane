@@ -224,8 +224,47 @@ fn action_unlocked(p:&Path,op:&str,file:Option<&str>,input:Option<&str>)->Result
         "worktree_add"=>{ // file=destination; input=new branch
             if filename.is_empty()||detail.is_empty(){return Err("Destination and new branch required".into());}
             git(&p,&["check-ref-format","--branch",detail])?;
-            if Path::new(filename).exists(){return Err("Destination already exists".into());}
+            let destination=Path::new(filename);
+            if !destination.is_absolute()||destination.components().any(|x|matches!(x,std::path::Component::ParentDir)){
+                return Err("Worktree destination must be an absolute path without parent traversal".into());
+            }
+            if destination.exists(){return Err("Worktree destination already exists".into());}
+            if !destination.parent().is_some_and(|parent|parent.is_dir()){
+                return Err("Worktree destination parent directory does not exist".into());
+            }
             vec!["worktree".into(),"add".into(),"-b".into(),detail.into(),filename.into()]},
+        "worktree_add_existing"=>{
+            if detail.is_empty()||detail.starts_with('-')||detail.len()>250{
+                return Err("Choose an existing local branch".into());
+            }
+            git(&p,&["show-ref","--verify","--quiet",&format!("refs/heads/{detail}")])
+                .map_err(|_|"Choose an existing local branch".to_string())?;
+            let destination=Path::new(filename);
+            if !destination.is_absolute()||destination.components().any(|x|matches!(x,std::path::Component::ParentDir)){
+                return Err("Worktree destination must be an absolute path without parent traversal".into());
+            }
+            if destination.exists(){return Err("Worktree destination already exists".into());}
+            if !destination.parent().is_some_and(|parent|parent.is_dir()){
+                return Err("Worktree destination parent directory does not exist".into());
+            }
+            vec!["worktree".into(),"add".into(),filename.into(),detail.into()]
+        },
+        "worktree_add_detached"=>{
+            if detail.len()<7||detail.len()>64||!detail.chars().all(|c|c.is_ascii_hexdigit()){
+                return Err("Choose an existing commit SHA".into());
+            }
+            git(&p,&["cat-file","-e",&format!("{detail}^{{commit}}")])
+                .map_err(|_|"Commit not found".to_string())?;
+            let destination=Path::new(filename);
+            if !destination.is_absolute()||destination.components().any(|x|matches!(x,std::path::Component::ParentDir)){
+                return Err("Worktree destination must be an absolute path without parent traversal".into());
+            }
+            if destination.exists(){return Err("Worktree destination already exists".into());}
+            if !destination.parent().is_some_and(|parent|parent.is_dir()){
+                return Err("Worktree destination parent directory does not exist".into());
+            }
+            vec!["worktree".into(),"add".into(),"--detach".into(),filename.into(),detail.into()]
+        },
         _=>return advanced::execute(&p,op,filename,detail)
     };
     // No shell execution. All arguments are passed independently to git.exe.
