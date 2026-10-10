@@ -131,6 +131,8 @@ pub fn output(mut command:Command)->Result<Output,String>{
     let context=CONTEXT.with(|c|c.borrow().as_ref().map(|v|(v.cancelled.clone(),v.deadline)));
     let Some((flag,deadline))=context else{return command.output().map_err(|e|e.to_string())};
     if flag.load(Ordering::Acquire){return Err("Git operation cancelled before launch; inspect repository state before retrying".into());}
+    // std::process::Command::output() supplies these pipes implicitly; spawn() does not.
+    command.stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::piped());
     let mut child=command.spawn().map_err(|e|format!("Unable to launch Git: {e}"))?;
     #[cfg(windows)]let job=match Job::assign(&child){Ok(job)=>job,Err(e)=>{let _=child.kill();let _=child.wait();return Err(e);}};
     let total=Arc::new(AtomicUsize::new(0));
