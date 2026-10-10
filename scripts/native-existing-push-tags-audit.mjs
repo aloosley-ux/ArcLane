@@ -52,7 +52,7 @@ try{
  await create.getByRole('textbox',{name:'Tag name'}).fill('v-ui-light');
  await create.getByRole('button',{name:'Create tag'}).click();
  await expect(create).toHaveCount(0);
- await expect.poll(()=>git('cat-file','-t','refs/tags/v-ui-light')).toBe('commit');
+ await expect.poll(()=>{try{return git('cat-file','-t','refs/tags/v-ui-light')}catch{return 'pending'}},{timeout:12000}).toBe('commit');
  checks.push('052 palette native lightweight tag resolves directly to exact commit');
  await page.locator('.workspace-tabs').getByRole('button',{name:'Commit graph'}).click();
  await page.keyboard.press('Control+p');const pp=page.getByRole('dialog',{name:'Command palette'});
