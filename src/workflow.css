@@ -11,7 +11,7 @@
 
 /* Git sequence editors extend the existing Review Bench workflow modal.
    No separate theme, controls or component design system. */
-.sequence-modal{width:min(790px,92vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.modal.sequence-modal{width:min(790px,calc(100vw - 40px));max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .sequence-modal h2{margin:12px 0 6px}
 .sequence-modal>p{margin:0 0 12px}
 .sequence-modal .icon-btn{flex-shrink:0}
@@ -56,4 +56,4 @@
 .sequence-step textarea{min-height:50px}
 .sequence-tools{display:flex;gap:2px;margin-top:2px}
 .sequence-modal button:focus-visible,.sequence-modal input:focus-visible,.sequence-modal textarea:focus-visible,.sequence-modal select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media(max-width:650px){.sequence-modal{padding:15px}.sequence-columns{grid-template-columns:minmax(0,1fr)}.sequence-list{max-height:155px}.sequence-step{flex-wrap:wrap}.sequence-step>select{margin-left:26px}}
+@media(max-width:650px){.modal.sequence-modal{padding:15px}.sequence-columns{grid-template-columns:minmax(0,1fr)}.sequence-list{max-height:155px}.sequence-step{flex-wrap:wrap}.sequence-step>select{margin-left:26px}}
