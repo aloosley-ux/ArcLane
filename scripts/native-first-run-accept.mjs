@@ -9,7 +9,7 @@ let session=await launch(repo,'native-cold-start',9475,{},profile),page=session.
 const checks=[];
 try{
  await expect(page.getByRole('heading',{name:'Open a Git workspace'})).toBeVisible();
- await expect(page.getByRole('button',{name:'Open repository'})).toBeVisible();
+ await expect(page.locator('.empty-home').getByRole('button',{name:'Open repository'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Clone',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Initialize',exact:true})).toBeVisible();
  checks.push('Clean first launch shows Open, Clone and Initialize using standard UI');
