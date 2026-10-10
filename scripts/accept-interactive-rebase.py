@@ -81,8 +81,8 @@ with tempfile.TemporaryDirectory(prefix="arclane-rebase-accept-") as tmp:
     (conflict/"common.txt").write_bytes(b"resolved\\n")
     git(conflict,"add","--","common.txt")
     action(conflict,"rebase_continue",ok=False)
-    assert (conflict/"common.txt").read_bytes()==b"resolved\\n"
     assert (conflict/".git"/"rebase-merge").exists()
+    assert git(conflict,"ls-files","-u"), "Second reordered commit should pause with a conflict"
     if (conflict/".git"/"rebase-merge").exists():
         (conflict/"common.txt").write_bytes(b"first\\n")
         git(conflict,"add","--","common.txt")
