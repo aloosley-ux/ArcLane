@@ -68,6 +68,10 @@ try{
  await bench.focus();await page.keyboard.press('Home');await expect(bench).toHaveAttribute('aria-valuenow','260');
  await page.keyboard.press('Shift+ArrowUp');await expect(bench).toHaveAttribute('aria-valuenow','300');
  await expect.poll(()=>page.evaluate(()=>[localStorage.getItem('arclane-bench-navigator'),localStorage.getItem('arclane-bench-height')])).toEqual(['270','300']);
+ await wait(1200); // allow WebView2 to flush localStorage before graceful window close
+ const ownPid=JSON.parse(fs.readFileSync(path.join(profile,'launch.json'),'utf8')).pid;
+ const closed=execFileSync('powershell.exe',['-NoProfile','-Command',`$p=Get-Process -Id ${ownPid} -ErrorAction Stop; $ok=$p.CloseMainWindow(); if(-not $ok){throw 'Window refused graceful close'}; if(-not $p.WaitForExit(6000)){throw 'Native app did not exit'}; Write-Output 'GRACEFUL_EXIT'`],{encoding:'utf8'});
+ if(!closed.includes('GRACEFUL_EXIT'))throw Error('Native graceful close not confirmed');
  await session.close();
  session=await launch(repo,'partial-shell-audit-restart',9482,{},profile);page=session.page;
  await expect(page.getByRole('separator',{name:'Resize navigator'})).toHaveAttribute('aria-valuenow','270');
