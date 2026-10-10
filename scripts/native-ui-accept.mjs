@@ -1,7 +1,7 @@
 import {spawn,execFileSync} from "node:child_process";
 import fs from "node:fs";import path from "node:path";
 import {chromium} from "playwright";
-const arclane=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
+const arclane=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,".."));
 const testbed="C:\\AI\\REA\\Experiments\\Forge-Testbed";
 const exe=path.join(arclane,"Build","Arclane.exe");
 const repo=fs.mkdtempSync(path.join(testbed,"arclane-native-ui-"));

@@ -1,0 +1,7 @@
+diff --git a/src/payments.ts b/src/payments.ts
+index 1111111..2222222 100644
+--- a/src/payments.ts
++++ b/src/payments.ts
+@@ -1 +1 @@
+-export const retries = 1;
++export const retries = 3;

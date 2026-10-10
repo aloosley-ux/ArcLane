@@ -7,6 +7,7 @@
 #[path="../file_inspection.rs"] mod file_inspection;
 #[path="../toolbox.rs"] mod toolbox;
 #[path="../provider.rs"] mod provider;
+#[path="../provider_process.rs"] mod provider_process;
 #[path="../commit_workflows.rs"] mod commit_workflows;
 #[path="../revision_review.rs"] mod revision_review;
 use serde_json::{json,Value};

@@ -1,7 +1,7 @@
 import fs from "node:fs";import path from "node:path";
 import{spawn,execFileSync}from "node:child_process";
 import{chromium}from "playwright";
-const base=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
+const base=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,".."));
 const repo=fs.mkdtempSync("C:\\AI\\REA\\Experiments\\Forge-Testbed\\arclane-native-provider-");
 const profile=fs.mkdtempSync(path.join(base,"artifacts","native-provider-profile-"));
 const data=path.join(profile,"github-fixtures");fs.mkdirSync(data);
@@ -61,7 +61,7 @@ try{
  fs.renameSync(path.join(data,"prs.json"),path.join(data,"prs-unavailable.json"));
  await page.getByRole("button",{name:/Pull requests \d/}).click();
  await page.getByRole("button",{name:"Refresh GitHub"}).click();
- await page.locator(".collab-toast.error").waitFor({timeout:9000});
+ await page.locator(".collab-diagnostics").waitFor({timeout:9000});
  if(await page.locator(".collab-item").count()!==0)throw Error("Failed PR feed retained stale records");
  checks.push("failed mock PR feed clears obsolete PR records");
  await page.getByRole("button",{name:/Issues/}).click();

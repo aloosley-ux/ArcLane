@@ -1,0 +1,4 @@
+{
+ "databaseId":101,"displayTitle":"Build and test","workflowName":"Validation","headBranch":"main","headSha":"abcdef1234567890","event":"push","attempt":2,"status":"completed","conclusion":"failure","startedAt":"2026-10-10T18:00:00Z","updatedAt":"2026-10-10T18:05:00Z","url":"https://github.com/fixture/fixture/actions/runs/101",
+ "jobs":[{"databaseId":201,"name":"Windows validation","status":"completed","conclusion":"failure","url":"https://github.com/fixture/fixture/actions/runs/101/job/201","startedAt":"2026-10-10T18:00:00Z","completedAt":"2026-10-10T18:05:00Z","steps":[{"number":1,"name":"Checkout","status":"completed","conclusion":"success"},{"number":2,"name":"Run acceptance tests","status":"completed","conclusion":"failure"}]}]
+}

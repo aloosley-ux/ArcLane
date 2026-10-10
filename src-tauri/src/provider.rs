@@ -1,22 +1,8 @@
 //! User-triggered GitHub collaboration via the installed gh CLI.
 //! Does not read, persist or transmit GitHub tokens itself. No background network requests.
 use serde_json::{json,Value};
-use std::{path::Path,process::{Command,Stdio}};
-#[cfg(windows)]use std::os::windows::process::CommandExt;
-const MAX_OUTPUT:usize=3_000_000;
-fn gh(repo:&Path,args:Vec<String>)->Result<String,String>{
- let mut p=Command::new("gh");
- p.args(args).current_dir(repo).stdin(Stdio::null()).stdout(Stdio::piped())
-  .stderr(Stdio::piped()).env("GH_PROMPT_DISABLED","1").env("GIT_TERMINAL_PROMPT","0");
- #[cfg(windows)]p.creation_flags(0x08000000);
- let r=p.output().map_err(|_|"GitHub CLI (gh) is unavailable. Install gh and sign in with gh auth login.".to_string())?;
- if r.stdout.len()>MAX_OUTPUT{return Err("GitHub returned too much data; narrow the selection".into());}
- if r.status.success(){Ok(String::from_utf8_lossy(&r.stdout).trim().to_string())}
- else{
-  let msg=String::from_utf8_lossy(&r.stderr).trim().to_string();
-  Err(if msg.is_empty(){format!("GitHub CLI failed ({})",r.status)}else{msg.chars().take(1300).collect()})
- }
-}
+use std::path::Path;
+fn gh(repo:&Path,args:Vec<String>,request:Option<&str>)->Result<String,String>{crate::provider_process::run(repo,args,request)}
 fn a(parts:&[&str])->Vec<String>{parts.iter().map(|s|s.to_string()).collect()}
 fn number(id:&str)->Result<(),String>{
  let n=id.parse::<u32>().map_err(|_|"Expected an issue/PR number")?;
@@ -30,20 +16,23 @@ fn message(s:&str,min:usize,max:usize)->Result<(),String>{
 fn param<'a>(data:&'a Value,key:&str)->Result<&'a str,String>{
  data.get(key).and_then(Value::as_str).ok_or_else(||format!("Missing GitHub {key}"))
 }
-fn parse_json(repo:&Path,argv:Vec<String>)->Result<Value,String>{
- let value=gh(repo,argv)?;
+fn parse_json(repo:&Path,request:Option<&str>,argv:Vec<String>)->Result<Value,String>{
+ let value=gh(repo,argv,request)?;
  serde_json::from_str(&value).map_err(|e|format!("GitHub returned invalid JSON: {e}"))
 }
-pub fn query(repo:&Path,kind:&str,id:Option<&str>)->Result<Value,String>{
+pub fn query(repo:&Path,kind:&str,id:Option<&str>)->Result<Value,String>{query_request(repo,kind,id,None)}
+pub fn query_request(repo:&Path,kind:&str,id:Option<&str>,request:Option<&str>)->Result<Value,String>{
  match kind{
-  "prs"=>parse_json(repo,a(&["pr","list","--state","all","--limit","75","--json","number,title,headRefName,baseRefName,updatedAt,isDraft,url,reviewDecision,statusCheckRollup,state,mergeable,author,labels,body"])),
-  "issues"=>parse_json(repo,a(&["issue","list","--state","all","--limit","75","--json","number,title,author,labels,assignees,state,url,updatedAt,body"])),
-  "runs"=>parse_json(repo,a(&["run","list","--limit","50","--json","databaseId,displayTitle,workflowName,status,conclusion,headBranch,updatedAt,url"])),
+  "prs"=>parse_json(repo,request,a(&["pr","list","--state","all","--limit","75","--json","number,title,headRefName,baseRefName,updatedAt,isDraft,url,reviewDecision,statusCheckRollup,state,mergeable,author,labels,body"])),
+  "issues"=>parse_json(repo,request,a(&["issue","list","--state","all","--limit","75","--json","number,title,author,labels,assignees,state,url,updatedAt,body"])),
+  "runs"=>parse_json(repo,request,a(&["run","list","--limit","50","--json","databaseId,displayTitle,workflowName,status,conclusion,headBranch,updatedAt,url"])),
   "pr"=>{let selected=id.ok_or("PR number required")?;number(selected)?;
-    parse_json(repo,a(&["pr","view",selected,"--json","number,title,body,headRefName,baseRefName,isDraft,url,reviewDecision,state,mergeable,mergeStateStatus,comments,reviews,files,commits,statusCheckRollup,author,labels"]))},
+    parse_json(repo,request,a(&["pr","view",selected,"--json","number,title,body,headRefName,baseRefName,isDraft,url,reviewDecision,state,mergeable,mergeStateStatus,comments,reviews,files,commits,statusCheckRollup,author,labels"]))},
+  "pr_diff"=>{let selected=id.ok_or("PR number required")?;number(selected)?;let patch=gh(repo,a(&["pr","diff",selected,"--patch","--color=never"]),request)?;Ok(json!({"patch":patch}))},
+  "run"=>{let selected=id.ok_or("Run ID required")?;let n=selected.parse::<u64>().map_err(|_|"Invalid run ID")?;if n==0{return Err("Invalid run ID".into());}parse_json(repo,request,a(&["run","view",selected,"--json","databaseId,displayTitle,workflowName,status,conclusion,headBranch,headSha,event,attempt,startedAt,updatedAt,url,jobs"]))},
   "issue"=>{let selected=id.ok_or("Issue number required")?;number(selected)?;
-    parse_json(repo,a(&["issue","view",selected,"--json","number,title,body,state,url,author,labels,assignees,comments"]))},
-  "status"=>{let value=gh(repo,a(&["auth","status"]))?;Ok(json!({"authenticated":true,"status":value.chars().take(500).collect::<String>()}))},
+    parse_json(repo,request,a(&["issue","view",selected,"--json","number,title,body,state,url,author,labels,assignees,comments"]))},
+  "status"=>{let value=gh(repo,a(&["auth","status"]),request)?;Ok(json!({"authenticated":true,"status":value.chars().take(500).collect::<String>()}))},
   _=>Err("Unsupported GitHub query".into())
  }
 }
@@ -98,6 +87,6 @@ pub fn mutate(repo:&Path,operation:&str,target:&str,detail:&Value)->Result<Value
   },
   _=>return Err("Unsupported GitHub mutation".into())
  };
- let result=gh(repo,cmd)?;
+ let result=gh(repo,cmd,None)?;
  Ok(json!({"ok":true,"operation":operation,"output":result}))
 }

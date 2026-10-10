@@ -3,7 +3,7 @@ import path from "node:path";
 import {spawn,execFileSync} from "node:child_process";
 import {chromium} from "playwright";
 
-const root=(process.env.ARCLANE_TEST_ROOT||"C:\\AI\\REA\\Experiments\\Arclane");
+const root=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,".."));
 const testbed="C:\\AI\\REA\\Experiments\\Forge-Testbed";
 const repo=fs.mkdtempSync(path.join(testbed,"arclane-conflict-native-"));
 const exe=path.join(root,"Build","Arclane.exe");

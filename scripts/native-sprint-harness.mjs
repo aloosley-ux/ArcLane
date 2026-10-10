@@ -11,11 +11,12 @@ export function fixture(prefix){
  git('init','-q','-b','main');git('config','user.name','Native test');git('config','user.email','native@invalid.local');git('config','core.autocrlf','false');
  return {repo,git,write:(file,text)=>fs.writeFileSync(path.join(repo,file),text)};
 }
-export async function launch(repo,name,port){
+export async function launch(repo,name,port,environment={}){
  fs.mkdirSync(path.join(base,'artifacts'),{recursive:true});
  const profile=fs.mkdtempSync(path.join(base,'artifacts',name+'-profile-'));
  fs.writeFileSync(path.join(profile,'repos.json'),JSON.stringify([repo]));
- const child=spawn(path.join(base,'Build','Arclane.exe'),[],{cwd:base,env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`},stdio:'ignore'});
+ const child=spawn(path.join(base,'Build','Arclane.exe'),[],{cwd:base,env:{...process.env,...environment,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`},stdio:'ignore'});
+ fs.writeFileSync(path.join(profile,'launch.json'),JSON.stringify({pid:child.pid,port,repo}));
  let browser,page;const errors=[];
  const close=async()=>{await browser?.close().catch(()=>{});if(child.exitCode===null)try{execFileSync('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore'})}catch{}};
  try{
