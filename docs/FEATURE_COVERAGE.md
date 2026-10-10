@@ -41,7 +41,7 @@
 | 035 | Files and commits | Untracked, ignored, renamed and deleted files | partial | Mixed fixture correctly groups file states |
 | 036 | Files and commits | Inline and side-by-side textual diffs | partial — verified UTF-8 paired snapshots, virtual scroll, wide view; syntax highlighting and binary/image diffs remain | Whitespace/line endings and syntax highlighting |
 | 037 | Files and commits | Binary/image/file-type diffs | not verified | Image preview, safe fallback for binaries |
-| 038 | Files and commits | Diff search, word diff, whitespace controls | not verified | Diff settings do not mutate repository |
+| 038 | Files and commits | Diff search, word diff, whitespace controls | accepted for UTF-8 text — native next/previous wrapped search, patch search, word highlights, ignored/visible whitespace and saved preferences; exact HEAD/index/working bytes retained | Diff settings do not mutate repository |
 | 039 | Files and commits | Commit summary+description and co-authors | accepted for local index commits — packaged commit editor verifies multiline message, author override and Co-authored-by trailers against git show | Headers validated with git show |
 | 040 | Files and commits | Commit staged contents and push option | backend-tested | Only staged bytes committed and upstream checked |
 | 041 | Files and commits | Amend previous commit with safeguard | accepted for local amend — message-only amend, remote-tracking sharing warning, explicit rewrite acknowledgement and stale-HEAD refusal backend/native verified; remote publishing excluded | Hash changed, file state correct, shared warning |
@@ -63,7 +63,7 @@
 | 057 | Git operations | Merge fast-forward and non-FF, abort | not verified | Correct parents and working tree |
 | 058 | Git operations | Conflict detection, resolver and continue | accepted for text merges — native ours/theirs/manual resolution, clean staged index and merge continue verified | Unmerged paths surface; safe resolve |
 | 059 | Git operations | Rebase interactive pick/reword/squash/drop | not verified | Result SHA & commit order validated |
-| 060 | Git operations | Cherry pick single/multiple and conflict resume | partial — confirmed single-commit context action native verifies expected file tree and parent; merge commits disabled, multi-pick absent | Expected tree diff and parent relationship |
+| 060 | Git operations | Cherry pick single/multiple and conflict resume | partial — confirmed single-commit action and reopening a paused cherry-pick with native manual resolution/continue/abort verified; merge commits disabled, multi-pick absent | Expected tree diff and parent relationship |
 | 061 | Git operations | Stash list/create/apply/pop/drop | accepted for local stash workflows — native create/review/apply with index restoration and retained stash; backend guarded pop/drop plus tracked/untracked checks; stale selector refuses mismatched stash SHA | Tracked and untracked preserved |
 | 062 | Git operations | Worktree create/open/lock/unlock/remove/prune | partial | Disk, branch, lock and refs validated |
 | 063 | Git operations | Submodules sync/add/update | partial — submodule status/sync/update controls exist; native sync acceptance only; add/removal lifecycle unverified | Gitlink and nested refs validated |
@@ -99,7 +99,7 @@
 | 093 | Quality and recovery | Cancellation/timeouts/no app hangs | not verified | Cancel long Git operation; UI remains responsive |
 | 094 | Quality and recovery | Multi-process and lock-file handling | not verified | No concurrent index modification races |
 | 095 | Quality and recovery | Error banners and retry with diagnostics | partial | Offline native provider fixture verifies failed PR feed clears stale records, successful issue feed remains available, and explicit retry recovers. Actionable provider diagnostics and live failure recovery remain unaccepted |
-| 096 | Quality and recovery | Crash/restart while rebase/cherry-pick | not verified | Detect sequencer and offer continue/abort |
+| 096 | Quality and recovery | Crash/restart while rebase/cherry-pick | accepted for reopening Git-paused text operations — native startup detects merge/rebase/cherry-pick/revert, resolves and continues or restores exact pre-operation state on abort; arbitrary mid-write crash recovery excluded | Detect sequencer and offer continue/abort |
 | 097 | Quality and recovery | Accessibility, keyboard focus, screen reader | not verified | UIA names, tabs, input and narration |
 | 098 | Quality and recovery | Offline work without GitHub or AI | not verified | Local workflows function disconnected |
 | 099 | Quality and recovery | No destructive real-repo acceptance writes | not verified | All mutations limited to disposable fixture repos |
@@ -123,6 +123,8 @@ Never use Cortana, SDS, Nostalgia, any live developer repo, or external GitHub r
 | 104 | Agent and terminal | Multiple persistent PTY terminal tabs per worktree, create/switch/close, process state and graceful shutdown | partial — two independent Windows ConPTY tabs, cwd and teardown native verified; process persistence after app restart not supported | Separate concurrent CLI processes in isolated testbed worktree; no orphaned processes after closing tabs/app |
 
 **Total Arclane product obligations: 104** (102 baseline plus the 12.6 additions). These do not represent implemented counts.
+
+**Feature sprint, batch 4 (2026-10-10):** `native-diff-productivity-accept.mjs` passed seven packaged checks, including word highlights, wraparound search, visible whitespace, preference reload, and unchanged exact Git state. Ignore-whitespace alignment now compares normalized lines while displaying each side's original text; it no longer substitutes one side's whitespace for the other. Patch search explicitly covers the displayed 1400-line limit. `native-sequencer-recovery-accept.mjs` passed 16 checks over eight fresh paused-operation fixtures (abort and continue for merge/rebase/cherry-pick/revert), independently checking resulting HEAD/index/file bytes. Dark-theme screenshot inspected. No additional background activity.
 
 **Feature sprint, batch 3 (2026-10-10):** `accept-operation-workflows.py` passed 12 groups; `native-operation-workflows-accept.mjs` passed 9 Git-context/stash/recovery checks and 3 packaged pull checks. Advanced Git (20) and conflicts (6) regressions passed. Pull never autostashes and rejects dirty, detached, missing-upstream and active-sequencer states. Stash review includes saved untracked content and pins the reviewed SHA before apply/pop/drop. Reference menus expose switch/merge/rebase/rename/safe delete/local tracking; commit menus expose inspect/compare/create branch/pick/revert/soft/mixed reset. Graph arrows, Home/End and Shift+F10 work on loaded history. The old unavailable Undo toolbar now opens real non-destructive reflog recovery. Continue palette dispatch now includes revert; rebase skip is explicitly confirmed. No hard reset, force push or remote provider writes.
 
