@@ -1,4 +1,5 @@
 use serde_json::{json, Value};
+use crate::advanced;
 use std::{path::{Path,PathBuf},process::{Command,Stdio}};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -99,7 +100,7 @@ pub fn inspect(path:&str)->Result<Value,String>{
     Ok(json!({"path":p.to_string_lossy(),"name":p.file_name().unwrap_or_default().to_string_lossy(),
        "branch":branch,"branchline":branchline,"head":head,"upstream":upstream,"ahead":ahead,"behind":behind,
        "origin":origin,"files":files,"stashes":stashes,"refs":refs(&p),"worktrees":worktrees(&p),
-       "stats":{"staged":staged,"modified":modified,"untracked":untracked,"conflicts":conflicts,"total":files.len()}}))
+       "stats":{"staged":staged,"modified":modified,"untracked":untracked,"conflicts":conflicts,"total":files.len()},"sequencer":advanced::sequencer_status(&p)}))
 }
 pub fn history(path:&str,limit:usize,reference:Option<&str>,skip:usize)->Result<Value,String>{
     let p=root(path)?;
@@ -183,7 +184,7 @@ pub fn action(path:&str,op:&str,file:Option<&str>,input:Option<&str>)->Result<Va
             git(&p,&["check-ref-format","--branch",detail])?;
             if Path::new(filename).exists(){return Err("Destination already exists".into());}
             vec!["worktree".into(),"add".into(),"-b".into(),detail.into(),filename.into()]},
-        _=>return Err("Unsupported action. Forge only runs explicitly listed Git operations".into())
+        _=>return advanced::execute(&p,op,filename,detail)
     };
     // No shell execution. All arguments are passed independently to git.exe.
     let description=format!("git {}",args.join(" "));
