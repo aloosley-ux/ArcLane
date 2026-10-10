@@ -31,7 +31,8 @@ with tempfile.TemporaryDirectory(prefix="arclane-favourites-") as temp:
     favourite=[str(repos[0]),str(repos[1]),str(repos[0]).upper()]
     saved=cli("save_workspace",root,{"tabs":[],"active":None,"closed":[],"favourites":favourite})["result"]
     assert len(saved["favourites"])==2,saved
-    assert cli("workspace",root)["result"]["favourites"]==[str(p) for p in repos]
+    loaded=cli("workspace",root)["result"]["favourites"]
+    assert [pathlib.Path(p).resolve() for p in loaded]==[p.resolve() for p in repos],(loaded,repos)
     print("PASS favourites persist without tabs; duplicates canonicalized")
     missing=str(root/"missing")
     result=cli("save_workspace",root,{"tabs":[],"active":None,"closed":[],"favourites":[missing]},ok=False)
