@@ -32,6 +32,7 @@ f=setup('storage-failure');f.write(file,b'keep');(f.data/'file-recovery').write_
 f=setup('capacity');f.write(file,b'keep');store=f.data/'file-recovery';store.mkdir();[(store/str(i)).mkdir() for i in range(32)];state=f.state();action(f,'discard_file',ok=False);check('Capacity failure refuses without eviction or mutation',f.state()==state and len(list(store.iterdir()))==32)
 f=setup('symlink')
 blob=subprocess.run(['git','-C',str(f.repo),'hash-object','-w','--stdin'],input=b'notes1.txt',capture_output=True,check=True).stdout.decode().strip();f.git('update-index','--add','--cacheinfo',f'120000,{blob},link');f.write('link',b'notes1.txt');state=f.state();action(f,'discard_file',ok=False,name='link');check('Index symlink refused',f.state()==state)
+f=setup('readonly');f.write(file,b'longer readonly worktree content');readonly=f.repo/file;readonly.chmod(0o444);state=f.state();mode=readonly.stat().st_mode;action(f,'discard_file',ok=False);check('Read-only file discard refused without byte, permission or Git state changes',f.state()==state and readonly.read_bytes()==b'longer readonly worktree content' and readonly.stat().st_mode==mode)
 # Junction requires no symlink privilege; points at a separate disposable target.
 target=pathlib.Path(tempfile.mkdtemp(prefix='run3-junction-target-',dir=f.repo.parent));(target/'outside.txt').write_bytes(b'outside');junction=f.repo/'junction'
 p=subprocess.run(['cmd','/c','mklink','/J',str(junction),str(target)],capture_output=True);assert p.returncode==0,p.stderr

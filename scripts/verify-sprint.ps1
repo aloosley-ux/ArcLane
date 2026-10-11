@@ -20,7 +20,7 @@ if($Phase -ne 'native'){
 if($Phase -ne 'backend'){
  if(-not (Test-Path -LiteralPath Build\Arclane.exe)){throw 'Package Windows executable first'}
  $results=@()
- $suites=@('native-ui-accept','native-conflict-accept','native-file-insights-accept','native-graph-accept','native-toolbox-accept','native-collab-mock-accept','native-literal-paths-accept','native-repository-state-accept','native-design-review','native-commit-options-accept','native-revision-review-accept','native-operation-workflows-accept','native-sequencer-recovery-accept','native-provider-process-accept','native-workspace-accept','native-worktree-workflows-accept','native-diff-productivity-accept','native-ignored-files-accept')
+ $suites=@('native-ui-accept','native-conflict-accept','native-file-insights-accept','native-graph-accept','native-toolbox-accept','native-collab-mock-accept','native-literal-paths-accept','native-repository-state-accept','native-design-review','native-commit-options-accept','native-revision-review-accept','native-operation-workflows-accept','native-sequencer-recovery-accept','native-provider-process-accept','native-workspace-accept','native-worktree-workflows-accept','native-diff-productivity-accept','native-ignored-files-accept','native-diff-media-accept','native-discard-undo-accept','native-window-bounds-accept')
  foreach($suite in $suites){
   $log=Join-Path $taskRoot ('artifacts\final-'+$suite+'.log')
   try{$ErrorActionPreference='Continue';rtk proxy node ('scripts/'+$suite+'.mjs') 2>&1 | Tee-Object -FilePath $log;$code=$LASTEXITCODE}finally{$ErrorActionPreference='Stop'}

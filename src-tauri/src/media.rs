@@ -56,9 +56,9 @@ fn side(bytes:Option<Vec<u8>>,size:u64,oid:Option<String>,unsupported:Option<&st
 fn absent()->Value{json!({"exists":false,"size":0,"kind":"absent","reason":"File absent"})}
 fn blob(root:&Path,rev:&str,file:&str)->Result<Value,String>{
  let entry=format!("{rev}:{file}");let oid=match text(root,&["rev-parse","--verify",&entry]){Ok(s)=>s,Err(_)=>return Ok(absent())};
- let mode=if rev.is_empty(){text(root,&["ls-files","--stage","--",file])?.split_whitespace().next().unwrap_or("").to_string()}else{text(root,&["ls-tree","--format=%(objectmode)",rev,"--",file])?};
- if mode!="100644"&&mode!="100755"{return Ok(side(None,0,Some(oid),Some("Non-regular Git entry: metadata only")));}
  let size=text(root,&["cat-file","-s",&oid])?.parse::<u64>().map_err(|e|e.to_string())?;
+ let mode=if rev.is_empty(){text(root,&["ls-files","--stage","--",file])?.split_whitespace().next().unwrap_or("").to_string()}else{text(root,&["ls-tree","--format=%(objectmode)",rev,"--",file])?};
+ if mode!="100644"&&mode!="100755"{return Ok(side(None,size,Some(oid),Some("Non-regular Git entry: metadata only")));}
  let bytes=if size<=LIMIT{Some(git(root,&["cat-file","blob",&oid])?)}else{None};Ok(side(bytes,size,Some(oid),None))
 }
 fn working(root:&Path,file:&str)->Result<Value,String>{

@@ -1,6 +1,6 @@
-# Run 3 controlled handoff — continue under Luna High
+# Run 3 continuation handoff and final acceptance — Luna High
 
-The user stopped this run for model usage cost on 11 October 2026. Scope expansion stopped. The already-running production build was allowed to finish; no new build or broad regression cycle was started after the stop. All three requirements remain **PARTIAL**, not accepted.
+The opening sections record the controlled handoff state before continuation; their pending test/status statements are historical. See **Final continuation result** at the end for current evidence and disposition.
 
 ## Checkout and source
 
@@ -72,3 +72,13 @@ Penpot file `52a5041f-08a1-80f1-8008-c5171920d528`, page `52a5041f-08a1-80f1-800
 USED: Git CLI and GitHub connector (remote starting HEAD), Penpot MCP, Rust/Tauri/TypeScript, independent Python fixtures, PowerShell; UI/UX skill for modal-focus guidance; narrow web read of official image 0.25.8 decoder/limits documentation (https://docs.rs/image/0.25.8/image/struct.ImageReader.html). REA and ReAgent SKIPPED: requirements/design sufficient, no differential experiment. Figma/Canva SKIPPED: Penpot sole authority. Model Testing SKIPPED: optional post-run only. Full packaged Playwright acceptance pending; any brief smoke is separately recorded.
 
 Human interventions: **1**, the cost-limit stop. No model/effort switch or agents spawned. Allowance/token delta unavailable, not guessed. Checkout creation measured at 02:06:34 UTC (03:06:34 London); wrap-up time recorded in execution evidence. No main/integration/Run 2 mutation, installation overwrite, merge, force push, hosted issue/PR/provider writes or manually launched Actions.
+
+## Final continuation result
+
+- Starting continuation state: branch `feature/sol-low-file-review`, HEAD `72970bca36cc7aaeb20a14d24048882a570f8b15`; exact Run 2 ancestor remains `e0fd0492613a88ceb8a11fe30307d14104747630`.
+- #036 **ACCEPTED** and #037 **ACCEPTED**. #049 **PARTIAL** because retained interrupted `prepared` snapshots have no in-app recovery path and external Git/editor races remain unguarded.
+- Fresh final package: `Build\Arclane.exe`, 11,451,904 bytes, SHA-256 `FD0BEC0FB7C31F1E48A2F9755B9944EE3D9970EB0F49233BC6100C0175CC737A`; package provenance is in `artifacts/run3-provenance.json`.
+- Full backend: 23 suites passed. Full native: 20 suites passed. Final-package focused reruns: native UI 13, Worktrees 13, discard/undo 8, media/diff 12; Win32 bounds 3. Detailed commands, exit codes, screenshots and remaining safety limits are in `RUN3_EXECUTION_EVIDENCE.md`.
+- Win32 startup and resize measurements showed the WRY WebView child and WebView2 viewport matching the actual client at 1536×958, 1080×680, and 1536×958 again. No native sizing defect was reproduced at 96 DPI; a focused registered regression is `scripts/native-window-bounds-accept.mjs`.
+- Dark Worktrees spacing/text and malformed ellipses were corrected in source. The visual evidence includes light, dark and compact frames; the black region in the supplied screenshot did not reproduce in the isolated packaged check and may require an original-display/DPI capture to diagnose further.
+- At final handoff, the branch is to be pushed after the reviewed final commit; the exact SHA and clean remote agreement will be recorded in the completion message.

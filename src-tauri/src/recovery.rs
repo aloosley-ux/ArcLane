@@ -21,8 +21,17 @@ fn save(dir:&Path,r:&Record)->Result<(),String>{
 fn load(dir:&Path)->Result<Record,String>{let p=dir.join("record.json");if fs::metadata(&p).map_err(|e|e.to_string())?.len()>32000{return Err("Invalid recovery record size".into());}serde_json::from_slice(&fs::read(p).map_err(|e|e.to_string())?).map_err(|e|e.to_string())}
 fn bytes_hash(b:&Option<Vec<u8>>)->Option<String>{b.as_ref().map(|b|hash(b))}
 fn index_bytes(root:&Path)->Result<Vec<u8>,String>{let index=text(root,&["rev-parse","--git-path","index"])?;let p=PathBuf::from(index);let p=if p.is_absolute(){p}else{root.join(p)};if fs::metadata(&p).map_err(|e|e.to_string())?.len()>32_000_000{return Err("Index exceeds safe recovery limit".into());}fs::read(p).map_err(|e|e.to_string())}
+struct PrivateIndex(PathBuf);
+impl Drop for PrivateIndex{fn drop(&mut self){let _=fs::remove_file(&self.0);}}
+fn private_index(store:&Path,bytes:&[u8])->Result<PrivateIndex,String>{
+ let path=store.join(format!("preflight-index-{}-{}",std::process::id(),SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e|e.to_string())?.as_nanos()));
+ let mut f=fs::OpenOptions::new().write(true).create_new(true).open(&path).map_err(|e|e.to_string())?;
+ f.write_all(bytes).and_then(|_|f.sync_all()).map_err(|e|e.to_string())?;drop(f);
+ if fs::read(&path).map_err(|e|e.to_string())?!=bytes{return Err("Private preflight index verification failed".into());}Ok(PrivateIndex(path))
+}
 fn validate_index(root:&Path,file:&str)->Result<(),String>{
  let mode=text(root,&["ls-files","--stage","--",file])?;let mut fields=mode.split_whitespace();let m=fields.next().unwrap_or("");fields.next();let stage=fields.next().unwrap_or("");if !matches!(m,"100644"|"100755")||stage!="0"{return Err("Discard supports tracked regular files without conflicts only; untracked/symlink targets refused".into());}
+ if let Ok(meta)=fs::metadata(root.join(file)){if meta.permissions().readonly(){return Err("Read-only files are unsupported for discard and undo; clear the read-only attribute and retry".into());}}
  if crate::advanced::sequencer_status(root)["active"]==true{return Err("Finish the active Git operation before discard or undo".into());}
  let attr=text(root,&["check-attr","filter","--",file])?;if !attr.ends_with(": unspecified")&& !attr.ends_with(": unset"){return Err("Custom Git filters are unsupported for safe discard".into());}Ok(())
 }
@@ -32,7 +41,12 @@ pub fn list(root:&Path)->Result<Value,String>{
 }
 pub fn discard(root:&Path,file:&str)->Result<Value,String>{
  safe_path(root,file)?;validate_index(root,file)?;let before=read_file(root,file,LIMIT)?;let state=identity(root)?;let store=storage(root)?;
- if text(root,&["diff","--no-ext-diff","--no-textconv","--name-only","--",file])?.is_empty(){return Err("No unstaged changes remain; duplicate discard refused".into());}
+ // `git diff` may refresh index stat data even with optional locks disabled.
+ // Run the preflight against a verified copy so a refusal is byte-for-byte read-only.
+ let live_index=index_bytes(root)?;if hash(&live_index)!=state.3{return Err("Index changed before discard; refused".into());}
+ let preflight=private_index(&store,&live_index)?;
+ if crate::media::git_index(root,&["diff","--no-ext-diff","--no-textconv","--name-only","--",file],Some(&preflight.0))?.is_empty(){return Err("No unstaged changes remain; duplicate discard refused".into());}
+ drop(preflight);
  let blob_size=text(root,&["cat-file","-s",&format!(":{file}")])?.parse::<u64>().map_err(|e|e.to_string())?;
  if blob_size>LIMIT/2{return Err("Staged source exceeds safe restore limit (2 MB, allowing CRLF expansion); discard refused".into());}
  let entries=fs::read_dir(&store).map_err(|e|e.to_string())?.collect::<Result<Vec<_>,_>>().map_err(|e|e.to_string())?;

@@ -32,6 +32,10 @@ try{
  checks.push('Old workspace shape migrates common-directory identity while retaining alias and active tab');
 
  await chooseRoute('Worktrees');await expect(cards()).toHaveCount(2);
+ await expect(page.locator('.quick-search')).toContainText('Search commands…');
+ const worktreeReadability=await cards().filter({hasText:'feature/open'}).evaluate(card=>{const path=card.querySelector('.wt-path'),branch=card.querySelector('.wt-branch h3'),actions=card.querySelector('.worktree-card-actions'),extra=card.querySelector('.wt-extra');return {pathFont:parseFloat(getComputedStyle(path).fontSize),branchFont:parseFloat(getComputedStyle(branch).fontSize),actionFont:parseFloat(getComputedStyle(actions.querySelector('button')).fontSize),secondaryGap:extra.getBoundingClientRect().top-actions.getBoundingClientRect().bottom};});
+ if(worktreeReadability.pathFont<10.9||worktreeReadability.branchFont<12.9||worktreeReadability.actionFont<10.9||worktreeReadability.secondaryGap>18)throw Error('Worktree card text or secondary-action spacing remains below the readable compact baseline: '+JSON.stringify(worktreeReadability));
+ checks.push('Command search label renders a real ellipsis; worktree metadata/actions are legible and secondary actions stay grouped');
  await expect(cards().filter({hasText:'main'})).toContainText('MAIN');
  await expect(cards().filter({hasText:'feature/open'})).toContainText(linked.replaceAll('\\','/'));
  await page.getByRole('button',{name:'Open worktree in ArcLane'}).click();

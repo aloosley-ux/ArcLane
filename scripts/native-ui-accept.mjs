@@ -44,6 +44,8 @@ try{
  if(!page)throw Error("No inspectable WebView2 tab");
  result.nativePage={url:page.url(),title:await page.title().catch(()=>""),body:(await page.locator("body").innerText().catch(()=>"")).slice(0,1800)};
  console.log("NATIVE_PAGE",JSON.stringify(result.nativePage));
+ if(!result.nativePage.body.includes("Search commands…"))throw Error("Command search placeholder contains malformed text");
+ result.tests.push("command search placeholder displays a valid ellipsis");
  page.on("pageerror",e=>result.errors.push(String(e)));
  await page.locator(".commit-row").first().waitFor({timeout:20000});
  const rows=await page.locator(".commit-row").count();
