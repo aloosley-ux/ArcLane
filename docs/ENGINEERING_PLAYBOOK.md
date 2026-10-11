@@ -64,7 +64,7 @@ This is the **desired invariant**, not a claim that all details are already impl
 
 **Before coding (one focused architecture note, not a research marathon):**
 
-1. Read the **existing REA research first** using [REA_EVIDENCE_INDEX.md](REA_EVIDENCE_INDEX.md): record exact evidence files/findings and reference journeys, then read current `AGENTS.md`, this playbook, the ledger rows, last accepted handoff and **actual source seams**. Distinguish reference behaviour from what ArcLane happens to implement.
+1. **Read `AGENTS.md` first**, then use [REA_EVIDENCE_INDEX.md](REA_EVIDENCE_INDEX.md) to locate only the **relevant** existing REA evidence and record bounded finding(s)/journey(s). Look up only target ledger rows, source seams and relevant playbook sections; consult old handoffs only to resolve a specific uncertainty. **Do not read whole archives, all 104 rows, every historical packet or this whole playbook by default.**
 2. Describe one user journey end-to-end, including state owners, inputs/outputs, invariants, async ordering and two or three highest-risk failures. Draw a short transition table if there are multiple async actors.
 3. State a falsifiable acceptance criterion for each requirement. Differentiate backend, packaged-native and externally unverified behavior. Confirm a safe disposable fixture design.
 4. For changed UI, perform the existing mandatory Penpot light/dark/compact review **after determining behavior and before writing React/CSS**. Penpot does not replace the architecture note.
@@ -93,9 +93,10 @@ This is the **desired invariant**, not a claim that all details are already impl
 
 ```text
 Implement ArcLane requirements [IDs] in [isolated checkout / branch] from [exact SHA].
-Read docs/REA_EVIDENCE_INDEX.md and the relevant existing REA reports FIRST;
-record evidence-to-requirement mappings. Then read AGENTS.md,
-docs/ENGINEERING_PLAYBOOK.md and relevant ledger/source.
+Read AGENTS.md FIRST; use docs/REA_EVIDENCE_INDEX.md to locate the
+relevant bounded REA evidence (not the whole archive). Record a short
+evidence-to-requirement mapping. Read only the relevant ledger rows,
+source seams and playbook sections.
 
 User journey: [one end-to-end outcome].
 Reuse: [current working components].

@@ -9,6 +9,13 @@ Required order: **REA research and GitKraken product evidence → exact user jou
 
 Do not silently substitute the current ArcLane UI or a generic Git-client convention for missing research. Mark gaps and decide deliberately whether to research further. **Mandatory REA report review ≠ mandatory new heavyweight analysis** when an existing report already answers the question.
 
+## Fast path — no research marathon
+
+1. **Locate, do not read everything:** match feature terms/IDs against this index, then inspect **only** the corresponding small summary or bounded evidence. Use targeted line searches (for example, `rg -n -m 20 -i 'agent|worktree' <relevant-small-report>`). Start with 1–3 evidence references; expand only for an actual unresolved behaviour.
+2. **Do not decompress** the 85 MiB gzip, traverse 340 extracted files, rerun a whole-app REA scan or print huge raw JSON unless a specific unanswered question needs it. The feature-label inventory is a search aid, not feature proof.
+3. **Before coding, record at most a short paragraph/table**: source/version/finding, supported journey, missing evidence, original ArcLane behaviour, state ownership, failure checks and independent proof. Reuse existing citations; do not repeat background reports in the run packet.
+4. **Fail closed on unsupported claims:** if a search finds no behavioural evidence, flag the exact unknown and decide whether a narrow REA query or controlled observable reference check is warranted. Do not claim GitKraken parity from labels or static structure alone.
+
 ## Existing evidence: where to start
 
 | Resource | Verified location | What it provides / caveat |

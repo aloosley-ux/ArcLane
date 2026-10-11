@@ -1,55 +1,34 @@
-# ArcLane — development and verification rules
+# ArcLane — agent instructions (primary entry point)
 
-## Where we are
+**Product:** Independent Rust/Tauri Windows Git client, benchmarked against GitKraken. **Current product acceptance:** `docs/FEATURE_COVERAGE.md` (104 feature IDs; read ONLY the relevant rows, not the whole ledger). Follow the active run packet for its exact SHA, branch and scope. **If documents conflict, this `AGENTS.md` and `docs/REA_EVIDENCE_INDEX.md` override historical packets on research/safety rules.** Historical roadmap counts and earlier run packets are not live status.
 
-ArcLane is a Windows-first Rust/Tauri Git desktop client. The Review Bench interface is the current baseline. Public GitHub repository: https://github.com/aloosley-ux/ArcLane. The 104-item scope is documented in `docs/FEATURE_COVERAGE.md`; implementation status there is authoritative for claims, not a promise of full GitKraken parity.
+## Start each new feature run — short, research-led
 
-Start with: `docs/REA_EVIDENCE_INDEX.md`, the relevant local REA findings, `docs/GITKRAKEN_AUDIT.md`, `docs/ENGINEERING_PLAYBOOK.md`, `docs/FEATURE_COVERAGE.md` and `README.md`. Consult sprint checkpoints and current source after establishing the research-backed user journey. Additional REA analysis is on demand; reviewing the existing research is mandatory.
+1. **Read this file.** Identify the requested feature IDs and active checkout/branch. Verify `git status`, HEAD/base ancestry and protected locations before edits. Never touch another agent's checkout.
+2. **Review the EXISTING REA evidence FIRST.** Use `docs/REA_EVIDENCE_INDEX.md` as a path/index; select only the relevant report, feature-label matches and bounded findings. Capture source path, version, supporting findings and important unknowns. **Do not scan/decompress the full archive by default.** New REA analysis is conditional; existing research review is mandatory. A translation label alone is a lead, not proven runtime behaviour.
+3. **Inspect only the corresponding ledger rows and source seams.** Search/find relevant identifiers; do not reread all 104 rows, all prior runs, full research or every design document. Consult `docs/GITKRAKEN_AUDIT.md` for general product context, `docs/ENGINEERING_PLAYBOOK.md` for the relevant architecture/incident section and the last handoff only when needed.
+4. **Before design/code, give a short evidence-to-requirement brief:** REA source + relevant finding, intended user journey, what is known/unknown, state owners, high-risk failure/retry cases, exact disposable test proof. If research disagrees with planned UX, resolve before Penpot. A missing source is a research gap to record, not permission to claim parity.
+5. **Then** use Penpot for significant visual/UI changes; design light/dark/compact with actual frame refs before React/CSS. Implement with native authority, focused tests, packaged acceptance and regression evidence. Do not make agents do exhaustive tool tours to tick checkboxes.
 
-**Active delivery plan:** `docs/DEVELOPMENT_PROGRAM_2026-10-11.md` maps every one of the 80 unaccepted scope IDs exactly once, sets batch dependencies, proper REA/ReAgent/Penpot/Model Testing roles, native gates and release criteria. For the isolated GPT-6 Luna (Maximum reasoning) test, read `docs/LUNA_MAX_PILOT_035.md` and work only in an independent topic checkout. Neither plan grants permission to modify `main`, invent UI styling, or treat mock provider writes as acceptance.
+**Authority hierarchy:** REA/reference evidence informs **what the reference product does**; the agreed ArcLane specification defines **what we will build**; Rust/Git own durable facts and process state, React owns display; Penpot governs **appearance**; native tests + `FEATURE_COVERAGE.md` determine **what ArcLane has actually proven**. These are different kinds of truth.
 
-**Research authority — mandatory:** Before scoping or designing EVERY feature run, review the existing REA findings via [docs/REA_EVIDENCE_INDEX.md](docs/REA_EVIDENCE_INDEX.md), [docs/GITKRAKEN_AUDIT.md](docs/GITKRAKEN_AUDIT.md) and the relevant local REA reports. Record the actual evidence references and reference workflows in a compact evidence-to-requirement brief. Do not mark REA research SKIPPED merely because existing ArcLane code or Penpot looks sufficient; new heavyweight REA analysis is conditional on missing evidence. The 104-row ledger measures ArcLane acceptance, not competitor reference coverage. Do not copy proprietary code/assets.
+## Tools — use for a reason, not for theatre
 
-**Engineering playbook (living):** Read [docs/ENGINEERING_PLAYBOOK.md](docs/ENGINEERING_PLAYBOOK.md) before drafting a new run or modifying a cross-component workflow. Define authoritative state, transitions and failure/retry behavior after reviewing REA and before UI implementation; update the playbook with evidence-backed lessons after major defects. It complements, rather than replaces, the safety and native gates below.
+- **Required for every feature run:** targeted review of existing REA reports; local Git/source inspection; independent fixture proof; honest Git handoff. **Not required every run:** launching REA analyses, reading full REA data, calling ReAgent, web research, Model Testing, Figma/Canva, or generating new design boards for backend-only work.
+- **UI/UX changes:** Penpot review before substantial visual implementation; real packaged Tauri/WebView2 pixels after. Penpot does not define native state ownership.
+- **Native parity only when justified:** selective ReAgent differential tests. No mandatory full REA rerun. No extra service, model load or idle polling.
+- **Preferred scripts:** targeted `scripts/accept-*.py` and `scripts/native-*-accept.mjs` while coding; after a fresh `npx tauri build --no-bundle`, use `powershell -NoProfile -File scripts/verify-sprint.ps1 -Phase backend` and `-Phase native` for full final gates. Native tests must run against the last source-built executable, not stale output.
 
-## Repo-first working model
+## Non-negotiable safety
 
-- `main` is the integrated, tested public baseline. Develop on a feature branch and preserve commit history.
-- No unrelated repository changes, no destructive cleanup, no force pushing, and no history rewrites of published branches.
-- Prefer source edits, normal Git commands and reproducible repo scripts. Use desktop remote control only for essential native Windows tasks.
-- Commit coherent verified batches with concise messages and updated coverage evidence. Do not claim tests were run unless they were actually executed.
-- Remote GitHub reads may be useful; **never** perform live issue/PR/merge/review writes or destructive remote Git operations during tests without explicit approval.
-- Never copy proprietary GitKraken code, icons, art, bundles, internal styles or extracted source from REA research into ArcLane.
+- Work on a clean, isolated feature checkout. Do not merge, rewrite published history, install over the user's app or modify `main` unless explicitly authorised. Push only the agreed feature branch after tests.
+- **All mutating Git tests use new disposable repositories** under the authorised fixture root (historically `C:\AI\REA\Experiments\Forge-Testbed`). Protect user/development repos and fixtures belonging to other processes. Never use force push, `git reset --hard`, `git clean -fd`, broad process kills or orphan cleanup against unknown targets.
+- No real provider writes (PR/issue/merge/review), billing/paid-agent launches in tests, credential reads/logging, continuous polling, background inference or new network dependency without explicit approval.
+- Never copy GitKraken proprietary source, assets, bundles or implementation details from REA into the ArcLane repository. Use evidence to design original code and interfaces.
 
-## Git safety
+## Acceptance & handoff
 
-All mutating Git acceptance tests must use **new disposable fixture repositories**, never real development/user repos. On the original dev machine the isolated fixture root is `C:\AI\REA\Experiments\Forge-Testbed`. Some inherited scripts assume that environment; make them portable gradually, without redirecting destructive tests at real repositories.
-
-Do not use `git reset --hard`, `git clean -fd`, force push, or mass-kill process commands as cleanup shortcuts. Preserve unknown data. Verify HEAD, refs, index and file bytes independently for state-changing operations. Do not extract or log credentials.
-
-## Testing: fast, focused, and honest
-
-- During implementation, run the relevant `scripts/accept-*.py` backend fixture checks and `scripts/native-*-accept.mjs` packaged UI tests.
-- Before integrating or releasing, use `powershell -NoProfile -File scripts/verify-sprint.ps1` with configured Windows dependencies. Targeted `-Phase backend` or `-Phase native` is supported.
-- Build the release with `npx tauri build --no-bundle`, not standalone `cargo build --release`. Native acceptance must exercise the embedded Tauri/WebView2 production executable.
-- Provider mock tests do not count as live provider acceptance. The live GitHub read-only suite is explicitly opt-in and has no remote writes.
-- Keep test output compact on success; retain full logs/evidence to inspect only when failures arise. REA can provide evidence-driven native UI inspection; use ReAgent's differential harness only when appropriate.
-- Update `docs/FEATURE_COVERAGE.md` accurately; accepted local scopes, mock-only evidence and unverified features are different classifications.
-- Protect the original design and responsive behaviour. Inspect actual pixels whenever changing UI.
-- Extend existing Review Bench components and `src/workflow.css`/shared design tokens for new Git workflows. Do not introduce parallel theme systems or one-off visual stylesheets where established modal, button, warning, keyboard and layout patterns fit. Validate both light and dark packaged pixels before claiming UI completion.
-
-## AI development boundaries
-
-AI contributions are welcome, but claims must match evidence. Preserve low idle resource usage and on-demand processes. Never introduce background AI, telemetry, always-on polling or cloud dependence without user approval. Favour completion, independent verification and clean handoffs over speculative redesigns.
-
-## Mandatory tool-use and visual acceptance contract — every agent run
-
-**Every new development run MUST specify, before coding:** (1) the exact source base SHA and isolated branch/checkout; (2) requirement IDs and acceptance criteria; (3) a **tool-by-tool use matrix** naming REQUIRED, CONDITIONAL or SKIPPED for Git/GitHub, Penpot, REA, ReAgent, local Rust/TypeScript, PowerShell, packaged WebView2/Playwright, and any other relevant tools; (4) the order, prerequisites, evidence to save, prohibitions and stop/failure gates for each tool; (5) the actual focused and regression commands, disposable fixtures, package freshness proof and handoff checklist. Never infer tool use merely from generic instructions to match existing UI.
-
-**Penpot is REQUIRED before significant React/CSS, screen, layout or workflow UI changes.** Open the actual connected ArcLane Design Playground, inspect the Review Bench system, create/review light and dark plus relevant compact-size design frames, record real frame/node IDs and build a design-to-implementation checklist **before UI coding**. Reusing existing CSS tokens alone is not a design review. If the work is truly backend-only, explicitly record Penpot SKIPPED and why. Do not quietly skip it or substitute Figma/Canva.
-
-**Native acceptance cannot be declared from stale binaries or superficial DOM checks.** Rebuild Tauri/WebView2 production executable after the final source edit, establish build provenance (source revision, EXE SHA-256, freshness, observable new UI/behaviour), and inspect actual light/dark/compact screenshots versus Penpot before full regression. Keep CLI environment variables in the runner process; check native command exit codes rather than treating all Git stderr warnings as failures. Fix test races by waiting for a real initial loaded state, not by inflating arbitrary delays.
-
-**Run gates are mandatory:** source/safety → Penpot design (if UI) → focused implementation and independent backend fixtures → fresh packaged visual inspection → focused native safety/interaction → full impacted/backend/native regression → diff review/coverage/evidence → clean branch commit and controlled push. Any failed gate blocks claiming acceptance. At handoff list every tool as USED with actual evidence or SKIPPED with explicit rationale, plus measured results, incomplete behaviours, touched branches and installed-app status.
-
-Do not combine these gates into a theatrical research marathon; named specialist tools are employed **only for their designated task**. For a concrete implementation example, see [Run 3 Sol Low file-review execution packet](docs/RUN3_SOL_LOW_FILE_REVIEW_2026-10-11.md).
+- Before code: record state owner/invariants and the highest-risk failure/retry scenarios; test those boundaries independently. If multiple regressions share one failure mode, revisit the architecture rather than loop through patch → package → patch.
+- For state-changing Git work, independently check refs, HEAD, index and file bytes. For terminals/agents, test immutable session identity, correct cwd/argv, late output/exit, unrelated session isolation and child cleanup as relevant.
+- Gate: focused backend/type tests → fresh packaged native interactive/light/dark/compact checks → full backend/native regressions → honest per-ID coverage → diff and executable provenance → commit/push → clean status. Do not weaken assertions, invent acceptance, promise a fixed rebuild count or merge before approval.
+- Handoff succinctly: feature IDs **ACCEPTED/PARTIAL/UNVERIFIED**, test outcomes, source/EXE SHA, open gaps, branch/commit/push/clean status, unchanged protected repos and any **actually useful** tool exceptions. Historical run packets are evidence, not timeless instructions.
