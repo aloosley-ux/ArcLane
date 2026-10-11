@@ -1,10 +1,11 @@
+from fixture_support import cli_path
 """Arclane repository toolkit safety and behaviour suite. All writes stay in Forge-Testbed."""
 import json,subprocess,tempfile,pathlib
 home=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
 root=pathlib.Path(tempfile.mkdtemp(prefix="arclane-tools-",dir=home))
 repo=root/"workspace";repo.mkdir()
 remote=root/"server.git";remote2=root/"server2.git"
-cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 checks=[]
 def git(*params,where=repo,expect=True):
  r=subprocess.run(["git","-C",str(where),*params],capture_output=True,text=True,encoding="utf-8")

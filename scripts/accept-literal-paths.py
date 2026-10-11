@@ -1,3 +1,4 @@
+from fixture_support import cli_path
 """Single-file operations must treat selected filenames literally, not as Git patterns."""
 import json
 import pathlib
@@ -6,7 +7,7 @@ import tempfile
 
 base = pathlib.Path(__file__).resolve().parents[1]
 repo = pathlib.Path(tempfile.mkdtemp(prefix="arclane-literal-paths-", dir=r"C:\AI\REA\Experiments\Forge-Testbed"))
-cli = pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli = cli_path()
 checks = []
 selected, neighbour = "notes[1].txt", "notes1.txt"
 

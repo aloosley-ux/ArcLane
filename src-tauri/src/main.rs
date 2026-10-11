@@ -7,6 +7,8 @@ mod terminal;
 mod repository;
 mod conflicts;
 mod comparison;
+mod media;
+mod recovery;
 mod file_inspection;
 mod toolbox;
 mod provider;
@@ -86,6 +88,12 @@ async fn inspect_file_blame(path:String,file:String)->Result<Value,String>{
 async fn compare_file(path:String,file:String,staged:bool,commit:Option<String>)->Result<Value,String>{
  spawn_blocking(move||comparison::compare(&git::root(&path)?,&file,staged,commit.as_deref())).await.map_err(|e|e.to_string())?
 }
+#[tauri::command]
+async fn compare_media(path:String,file:String,staged:bool,commit:Option<String>)->Result<Value,String>{
+ spawn_blocking(move||media::compare(&git::root(&path)?,&file,staged,commit.as_deref())).await.map_err(|e|e.to_string())?
+}
+#[tauri::command]
+async fn file_recoveries(path:String)->Result<Value,String>{spawn_blocking(move||recovery::list(&git::root(&path)?)).await.map_err(|e|e.to_string())?}
 #[tauri::command]
 async fn list_conflicts(path:String)->Result<Value,String>{
  spawn_blocking(move||conflicts::list(&git::root(&path)?)).await.map_err(|e|e.to_string())?
@@ -174,6 +182,6 @@ fn main(){
     tauri::Builder::default()
     .manage(terminal::TerminalManager::default())
     .on_window_event(|window,event|{if let tauri::WindowEvent::Destroyed=event {window.app_handle().state::<terminal::TerminalManager>().shutdown();}})
-    .invoke_handler(tauri::generate_handler![cancel_git_action,rebase_preview,load_workspace,save_workspace,cancel_provider_read,inspect_stash,review_revisions,commit_context,snapshot,ignored_files,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
+    .invoke_handler(tauri::generate_handler![compare_media,file_recoveries,cancel_git_action,rebase_preview,load_workspace,save_workspace,cancel_provider_read,inspect_stash,review_revisions,commit_context,snapshot,ignored_files,commits,collaboration_query,collaboration_action,toolbox_view,toolbox_action,inspect_file_history,inspect_file_blame,compare_file,list_conflicts,inspect_conflict,resolve_conflict,get_hunks,apply_hunk,file_diff,git_action,github_query,repositories,set_repositories,pick_repository,create_repository,clone_repository,open_path,open_external,terminal::terminal_open,terminal::terminal_send,terminal::terminal_resize,terminal::terminal_close,terminal::terminal_sessions])
     .run(tauri::generate_context!()).expect("Unable to run Forge");
 }

@@ -4,6 +4,8 @@
 #[path="../repository.rs"] mod repository;
 #[path="../conflicts.rs"] mod conflicts;
 #[path="../comparison.rs"] mod comparison;
+#[path="../media.rs"] mod media;
+#[path="../recovery.rs"] mod recovery;
 #[path="../file_inspection.rs"] mod file_inspection;
 #[path="../toolbox.rs"] mod toolbox;
 #[path="../provider.rs"] mod provider;
@@ -47,6 +49,8 @@ fn main(){
     "file_history"=>file_inspection::history(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
     "file_blame"=>file_inspection::blame(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
     "compare"=>comparison::compare(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,field("commit")),
+    "media"=>media::compare(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true,field("commit")),
+    "recoveries"=>recovery::list(&git::root(&input[2])?),
     "conflicts"=>conflicts::list(&git::root(&input[2])?),
     "inspect_conflict"=>conflicts::inspect(&git::root(&input[2])?,field("file").ok_or("Missing file")?),
     "resolve_conflict"=>{let root=git::root(&input[2])?;git::with_write_guard(&root,||conflicts::resolve(&root,field("file").ok_or("Missing file")?,field("choice").ok_or("Missing choice")?,field("manual")))},

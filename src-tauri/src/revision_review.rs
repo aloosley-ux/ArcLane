@@ -38,7 +38,8 @@ pub fn view(root:&Path,from:Option<&str>,to:&str,file:Option<&str>)->Result<Valu
  let (comparison,comparison_error)=if let Some(file)=file{
   match crate::comparison::between(root,file,source.as_deref(),&target){Ok(c)=>(Some(c),None),Err(e)=>(None,Some(e))}
  }else{(None,None)};
- Ok(json!({"from":source,"to":target,"details":details,"files":files,"patch":patch,"comparison":comparison,"comparisonError":comparison_error}))
+ let media=if comparison.is_none(){file.map(|f|crate::media::between(root,f,source.as_deref(),&target)).transpose()?}else{None};
+ Ok(json!({"from":source,"to":target,"details":details,"files":files,"patch":patch,"comparison":comparison,"comparisonError":comparison_error,"media":media}))
 }
 pub fn restore(root:&Path,input:&str)->Result<Value,String>{
  let opts:Value=serde_json::from_str(input).map_err(|e|e.to_string())?;

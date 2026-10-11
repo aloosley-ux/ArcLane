@@ -1,0 +1,6 @@
+import type {MediaComparison,MediaSide} from './types';
+import './comparison.css';
+export default function MediaDiff({media}:{media:MediaComparison}){
+ const side=(s:MediaSide,label:string)=><section className="media-side"><h4>{label}</h4><div className="media-metadata"><b>{s.exists?s.kind==='image'?s.format+' image':s.kind:'Absent file'}</b><span>{s.exists?s.size.toLocaleString()+' bytes':'Not present'}</span>{s.width&&<span>{s.width} × {s.height} px</span>}</div>{s.preview?<img src={s.preview} alt={label+' snapshot of '+media.file}/>:<div className="media-fallback">{s.reason}</div>}<small>{s.preview?s.reason:'No preview executed'}</small>{s.sha256&&<code title={s.sha256}>SHA-256 {s.sha256.slice(0,16)}…</code>}</section>;
+ return <div className="media-comparison" role="region" aria-label="Image and binary comparison"><div className="comparison-top"><b>{media.before.kind==='image'||media.after.kind==='image'?'Image comparison':'Binary inspection'}</b><span>{media.identical?'Identical bytes':!media.before.exists?'New file':!media.after.exists?'Deleted file':'Changed bytes'}</span></div><div className="media-sides">{side(media.before,media.leftLabel)}{side(media.after,media.rightLabel)}</div><div className="media-note">Read only · 2 MB source limit · 4096 px decode limit · static first frame · local bytes only</div></div>;
+}

@@ -1,8 +1,9 @@
+from fixture_support import cli_path
 """Hunk-level staging acceptance using an isolated repository and Git's own index."""
 import pathlib,tempfile,subprocess,json
 testbed=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-hunks-",dir=testbed))
-exe=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+exe=cli_path()
 def git(*v):
  r=subprocess.run(["git","-C",str(repo),*v],capture_output=True,text=True,encoding="utf-8")
  if r.returncode:raise AssertionError((v,r.stderr))

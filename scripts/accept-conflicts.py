@@ -1,8 +1,9 @@
+from fixture_support import cli_path
 """Conflict editor tests: separate disposable repos; independent Git index verification."""
 from pathlib import Path
 import json,subprocess,tempfile
 testbed=Path(r"C:\AI\REA\Experiments\Forge-Testbed")
-cli=Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 passed=[]
 def repo_fixture(filename):
     root=Path(tempfile.mkdtemp(prefix="arclane-conflicts-",dir=testbed))

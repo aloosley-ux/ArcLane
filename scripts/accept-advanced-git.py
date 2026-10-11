@@ -1,7 +1,8 @@
+from fixture_support import cli_path
 """Verify Arclane advanced Git commands only against newly created disposable repositories."""
 import json,subprocess,tempfile,pathlib,os
 root=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
-cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-advanced-",dir=root))
 wt=repo.parent/(repo.name+"-linked")
 passes=[]

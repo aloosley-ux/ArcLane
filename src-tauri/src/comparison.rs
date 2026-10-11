@@ -23,9 +23,13 @@ fn oid_text(root:&Path,rev:&str,file:&str)->Result<Option<String>,String>{
  if git(root,&["cat-file".into(),"-e".into(),entry.clone()]).is_err(){return Ok(None);}
  let mode=git(root,&["cat-file".into(),"-t".into(),entry.clone()])?;
  if mode!=b"blob\n" {return Err("Selected entry is not a regular blob".into());}
+ let mode=if rev.is_empty(){crate::media::text(root,&["ls-files","--stage","--",file])?.split_whitespace().next().unwrap_or("").to_string()}else{crate::media::text(root,&["ls-tree","--format=%(objectmode)",rev,"--",file])?};
+ if mode!="100644"&&mode!="100755"{return Err("Text comparison requires regular files".into());}
+ let size=crate::media::text(root,&["cat-file","-s",&entry])?.parse::<usize>().map_err(|e|e.to_string())?;if size>LIMIT{return Err("File exceeds 1MB side-by-side comparison limit".into());}
  Ok(Some(utf8(git(root,&["show".into(),"--no-ext-diff".into(),entry])?)?))
 }
 fn validate_file(root:&Path,file:&str)->Result<(),String>{
+ crate::media::safe_path(root,file)?;
  let path=Path::new(file);
  if file.is_empty()||file.starts_with('-')||path.is_absolute()||file.contains('\0')||
    path.components().any(|c|matches!(c,Component::ParentDir|Component::RootDir|Component::Prefix(_))){
@@ -49,17 +53,14 @@ pub fn compare(root:&Path,file:&str,staged:bool,commit:Option<&str>)->Result<Val
    git(root,&["cat-file".into(),"-e".into(),format!("{sha}^{{commit}}")])?;
    let parent=git(root,&["rev-parse".into(),format!("{sha}^")]).ok()
       .map(|v|String::from_utf8_lossy(&v).trim().to_string());
-   let old=if let Some(par)=parent{oid_text(root,&par,file)?}else{None};
+   let old=if let Some(par)=parent{let old=crate::media::old_path(root,file,Some(&par),sha,false)?;oid_text(root,&par,&old)?}else{None};
    (old,oid_text(root,sha,file)?,"Parent commit","Selected commit")
  } else if staged{
-   (oid_text(root,"HEAD",file)?,oid_text(root,"",file)?,"HEAD","Staging area")
+   let old=crate::media::old_path(root,file,Some("HEAD"),"",true)?;
+   (oid_text(root,"HEAD",&old)?,oid_text(root,"",file)?,"HEAD","Staging area")
  } else{
    let previous=oid_text(root,"",file)?;
-   let current=match fs::read(root.join(file)){
-     Ok(bytes)=>Some(utf8(bytes)?),
-     Err(e) if e.kind()==std::io::ErrorKind::NotFound=>None,
-     Err(e)=>return Err(e.to_string())
-   };
+   let current=crate::media::read_file(root,file,LIMIT as u64)?.map(utf8).transpose()?;
    (previous,current,"Staging area","Working tree")
  };
  if before.is_none()&&after.is_none(){return Err("File does not exist in the selected comparison".into());}
@@ -72,7 +73,8 @@ pub fn compare(root:&Path,file:&str,staged:bool,commit:Option<&str>)->Result<Val
 }
 pub fn between(root:&Path,file:&str,from:Option<&str>,to:&str)->Result<Value,String>{
  validate_file(root,file)?;
- let before=from.map(|s|oid_text(root,s,file)).transpose()?.flatten();
+ let old=crate::media::old_path(root,file,from,to,false)?;
+ let before=from.map(|s|oid_text(root,s,&old)).transpose()?.flatten();
  let after=oid_text(root,to,file)?;
  let before_exists=before.is_some();let after_exists=after.is_some();
  let before=before.unwrap_or_default();let after=after.unwrap_or_default();

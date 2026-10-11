@@ -18,6 +18,8 @@ export const client={
   diff:(path:string,file="",staged=false,commit:string|null=null)=>invoke<DiffResult>("file_diff",{path,file,staged,commit}),
   hunks:(path:string,file:string,staged:boolean)=>invoke<HunkResponse>("get_hunks",{path,file,staged}),
   compare:(path:string,file:string,staged:boolean,commit:string|null=null)=>invoke<FileComparison>("compare_file",{path,file,staged,commit}),
+  media:(path:string,file:string,staged:boolean,commit:string|null=null)=>invoke<import("./types").MediaComparison>("compare_media",{path,file,staged,commit}),
+  recoveries:(path:string)=>invoke<import("./types").FileRecovery[]>("file_recoveries",{path}),
   fileHistory:(path:string,file:string)=>invoke<FileHistory>("inspect_file_history",{path,file}),
   fileBlame:(path:string,file:string)=>invoke<FileBlame>("inspect_file_blame",{path,file}),
   collabQuery:(path:string,kind:string,id:string|null=null,requestId:string|null=null)=>invoke<unknown>("collaboration_query",{path,kind,id,requestId}),

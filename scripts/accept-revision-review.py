@@ -1,7 +1,8 @@
+from fixture_support import cli_path
 """Tree comparisons, metadata and index-preserving restores, all in new testbed."""
 import json,subprocess,tempfile,pathlib
 repo=pathlib.Path(tempfile.mkdtemp(prefix='arclane-revisions-',dir=r'C:\AI\REA\Experiments\Forge-Testbed'))
-cli=r'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe'
+cli=cli_path()
 def git(*args):return subprocess.check_output(['git','--literal-pathspecs','-C',str(repo),*args],text=True).strip()
 def call(kind,opts,ok=True):
  p=subprocess.run([cli,kind,str(repo),json.dumps(opts)],capture_output=True,text=True);assert (p.returncode==0)==ok,(p.stdout,p.stderr)

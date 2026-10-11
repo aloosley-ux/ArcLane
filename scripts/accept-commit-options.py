@@ -1,7 +1,8 @@
+from fixture_support import cli_path
 """Commit editor acceptance using fresh disposable Git state, no remotes/network."""
 import json,subprocess,tempfile,pathlib
 repo=pathlib.Path(tempfile.mkdtemp(prefix='arclane-commit-',dir=r'C:\AI\REA\Experiments\Forge-Testbed'))
-cli=r'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe'
+cli=cli_path()
 def git(*args):return subprocess.check_output(['git','-C',str(repo),*args],text=True).strip()
 def call(kind,opts={},ok=True):
  p=subprocess.run([cli,kind,str(repo),json.dumps(opts)],capture_output=True,text=True)

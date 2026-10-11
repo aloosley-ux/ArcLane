@@ -1,8 +1,9 @@
+from fixture_support import cli_path
 """Hermetic GitHub CLI bridge contract tests. The only gh executable on PATH is a local mock."""
 import json,os,subprocess,tempfile,pathlib
 base=pathlib.Path(__file__).resolve().parents[1]
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-github-mock-",dir=r"C:\AI\REA\Experiments\Forge-Testbed"))
-cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 subprocess.run(["git","-C",str(repo),"init","-q","-b","main"],check=True)
 mock=base/"artifacts"/"mock-gh"/"gh.exe"
 assert mock.exists(), "Hermetic mock gh.exe missing"

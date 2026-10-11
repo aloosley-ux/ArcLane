@@ -1,3 +1,4 @@
+from fixture_support import cli_path
 """Hermetic provider process acceptance. All gh invocations route to our offline mock."""
 import ctypes,json,os,pathlib,shutil,subprocess,tempfile,time
 base=pathlib.Path(__file__).resolve().parents[1];mock=base/'artifacts'/'mock-gh'/'gh.exe';assert mock.is_file(),'Mock missing; refusing provider tests'
@@ -6,7 +7,7 @@ subprocess.check_call(['git','init','-q',str(repo)])
 data=pathlib.Path(tempfile.mkdtemp(prefix='provider-process-',dir=base/'artifacts'))
 for file in (base/'scripts'/'github-fixtures').iterdir():shutil.copy(file,data/file.name)
 env=os.environ|dict(PATH=str(mock.parent)+';'+os.environ['PATH'],ARCLANE_GH_MOCK_DATA=str(data),ARCLANE_GH_TIMEOUT_MS='1000',ARCLANE_GH_MOCK_LOG=str(data/'calls.log'))
-cli=r'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe'
+cli=cli_path()
 def call(kind,id=None,ok=True):
  start=time.monotonic();p=subprocess.run([cli,'collab',str(repo),json.dumps(dict(kind=kind,id=id))],env=env,text=True,capture_output=True,timeout=10)
  assert (p.returncode==0)==ok,(p.stdout,p.stderr);assert time.monotonic()-start<6

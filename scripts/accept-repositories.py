@@ -1,3 +1,4 @@
+from fixture_support import cli_path
 """Repository cloning and initialization fixture acceptance."""
 import pathlib,tempfile,subprocess,json
 root=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
@@ -5,7 +6,7 @@ src=pathlib.Path(tempfile.mkdtemp(prefix="arclane-repo-source-",dir=root))
 dst=pathlib.Path(tempfile.mkdtemp(prefix="arclane-clone-parent-",dir=root))
 initial=pathlib.Path(tempfile.mkdtemp(prefix="arclane-init-",dir=root))
 nested=src/"nested"
-cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 def git(*args):
  p=subprocess.run(["git",*args],capture_output=True,text=True,encoding="utf-8")
  if p.returncode:raise AssertionError(f"git {args}: {p.stderr}")

@@ -88,6 +88,8 @@
     Ok(())
  }
  pub fn execute(path:&Path,op:&str,file:&str,input:&str)->Result<Value,String>{
+    if op=="discard_file"{return crate::recovery::discard(path,file);}
+    if op=="undo_discard"{return crate::recovery::undo(path,input.trim());}
     let val=input.trim();
     let mut execution_path=path.to_path_buf();
     let command:Vec<String>=match op{

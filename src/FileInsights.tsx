@@ -2,6 +2,7 @@ import{useEffect,useMemo,useState}from "react";
 import{ArrowLeft,Braces,CalendarDays,Check,Clock3,Code2,FileClock,FileDiff,GitCommitHorizontal,GitPullRequest,History,LoaderCircle,Search,ShieldCheck,Users,X}from "lucide-react";
 import{client}from "./api";
 import SideBySideDiff from "./SideBySideDiff";
+import MediaDiff from "./MediaDiff";
 import type{FileHistory,FileBlame,FileComparison}from "./types";
 import "./file-insights.css";
 
@@ -15,6 +16,7 @@ export default function FileInsights({path,file,onClose}:{path:string;file:strin
  const[history,setHistory]=useState<FileHistory|null>(null);
  const[blame,setBlame]=useState<FileBlame|null>(null);
  const[comparison,setComparison]=useState<FileComparison|null>(null);
+ const[media,setMedia]=useState<import("./types").MediaComparison|null>(null);
  const[activeSha,setActiveSha]=useState("");
  const[loading,setLoading]=useState(false);
  const[diffLoading,setDiffLoading]=useState(false);
@@ -36,8 +38,8 @@ export default function FileInsights({path,file,onClose}:{path:string;file:strin
  },[tab,path,file,blame]);
  useEffect(()=>{
    if(tab!=="history"||!activeSha)return;
-   let alive=true;setComparison(null);setDiffLoading(true);setError("");
-   client.compare(path,file,false,activeSha).then(data=>{if(alive)setComparison(data)}).catch(e=>{if(alive)setError(String(e))}).finally(()=>{if(alive)setDiffLoading(false)});
+   let alive=true;setComparison(null);setMedia(null);setDiffLoading(true);setError("");
+   client.compare(path,file,false,activeSha).then(data=>{if(alive)setComparison(data)}).catch(async()=>{try{const m=await client.media(path,file,false,activeSha);if(alive)setMedia(m)}catch(e){if(alive)setError(String(e))}}).finally(()=>{if(alive)setDiffLoading(false)});
    return()=>{alive=false};
  },[activeSha,path,file,tab]);
  useEffect(()=>{
@@ -56,7 +58,7 @@ export default function FileInsights({path,file,onClose}:{path:string;file:strin
    <header className="insights-header"><div className="insights-heading"><span className="insights-logo"><History size={23}/></span><div><span className="insights-kicker">SOURCE INTELLIGENCE / FILE EXPLORER</span><h2>{base(file)}</h2><small>{file}</small></div></div><div className="insights-closebar"><span><ShieldCheck size={14}/> READ ONLY</span><button aria-label="Close file insights" onClick={onClose}><X size={19}/></button></div></header>
    <div className="insights-toolbar"><div className="insights-tabs"><button className={tab==="history"?"active":""} onClick={()=>{setTab("history");setSearch("");}}><FileClock size={15}/> File history {history?.commits.length??""}</button><button className={tab==="blame"?"active":""} onClick={()=>{setTab("blame");setSearch("");}}><Users size={15}/> Line blame</button></div><label className="insights-search"><Search size={16}/><input aria-label="Search file insights" value={search} onChange={e=>setSearch(e.target.value)} placeholder={tab==="history"?"Search commits, authors...":"Find lines, authors, SHAs..."}/></label></div>
    <div className="insights-content">
-    {tab==="history"?<><aside className="insights-timeline"><div className="insights-list-title"><GitCommitHorizontal size={15}/> EVOLUTION <span>{visibleHistory.length}</span></div><div className="insights-timeline-scroll">{visibleHistory.map((commit,i)=><button key={commit.sha} className={"insights-commit"+(activeSha===commit.sha?" selected":"")} onClick={()=>setActiveSha(commit.sha)}><span className="insights-timeline-node"><span/></span><span className="insights-commit-main"><b>{commit.subject}</b><small>{commit.author}<span>{commit.date}</span></small></span><span className="insights-sha">{short(commit.sha)}</span></button>)}{!loading&&visibleHistory.length===0&&<div className="insights-empty-list">No commit history matches this file.</div>}</div></aside><div className="insights-preview"><div className="insights-preview-top"><FileDiff size={16}/><b>{activeSha?"Commit "+short(activeSha):"Select a revision"}</b><span>Parent → Commit</span></div>{diffLoading?<div className="insights-wait"><LoaderCircle className="spin" size={21}/> Loading historical file snapshots...</div>:comparison?<SideBySideDiff comparison={comparison}/>:<div className="insights-wait"><FileDiff size={25}/> Select a commit to inspect exact changed lines.</div>}</div></>:
+    {tab==="history"?<><aside className="insights-timeline"><div className="insights-list-title"><GitCommitHorizontal size={15}/> EVOLUTION <span>{visibleHistory.length}</span></div><div className="insights-timeline-scroll">{visibleHistory.map((commit,i)=><button key={commit.sha} className={"insights-commit"+(activeSha===commit.sha?" selected":"")} onClick={()=>setActiveSha(commit.sha)}><span className="insights-timeline-node"><span/></span><span className="insights-commit-main"><b>{commit.subject}</b><small>{commit.author}<span>{commit.date}</span></small></span><span className="insights-sha">{short(commit.sha)}</span></button>)}{!loading&&visibleHistory.length===0&&<div className="insights-empty-list">No commit history matches this file.</div>}</div></aside><div className="insights-preview"><div className="insights-preview-top"><FileDiff size={16}/><b>{activeSha?"Commit "+short(activeSha):"Select a revision"}</b><span>Parent → Commit</span></div>{diffLoading?<div className="insights-wait"><LoaderCircle className="spin" size={21}/> Loading historical file snapshots...</div>:media?<MediaDiff media={media}/>:comparison?<SideBySideDiff comparison={comparison}/>:<div className="insights-wait"><FileDiff size={25}/> Select a commit to inspect exact changed lines.</div>}</div></>:
     <div className="insights-blame"><aside className="insights-authors"><div className="insights-list-title"><Users size={15}/> ATTRIBUTION <span>{authors.length}</span></div>{authors.map(([author,count])=><div className="insights-author" key={author}><span style={{background:colour(author)}}/><b>{author}</b><small>{count} lines</small></div>)}<div className="insights-attribution-note">Each line is attributed to the commit that last changed it, according to Git blame.</div></aside><div className="insights-blame-main"><div className="insights-preview-top"><Braces size={16}/><b>Line-by-line ownership</b><span>{blame?.total||0} lines</span></div><div className="insights-blame-scroll">{visibleBlame.map(row=><div className="insights-blame-row" key={row.number}><span className="insights-line-number">{row.number}</span><span className="insights-line-owner" title={row.summary+" · "+date(row.authorTime)}><span style={{background:colour(row.author)}}/><b>{row.author}</b><small>{short(row.sha)}</small></span><code>{row.text||" "}</code></div>)}{!loading&&visibleBlame.length===0&&<div className="insights-empty-list">No attributed lines available for this file.</div>}</div></div></div>}
    </div>
    {loading&&<div className="insights-progress"><LoaderCircle className="spin" size={15}/> Reading file data from Git...</div>}

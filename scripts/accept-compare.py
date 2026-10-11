@@ -1,8 +1,9 @@
+from fixture_support import cli_path
 """Read-only side-by-side Git content acceptance on a fresh isolated repository."""
 import subprocess,tempfile,json,pathlib
 root=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-side-by-side-",dir=root))
-cli=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+cli=cli_path()
 checks=[]
 def git(*args):
  result=subprocess.run(["git","-C",str(repo),*args],encoding="utf-8",text=True,capture_output=True)

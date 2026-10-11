@@ -3,6 +3,7 @@ import {ArrowLeftRight,FileDiff,LoaderCircle,Undo2,X} from "lucide-react";
 import {client} from "./api";
 import PatchDiff from "./PatchDiff";
 import SideBySideDiff from "./SideBySideDiff";
+import MediaDiff from "./MediaDiff";
 import type {Commit,CommitDefaults,Ref,RevisionReview} from "./types";
 import "./workflow.css";
 
@@ -27,8 +28,8 @@ export default function RevisionReviewPanel({path,to,from=null,refs,commits,busy
    <div className="revision-files">{data.files.map(f=><div key={f.path} className={"revision-file"+(file===f.path?" selected":"")}><input type="checkbox" aria-label={"Select restore "+f.path} checked={selected.includes(f.path)} disabled={f.status==="D"||busy||loading} onChange={e=>setSelected(s=>e.target.checked?[...s,f.path]:s.filter(x=>x!==f.path))}/><button onClick={()=>setFile(f.path)} title={f.path}><span>{f.status}</span>{f.path}</button></div>)}</div></>}
    <div className="revision-restore"><button className="outline-action" disabled={!selected.length||!head||busy||loading} onClick={()=>{setConfirm(true);setAck(false)}}><Undo2 size={14}/>Restore {selected.length||"selected"} file(s)</button><small>Restores source bytes to the working tree. Staged bytes stay intact.</small></div>
   </aside><div className="revision-preview"><div className="revision-preview-heading"><span>{file||"All changed files"}</span><small>{data?.from?.slice(0,8)||"Empty tree"} → {data?.to.slice(0,8)}</small>{file&&data?.comparison&&<button aria-pressed={mode==="side"} onClick={()=>setMode(m=>m==="side"?"patch":"side")}>{mode==="side"?"Show patch":"Side by side"}</button>}</div>
-   {loading?<div className="revision-wait"><LoaderCircle className="spin" size={20}/>Reading Git trees…</div>:data&&file&&data.comparison&&mode==="side"?<SideBySideDiff comparison={data.comparison}/>:<PatchDiff text={data?.patch||"No changes between these revisions."} label="Revision patch"/>}
-   {data?.comparisonError&&<div className="revision-note">{data.comparisonError}. Patch remains available.</div>}{error&&<div role="alert" className="revision-note workflow-error">{error}</div>}
+   {loading?<div className="revision-wait"><LoaderCircle className="spin" size={20}/>Reading Git trees…</div>:data?.media&&file?<MediaDiff media={data.media}/>:data&&file&&data.comparison&&mode==="side"?<SideBySideDiff comparison={data.comparison}/>:<PatchDiff text={data?.patch||"No changes between these revisions."} label="Revision patch"/>}
+   {data?.comparisonError&&!data.media&&<div className="revision-note">{data.comparisonError}. Patch remains available.</div>}{error&&<div role="alert" className="revision-note workflow-error">{error}</div>}
   </div></div>
   {confirm&&<div className="revision-confirm"><strong>Restore {selected.length} historical file(s)?</strong><p>{selected.join(", ")}</p><label className="workflow-check"><input type="checkbox" checked={ack} disabled={busy} onChange={e=>setAck(e.target.checked)}/>Overwrite the selected working files with revision {data?.to.slice(0,8)}; preserve the index</label><button className="quiet-btn" disabled={busy} onClick={()=>setConfirm(false)}>Cancel restore</button><button className="dialog-confirm" disabled={!ack||busy} onClick={()=>void restore()}>Confirm historical restore</button></div>}
  </section></div>

@@ -1,7 +1,8 @@
+from fixture_support import cli_path
 """Local bare remotes and stash workflows; never access a remote service."""
 import json,subprocess,tempfile,pathlib
 base=pathlib.Path(tempfile.mkdtemp(prefix='arclane-operations-',dir=r'C:\AI\REA\Experiments\Forge-Testbed'))
-cli=r'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe'
+cli=cli_path()
 def git(repo,*args):return subprocess.check_output(['git','-C',str(repo),*args],text=True,stderr=subprocess.DEVNULL).strip()
 def call(repo,kind,opts,ok=True):
  p=subprocess.run([cli,kind,str(repo),json.dumps(opts)],capture_output=True,text=True);assert (p.returncode==0)==ok,(p.stdout,p.stderr)

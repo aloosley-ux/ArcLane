@@ -1,8 +1,9 @@
+from fixture_support import cli_path
 """Blame and file-history acceptance; compare to Git's porcelain output."""
 import json,subprocess,tempfile,pathlib
 testbed=pathlib.Path(r"C:\AI\REA\Experiments\Forge-Testbed")
 repo=pathlib.Path(tempfile.mkdtemp(prefix="arclane-blame-",dir=testbed))
-exe=pathlib.Path(r"C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe")
+exe=cli_path()
 def git(*args):
  p=subprocess.run(["git","-C",str(repo),*args],capture_output=True,text=True,encoding="utf-8")
  assert p.returncode==0,(args,p.stderr)
