@@ -37,3 +37,15 @@ Do not use `git reset --hard`, `git clean -fd`, force push, or mass-kill process
 ## AI development boundaries
 
 AI contributions are welcome, but claims must match evidence. Preserve low idle resource usage and on-demand processes. Never introduce background AI, telemetry, always-on polling or cloud dependence without user approval. Favour completion, independent verification and clean handoffs over speculative redesigns.
+
+## Mandatory tool-use and visual acceptance contract — every agent run
+
+**Every new development run MUST specify, before coding:** (1) the exact source base SHA and isolated branch/checkout; (2) requirement IDs and acceptance criteria; (3) a **tool-by-tool use matrix** naming REQUIRED, CONDITIONAL or SKIPPED for Git/GitHub, Penpot, REA, ReAgent, local Rust/TypeScript, PowerShell, packaged WebView2/Playwright, and any other relevant tools; (4) the order, prerequisites, evidence to save, prohibitions and stop/failure gates for each tool; (5) the actual focused and regression commands, disposable fixtures, package freshness proof and handoff checklist. Never infer tool use merely from generic instructions to match existing UI.
+
+**Penpot is REQUIRED before significant React/CSS, screen, layout or workflow UI changes.** Open the actual connected ArcLane Design Playground, inspect the Review Bench system, create/review light and dark plus relevant compact-size design frames, record real frame/node IDs and build a design-to-implementation checklist **before UI coding**. Reusing existing CSS tokens alone is not a design review. If the work is truly backend-only, explicitly record Penpot SKIPPED and why. Do not quietly skip it or substitute Figma/Canva.
+
+**Native acceptance cannot be declared from stale binaries or superficial DOM checks.** Rebuild Tauri/WebView2 production executable after the final source edit, establish build provenance (source revision, EXE SHA-256, freshness, observable new UI/behaviour), and inspect actual light/dark/compact screenshots versus Penpot before full regression. Keep CLI environment variables in the runner process; check native command exit codes rather than treating all Git stderr warnings as failures. Fix test races by waiting for a real initial loaded state, not by inflating arbitrary delays.
+
+**Run gates are mandatory:** source/safety → Penpot design (if UI) → focused implementation and independent backend fixtures → fresh packaged visual inspection → focused native safety/interaction → full impacted/backend/native regression → diff review/coverage/evidence → clean branch commit and controlled push. Any failed gate blocks claiming acceptance. At handoff list every tool as USED with actual evidence or SKIPPED with explicit rationale, plus measured results, incomplete behaviours, touched branches and installed-app status.
+
+Do not combine these gates into a theatrical research marathon; named specialist tools are employed **only for their designated task**. For a concrete implementation example, see [Run 3 Sol Low file-review execution packet](docs/RUN3_SOL_LOW_FILE_REVIEW_2026-10-11.md).
