@@ -4,11 +4,13 @@
 
 ArcLane is a Windows-first Rust/Tauri Git desktop client. The Review Bench interface is the current baseline. Public GitHub repository: https://github.com/aloosley-ux/ArcLane. The 104-item scope is documented in `docs/FEATURE_COVERAGE.md`; implementation status there is authoritative for claims, not a promise of full GitKraken parity.
 
-Start with: `README.md`, `docs/FEATURE_COVERAGE.md`, `docs/FEATURE_SPRINT_2026-10-10.md`, and `docs/GITHUB_LIVE_CHECKPOINT_2026-10-10.md`. Consult historical audit/research only when necessary for a concrete missing behaviour.
+Start with: `docs/REA_EVIDENCE_INDEX.md`, the relevant local REA findings, `docs/GITKRAKEN_AUDIT.md`, `docs/ENGINEERING_PLAYBOOK.md`, `docs/FEATURE_COVERAGE.md` and `README.md`. Consult sprint checkpoints and current source after establishing the research-backed user journey. Additional REA analysis is on demand; reviewing the existing research is mandatory.
 
 **Active delivery plan:** `docs/DEVELOPMENT_PROGRAM_2026-10-11.md` maps every one of the 80 unaccepted scope IDs exactly once, sets batch dependencies, proper REA/ReAgent/Penpot/Model Testing roles, native gates and release criteria. For the isolated GPT-6 Luna (Maximum reasoning) test, read `docs/LUNA_MAX_PILOT_035.md` and work only in an independent topic checkout. Neither plan grants permission to modify `main`, invent UI styling, or treat mock provider writes as acceptance.
 
-**Engineering playbook (living):** Read [docs/ENGINEERING_PLAYBOOK.md](docs/ENGINEERING_PLAYBOOK.md) before drafting a new run or modifying a cross-component workflow. Define authoritative state, transitions and failure/retry behavior before UI implementation; update the playbook with evidence-backed lessons after major defects. It complements, rather than replaces, the safety and native gates below.
+**Research authority — mandatory:** Before scoping or designing EVERY feature run, review the existing REA findings via [docs/REA_EVIDENCE_INDEX.md](docs/REA_EVIDENCE_INDEX.md), [docs/GITKRAKEN_AUDIT.md](docs/GITKRAKEN_AUDIT.md) and the relevant local REA reports. Record the actual evidence references and reference workflows in a compact evidence-to-requirement brief. Do not mark REA research SKIPPED merely because existing ArcLane code or Penpot looks sufficient; new heavyweight REA analysis is conditional on missing evidence. The 104-row ledger measures ArcLane acceptance, not competitor reference coverage. Do not copy proprietary code/assets.
+
+**Engineering playbook (living):** Read [docs/ENGINEERING_PLAYBOOK.md](docs/ENGINEERING_PLAYBOOK.md) before drafting a new run or modifying a cross-component workflow. Define authoritative state, transitions and failure/retry behavior after reviewing REA and before UI implementation; update the playbook with evidence-backed lessons after major defects. It complements, rather than replaces, the safety and native gates below.
 
 ## Repo-first working model
 

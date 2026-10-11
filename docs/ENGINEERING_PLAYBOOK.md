@@ -5,14 +5,15 @@
 
 ## At a glance: what we learned
 
-1. **Design the complete user journey before implementing the components.** Review Bench/Penpot addresses visual quality; it does not define state ownership or error recovery.
-2. **One authoritative owner per mutable state.** For native process sessions, Rust should own the facts; React should display/reconcile them. Worktree selection is not process identity.
-3. **Events are notifications, not guaranteed history.** A short-lived child can print and exit before a React component subscribes or learns its session ID. Use an authoritative snapshot and race-safe replay/reconciliation.
-4. **Model failure and recovery as first-class journeys.** Create succeeds + launch fails, refresh while retrying, tab switch during launch, exit before UI readiness, close after exit, startup output before attach.
-5. **Test the riskiest boundary before paying for a production build.** Compile + isolated state-machine/PTY/Git-fixture tests should catch identity and lifetime defects; the real packaged EXE remains indispensable for final acceptance.
-6. **Never weaken an assertion to obtain green.** Fix a fixture when it incorrectly models Windows (such as a CR-terminated ConPTY line); verify product behavior separately.
-7. **Accepted means proven, not merely coded.** Record per-requirement status honestly and distinguish user-visible tests, backend-only checks and the agent's statements.
-8. **Instruction quality is our responsibility.** A detailed tool checklist is not a substitute for understanding existing code, system invariants and failure boundaries. Avoid arbitrary deadlines, test counts, or promises about number of rebuilds.
+1. **Start with the REA reports — our primary product reference.** Review the actual GitKraken research and capture evidence-to-requirement mappings before choosing UI or architecture. See [REA evidence index](REA_EVIDENCE_INDEX.md). Our current code and Penpot are implementation/design inputs, not replacements for that reference.
+2. **Design the complete user journey before implementing the components.** Review Bench/Penpot addresses visual quality; it does not define state ownership or error recovery.
+3. **One authoritative owner per mutable state.** For native process sessions, Rust should own the facts; React should display/reconcile them. Worktree selection is not process identity.
+4. **Events are notifications, not guaranteed history.** A short-lived child can print and exit before a React component subscribes or learns its session ID. Use an authoritative snapshot and race-safe replay/reconciliation.
+5. **Model failure and recovery as first-class journeys.** Create succeeds + launch fails, refresh while retrying, tab switch during launch, exit before UI readiness, close after exit, startup output before attach.
+6. **Test the riskiest boundary before paying for a production build.** Compile + isolated state-machine/PTY/Git-fixture tests should catch identity and lifetime defects; the real packaged EXE remains indispensable for final acceptance.
+7. **Never weaken an assertion to obtain green.** Fix a fixture when it incorrectly models Windows (such as a CR-terminated ConPTY line); verify product behavior separately.
+8. **Accepted means proven, not merely coded.** Record per-requirement status honestly and distinguish user-visible tests, backend-only checks and the agent's statements.
+9. **Instruction quality is our responsibility.** A detailed tool checklist is not a substitute for understanding existing code, system invariants and failure boundaries. Avoid arbitrary deadlines, test counts, or promises about number of rebuilds.
 
 ## Recorded evidence and lessons
 
@@ -63,7 +64,7 @@ This is the **desired invariant**, not a claim that all details are already impl
 
 **Before coding (one focused architecture note, not a research marathon):**
 
-1. Read current `AGENTS.md`, this playbook, the relevant ledger rows, last accepted handoff and **actual source seams**. Write down what already works.
+1. Read the **existing REA research first** using [REA_EVIDENCE_INDEX.md](REA_EVIDENCE_INDEX.md): record exact evidence files/findings and reference journeys, then read current `AGENTS.md`, this playbook, the ledger rows, last accepted handoff and **actual source seams**. Distinguish reference behaviour from what ArcLane happens to implement.
 2. Describe one user journey end-to-end, including state owners, inputs/outputs, invariants, async ordering and two or three highest-risk failures. Draw a short transition table if there are multiple async actors.
 3. State a falsifiable acceptance criterion for each requirement. Differentiate backend, packaged-native and externally unverified behavior. Confirm a safe disposable fixture design.
 4. For changed UI, perform the existing mandatory Penpot light/dark/compact review **after determining behavior and before writing React/CSS**. Penpot does not replace the architecture note.
@@ -92,7 +93,9 @@ This is the **desired invariant**, not a claim that all details are already impl
 
 ```text
 Implement ArcLane requirements [IDs] in [isolated checkout / branch] from [exact SHA].
-Read AGENTS.md, docs/ENGINEERING_PLAYBOOK.md and relevant ledger/source first.
+Read docs/REA_EVIDENCE_INDEX.md and the relevant existing REA reports FIRST;
+record evidence-to-requirement mappings. Then read AGENTS.md,
+docs/ENGINEERING_PLAYBOOK.md and relevant ledger/source.
 
 User journey: [one end-to-end outcome].
 Reuse: [current working components].
@@ -121,6 +124,13 @@ After **every completed run** or material architectural incident, append a dated
 - Reuse: [one invariant/check/prompt change to carry into the next run].
 ```
 
+### 2026-10-11 - REA research was incorrectly bypassed
+- **Observed:** The Run 4 packet marked REA SKIPPED before mapping the existing product research to #082–#084; Penpot and current ArcLane components drove the proposed workflow instead.
+- **Root cause:** Research was treated as optional validation rather than the primary product specification input.
+- **Change/decision:** Mandatory existing-REA evidence review and evidence-to-requirement brief before architecture or Penpot; see [REA evidence index](REA_EVIDENCE_INDEX.md). Further REA analysis is conditional, but existing reports must not be ignored.
+- **Evidence:** The recorded Run 4 tool matrix and the verified local 12.5 research, 12.6 extraction manifest and agent/worktree/terminal feature labels.
+- **Reuse:** Every new run cites the actual research evidence and distinguishes supported behaviour from unconfirmed candidate features.
+
 ### 2026-10-11 - Run 4 ownership reset
 - **Observed:** multiple native-test failures across destination, retry, checkout selection, early PTY output and exit notification.
 - **Root cause:** verified individual races; broader cross-layer session authority failure identified as a design defect. Do not claim every aspect is fixed yet.
@@ -137,6 +147,7 @@ After **every completed run** or material architectural incident, append a dated
 
 ## Related source documents
 
+- [REA evidence index](REA_EVIDENCE_INDEX.md) — PRIMARY product reference sources, local report locations and required evidence-to-requirement review.
 - [Development rules](../AGENTS.md) — authoritative Git/safety/native/Penpot policy.
 - [Feature coverage](FEATURE_COVERAGE.md) — authoritative 104-row per-ID disposition. **Use rows, not the potentially stale summary paragraph:** Run 3 row-by-row inspection found 30 accepted, 45 partial, 1 backend-only and 28 unverified, while an older summary still said 26 accepted. Recalculate after every run.
 - [Development programme](DEVELOPMENT_PROGRAM_2026-10-11.md) — backlog and dependency map, **not proof that remaining work is complete**.
