@@ -1,5 +1,5 @@
 # ArcLane — remaining 80 requirements development programme
-*Prepared 11 October 2026 against `feature/next-parity-sprint` and `docs/FEATURE_COVERAGE.md`.*
+*Historical roadmap snapshot prepared 11 October 2026 against `feature/next-parity-sprint`. The 80 remaining IDs and all counts below describe that **old baseline**, not current Run 3/4 progress. Always query current `docs/FEATURE_COVERAGE.md` target rows instead of rereading this full roadmap for a scoped run. Current agent authority: `AGENTS.md` and `docs/REA_EVIDENCE_INDEX.md`.*
 
 ## Mission and non-negotiables
 
@@ -163,7 +163,7 @@ Complete interactive workflow (no decorative UI), truthful data/state/errors, no
 | Tool/source | Verified or known location | Use it for | Output to keep | Not for |
 | --- | --- | --- | --- | --- |
 | GitHub + local Git | Connected GitHub repo; Windows Git/gh | Source, branches, reviews of actual diffs, repo history, controlled pushes | commit SHA, changed paths, clean status | Actions/runner debugging or fake provider fixtures |
-| **REA 6.2.0** | `C:\AI\REA`; evidence under `Evidence\GitKraken-12.5.0-static`, `Reports`; Codex `rea` MCP configured | Read-only native UI/runtime observation, workflow reference and missing edge-case evidence | redacted behavioural checklist/screenshots, version/date, evidence IDs | importing competitor code, artwork or extracted JS; cannot infer 12.6 from 12.5 data |
+| **REA 6.2.0** | Primary index: `docs/REA_EVIDENCE_INDEX.md`; local historical reports under `C:\AI\REA\Reports` and `C:\AI\REA\Experiments\Forge\artifacts`; Codex `rea` registered | **Always review relevant existing evidence first**, then narrowly query/observe only if gaps remain | exact reference/version, bounded findings, unknowns | importing competitor code/assets, decompressing full data by default or claiming 12.6 behaviour from 12.5 observations |
 | **ReAgent 0.4.0** | `C:\AI\ReAgent\.venv\Scripts\re-agent.exe`; own Ghidra bridge config | Narrow independently verified native-function differential testing where a function boundary truly matters | input/output fixtures, parity differences, version, independent test | default Rust implementation or unlicensed cloning |
 | **Penpot (design authority)** | `penpot` Codex MCP registration verified on Windows; current approved file/node ID **not yet verified** | Inspect approved Review Bench tokens/components/layout before changing screens; propose incremental designs, visually approve differences | file+node reference, tokens, before/after screenshots, acceptance | fresh generic dashboard/layouts or styling without evidence |
 | Figma (secondary) | Codex Figma MCP and this chat's Figma connector | Cross-check references/asset inventory if specifically useful; do not displace Penpot | asset/component node IDs | silently creating a second design system |
@@ -174,7 +174,7 @@ Complete interactive workflow (no decorative UI), truthful data/state/errors, no
 | VS Code + GPT-6 Luna reasoning Max | User's existing VS Code/Codex arrangement | One isolated *real feature task* and measured agent trial | commits, test outcome, session metrics | bypassing checks or claiming success from agent prose |
 | Paperclip/Cortana | Existing local stack, optional | Durable delegation or checkpoints if a sprint truly requires multiple workers | task state, evidence paths | adding always-on ArcLane runtime dependency |
 
-**Tool trigger rules:** ordinary day-to-day Git fix = Rust/Python/native. New visual screen = Penpot **before** CSS and packaged screenshots **after**. Unclear GitKraken behaviour = REA observation (prefer prior evidence first). Native function parity question = selective ReAgent. LLM comparison = Model Testing benchmark rubric; correctness still comes from Git and native tests. No broad REA/ReAgent run merely to tick a box.
+**Current tool trigger precedence:** every new feature begins with a **targeted review of the existing REA evidence** using `docs/REA_EVIDENCE_INDEX.md` (mandatory, cheap); a **new** REA analysis or GitKraken observation is conditional on an evidence gap. New visual screen = Penpot **after research and architecture**, before CSS, with packaged screenshots afterward. Ordinary Git correctness = Rust/Python/native. Native differential parity = selective ReAgent when justified. LLM comparisons = Model Testing only when requested. Do not reread full corpora or run tools merely to tick a box.
 
 ## Luna Max trial and branch hygiene
 
