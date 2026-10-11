@@ -1,5 +1,5 @@
 import{invoke}from "@tauri-apps/api/core";
-import type{Repository,HistoryPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
+import type{Repository,HistoryPage,IgnoredPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
 export const client={
   workspace:()=>invoke<import("./types").WorkspaceState>("load_workspace"),
   saveWorkspace:(state:import("./types").WorkspaceState)=>invoke<import("./types").WorkspaceState>("save_workspace",{state}),
@@ -13,6 +13,7 @@ export const client={
   initialize:(folder:string)=>invoke<{path:string;output:string}>("create_repository",{folder}),
   clone:(url:string,parent:string)=>invoke<{path:string;output:string}>("clone_repository",{url,parent}),
   inspect:(path:string)=>invoke<Repository>("snapshot",{path}),
+  ignoredFiles:(path:string,scope:string|null=null,offset=0,limit=100)=>invoke<IgnoredPage>("ignored_files",{path,scope,offset,limit}),
   history:(path:string,limit=350,reference="all",skip=0)=>invoke<HistoryPage>("commits",{path,limit,reference,skip}),
   diff:(path:string,file="",staged=false,commit:string|null=null)=>invoke<DiffResult>("file_diff",{path,file,staged,commit}),
   hunks:(path:string,file:string,staged:boolean)=>invoke<HunkResponse>("get_hunks",{path,file,staged}),

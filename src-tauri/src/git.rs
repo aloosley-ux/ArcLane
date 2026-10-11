@@ -1,6 +1,6 @@
 use serde_json::{json, Value};
 use crate::advanced;
-use std::{path::{Path,PathBuf},process::{Command,Stdio},collections::HashSet,sync::{Mutex,OnceLock}};
+use std::{path::{Path,PathBuf},process::{Command,Stdio},collections::HashSet,sync::{Mutex,OnceLock},io::{BufRead,Read}};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
@@ -137,6 +137,85 @@ fn parse_status(p:&Path)->Result<(Vec<Value>,String),String>{
         files.push(json!({"path":path,"original":origin,"x":x.to_string(),"y":y.to_string(),"staged":x!=' '&&x!='?'&&x!='U',"unstaged":y!=' '&&y!='?'&&y!='U',"untracked":x=='?'&&y=='?', "conflict":conflict}));
     }
     Ok((files,branch))
+}
+const MAX_IGNORED_PAGE:usize=200;
+const MAX_IGNORED_OFFSET:usize=100_000;
+fn ignored_paths_page(p:&Path,args:&[String],offset:usize,limit:usize,status_rows:bool)->Result<(Vec<Value>,usize),String>{
+    let mut cmd=Command::new("git");
+    cmd.args(["-C",&p.to_string_lossy(),"-c","core.quotepath=false"]);
+    if args.iter().any(|arg|arg=="--"){cmd.arg("--literal-pathspecs");}
+    cmd.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).env("GIT_OPTIONAL_LOCKS","0");
+    #[cfg(windows)] {cmd.creation_flags(0x08000000);}
+    let mut child=cmd.spawn().map_err(|e|format!("Could not launch git: {e}"))?;
+    let stdout=child.stdout.take().ok_or("Could not read Git output")?;
+    let stderr=child.stderr.take().ok_or("Could not read Git error output")?;
+    let stderr_reader=std::thread::spawn(move||{let mut stderr=stderr;let mut bytes=Vec::new();let _=stderr.read_to_end(&mut bytes);bytes});
+    let mut reader=std::io::BufReader::new(stdout);
+    let mut record=Vec::new();let mut total=0usize;let mut entries=Vec::new();let mut read_error=None;
+    loop {
+        record.clear();
+        match reader.read_until(0,&mut record){
+            Ok(0)=>break,
+            Ok(_)=>{},
+            Err(error)=>{read_error=Some(error);break;}
+        }
+        if record.last()==Some(&0){record.pop();}
+        if status_rows {
+            if record.len()>=3 && (record[0]==b'R'||record[0]==b'C'||record[1]==b'R'||record[1]==b'C'){
+                let mut original=Vec::new();
+                if let Err(error)=reader.read_until(0,&mut original){read_error=Some(error);break;}
+            }
+            if !record.starts_with(b"!! "){continue;}
+            let path=&record[3..];
+            let directory=path.last()==Some(&b'/');
+            if total>=offset && total<offset.saturating_add(limit){
+                entries.push(json!({"path":String::from_utf8_lossy(path),"directory":directory}));
+            }
+            total=total.saturating_add(1);
+        } else {
+            if record.is_empty(){continue;}
+            if total>=offset && total<offset.saturating_add(limit){
+                entries.push(json!({"path":String::from_utf8_lossy(&record),"directory":false}));
+            }
+            total=total.saturating_add(1);
+        }
+    }
+    drop(reader);
+    if read_error.is_some(){let _=child.kill();}
+    let status=child.wait().map_err(|e|format!("Could not wait for Git: {e}"))?;
+    let stderr=stderr_reader.join().unwrap_or_default();
+    if let Some(error)=read_error{return Err(format!("Could not read Git output: {error}"));}
+    if !status.success(){
+        let message=String::from_utf8_lossy(&stderr).trim().to_string();
+        return Err(if message.is_empty(){format!("git failed: {status}")}else{message});
+    }
+    Ok((entries,total))
+}
+pub fn ignored_files(path:&str,scope:Option<&str>,offset:usize,limit:usize)->Result<Value,String>{
+    let p=root(path)?;
+    if offset>MAX_IGNORED_OFFSET{return Err("Ignored path offset exceeds supported limit".into());}
+    let limit=limit.clamp(1,MAX_IGNORED_PAGE);
+    let status_rows=scope.is_none();
+    let args=if let Some(scope)=scope{
+        let clean=scope.trim_end_matches(['/', '\\']).replace('\\',"/");
+        valid_file_path(&clean)?;
+        if clean==".git"||clean.starts_with(".git/"){return Err("Git metadata cannot be expanded as ignored content".into());}
+        let candidate=p.join(&clean);
+        let metadata=std::fs::symlink_metadata(&candidate).map_err(|_|"Ignored directory is unavailable")?;
+        if metadata.file_type().is_symlink()||!metadata.is_dir(){return Err("Ignored scope must be a repository directory".into());}
+        let canonical_root=p.canonicalize().map_err(|e|e.to_string())?;
+        let canonical_candidate=candidate.canonicalize().map_err(|e|e.to_string())?;
+        if !canonical_candidate.starts_with(&canonical_root){return Err("Ignored scope escapes the repository".into());}
+        vec!["ls-files".into(),"--others".into(),"--ignored".into(),"--exclude-standard".into(),"--full-name".into(),"-z".into(),"--".into(),clean]
+    }else{
+        // Git collapses fully ignored folders to one porcelain !! row here.
+        // Expanding one is a separate user action, so large ignored trees are not
+        // recursively returned as soon as the list is revealed.
+        vec!["status".into(),"--porcelain=v1".into(),"-z".into(),"--ignored".into(),"--untracked-files=normal".into()]
+    };
+    let (entries,total)=ignored_paths_page(&p,&args,offset,limit,status_rows)?;
+    let has_more=offset.saturating_add(entries.len())<total;
+    Ok(json!({"entries":entries,"total":total,"offset":offset,"limit":limit,"has_more":has_more,"scope":scope}))
 }
 fn refs(p:&Path)->Vec<Value>{
     let s=git(p,&["for-each-ref","--sort=-committerdate","--format=%(refname)%09%(refname:short)%09%(objectname:short)%09%(HEAD)","refs/heads","refs/remotes","refs/tags"]).unwrap_or_default();

@@ -22,11 +22,12 @@ fn main(){
    return;
  }
  let run=||->Result<Value,String>{
-   if input.len()<3{return Err("arclane-cli <inspect|history|diff|action> <repo> [JSON]".into());}
+   if input.len()<3{return Err("arclane-cli <inspect|ignored|history|diff|action> <repo> [JSON]".into());}
    let opts:Value=if input.len()>3{serde_json::from_str(&input[3]).map_err(|e|e.to_string())?}else{json!({})};
    let field=|k:&str|opts.get(k).and_then(|x|x.as_str());
    match input[1].as_str(){
     "inspect"=>git::inspect(&input[2]),
+    "ignored"=>git::ignored_files(&input[2],field("scope"),opts["offset"].as_u64().unwrap_or(0) as usize,opts["limit"].as_u64().unwrap_or(100) as usize),
     "workspace"=>serde_json::to_value(workspace::load()?).map_err(|e|e.to_string()),
     "save_workspace"=>serde_json::to_value(workspace::save(serde_json::from_value(opts).map_err(|e|e.to_string())?)?).map_err(|e|e.to_string()),
     "rebase_preview"=>rebase_workflows::preview(&git::root(&input[2])?,field("base").ok_or("Missing base")?),

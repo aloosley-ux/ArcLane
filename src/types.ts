@@ -1,4 +1,6 @@
 export type ChangedFile={path:string;original?:string;x:string;y:string;staged:boolean;unstaged:boolean;untracked:boolean;conflict:boolean};
+export type IgnoredEntry={path:string;directory:boolean};
+export type IgnoredPage={entries:IgnoredEntry[];total:number;offset:number;limit:number;has_more:boolean;scope:string|null};
 export type Ref={full:string;name:string;sha:string;current:boolean;kind:"local"|"remote"|"tag"};
 export type Worktree={path:string;branch:string;head:string;main:boolean;locked:boolean};
 export type Stash={id:string;title:string};

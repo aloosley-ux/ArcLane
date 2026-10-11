@@ -5,8 +5,7 @@ const arclane=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,"
 const testbed="C:\\AI\\REA\\Experiments\\Forge-Testbed";
 const exe=path.join(arclane,"Build","Arclane.exe");
 const repo=fs.mkdtempSync(path.join(testbed,"arclane-native-ui-"));
-const profile=path.join(arclane,"artifacts","native-ui-profile");
-fs.mkdirSync(profile,{recursive:true});
+const profile=fs.mkdtempSync(path.join(arclane,"artifacts","native-ui-profile-"));
 const git=(...args)=>execFileSync("git",["-C",repo,...args],{encoding:"utf8"});
 git("init","-b","main");
 git("config","user.name","Arclane GUI Test");
@@ -20,9 +19,10 @@ fs.writeFileSync(path.join(profile,"repos.json"),JSON.stringify([repo]));
 const port=9357;
 let child=null,browser=null;
 const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+const scrollToLine=(container,lineIndex)=>container.evaluate((node,index)=>{node.scrollTop=Math.max(0,index*23-node.clientHeight/2);},lineIndex);
 const result={repo,tests:[],errors:[],mode:"native WebView2 CDP"};
 try{
- child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore",windowsHide:false});
+ child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,"webview2"),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore",windowsHide:false});
  let responsive=false;
  for(let n=0;n<90;n++){
   await wait(220);
@@ -55,14 +55,14 @@ try{
  if(await page.locator(".comparison-titles").innerText().then(s=>!s.includes("Staging area")||!s.includes("Working tree")))throw Error("Real index/worktree side-by-side titles not present");
  const nearStart=await page.locator(".comparison-row.changed").allTextContents();
  if(!nearStart.join(" ").includes("MODIFIED 005"))throw Error("First changed line missing from paired file comparison");
- await page.locator(".right-diff .comparison-body").evaluate(node=>{node.scrollTop=65*23;node.dispatchEvent(new Event("scroll",{bubbles:true}));});
+ await scrollToLine(page.locator(".right-diff .comparison-body"),69);
  await page.locator(".right-diff .comparison-row.changed").filter({hasText:"MODIFIED 070"}).first().waitFor({timeout:8000});
  result.tests.push("side-by-side virtualisation shows both changed lines by scrolling");
  await page.getByRole("button",{name:"Expand diff"}).click();
  const expanded=page.getByRole("dialog",{name:"Side-by-side comparison segments.txt"});
  await expanded.waitFor({timeout:8000});
  await expanded.locator(".comparison-row.changed").filter({hasText:"MODIFIED 005"}).first().waitFor({timeout:8000});
- await expanded.locator(".comparison-body").evaluate(node=>{node.scrollTop=65*23;node.dispatchEvent(new Event("scroll",{bubbles:true}));});
+ await scrollToLine(expanded.locator(".comparison-body"),69);
  await expanded.locator(".comparison-row.changed").filter({hasText:"MODIFIED 070"}).first().waitFor({timeout:8000});
  await expanded.getByRole("button",{name:"Close expanded diff"}).click();
  result.tests.push("large side-by-side modal navigates complete file");

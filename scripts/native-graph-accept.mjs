@@ -2,14 +2,14 @@ import fs from "node:fs";import path from "node:path";import{spawn,execFileSync}
 const base=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,".."));
 const repo="C:\\AI\\REA\\Experiments\\Forge-Testbed\\forge-history-pages-dhdxjlfk";
 const exe=path.join(base,"Build","Arclane.exe");
-const profile=path.join(base,"artifacts","history-native-profile");
+const profile=fs.mkdtempSync(path.join(base,"artifacts","history-native-profile-"));
 if(!fs.existsSync(repo))throw Error("811-commit fixture missing");
 fs.mkdirSync(profile,{recursive:true});fs.writeFileSync(path.join(profile,"repos.json"),JSON.stringify([repo]));
 const port=9358;
 let child,browser;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const evidence={repo,tests:[],issues:[]};
 try{
- child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
+ child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,"webview2"),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
  let ready=false;
  for(let i=0;i<80;i++){await sleep(200);try{if((await fetch("http://127.0.0.1:"+port+"/json/version",{signal:AbortSignal.timeout(350)})).ok){ready=true;break}}catch{}}
  if(!ready)throw Error("WebView2 CDP unavailable");

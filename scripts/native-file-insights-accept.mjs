@@ -4,7 +4,7 @@ import {spawn,execFileSync} from "node:child_process";
 import {chromium} from "playwright";
 const base=(process.env.ARCLANE_TEST_ROOT||path.resolve(import.meta.dirname,".."));
 const repo=fs.mkdtempSync("C:\\AI\\REA\\Experiments\\Forge-Testbed\\arclane-blame-native-");
-const profile=path.join(base,"artifacts","blame-ui-profile");
+const profile=fs.mkdtempSync(path.join(base,"artifacts","blame-ui-profile-"));
 const exe=path.join(base,"Build","Arclane.exe");
 const git=(...a)=>execFileSync("git",["-C",repo,...a],{encoding:"utf8"}).trim();
 const file="contributor notes.txt";
@@ -23,7 +23,7 @@ fs.mkdirSync(profile,{recursive:true});fs.writeFileSync(path.join(profile,"repos
 const out={repo,checks:[],errors:[]};const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let child,browser;const port=9376;
 try{
- child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
+ child=spawn(exe,[],{cwd:path.dirname(exe),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,"webview2"),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
  for(let n=0;n<95;n++){try{if((await fetch("http://127.0.0.1:"+port+"/json/version",{signal:AbortSignal.timeout(250)})).ok)break;}catch{}await sleep(140);}
  browser=await chromium.connectOverCDP("http://127.0.0.1:"+port);
  let page;for(let n=0;n<60;n++){page=browser.contexts().flatMap(c=>c.pages()).find(x=>x.url().startsWith("http://tauri.localhost"));if(page)break;await sleep(140);}

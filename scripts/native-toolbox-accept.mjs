@@ -12,7 +12,7 @@ git("init","-q","-b","main");git("config","user.name","Arclane UI Test");git("co
 fs.writeFileSync(path.join(repo,"test.txt"),"original\n","utf8");git("add","--all");git("commit","-m","initial");
 git("branch","develop");git("init","--bare",bare);
 const baseline=git("rev-parse","HEAD");
-const profile=path.join(base,"artifacts","native-toolbox-profile");
+const profile=fs.mkdtempSync(path.join(base,"artifacts","native-toolbox-profile-"));
 fs.mkdirSync(profile,{recursive:true});fs.writeFileSync(path.join(profile,"repos.json"),JSON.stringify([repo]));
 const tests=[];const errors=[];let child,browser;const port=9359;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -24,7 +24,7 @@ async function command(page,modalTitle,phrase){
  await dialog.waitFor({state:"hidden",timeout:12000});
 }
 try{
- child=spawn(path.join(base,"Build","Arclane.exe"),[],{cwd:path.join(base,"Build"),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
+ child=spawn(path.join(base,"Build","Arclane.exe"),[],{cwd:path.join(base,"Build"),env:{...process.env,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,"webview2"),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:"--remote-debugging-port="+port+" --remote-debugging-address=127.0.0.1"},stdio:"ignore"});
  let listening=false;for(let i=0;i<100;i++){try{if((await fetch("http://127.0.0.1:"+port+"/json/version",{signal:AbortSignal.timeout(400)})).ok){listening=true;break;}}catch{}await wait(200);}
  if(!listening)throw Error("WebView2 debug endpoint absent");
  browser=await chromium.connectOverCDP("http://127.0.0.1:"+port);
