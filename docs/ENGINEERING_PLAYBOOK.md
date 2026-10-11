@@ -17,22 +17,16 @@
 
 ## Recorded evidence and lessons
 
-These are observations from Run 2/3 handoffs and Run 4's reported progress, **not a declaration that Run 4 is complete**. "Reported" means an agent stated the finding; retain the relevant fixtures/native logs before claiming independent verification.
+These are short evidence-backed lessons, not instructions to replay previous sprints. Look up the detailed incident only when a new task reaches the same boundary.
 
-| Run / observation | What happened | Lesson or prevention | Evidence status |
-| --- | --- | --- | --- |
-| Run 2 worktrees | #003, #032 and #062 gained accepted native workflows with linked worktree identity and lifecycle controls. | Reuse canonical Git checkout/common-directory identity; do not invent separate lists or storage semantics for each screen. | Accepted Run 2 handoff; cross-check current ledger. |
-| Run 3 file review | #036 text diff and #037 media review accepted; #049 discard/undo remains **PARTIAL** because interrupted/prepared recovery and external Git/editor races are not closed. | Narrow, honest acceptance with real HEAD/index/ref/byte invariants beats a misleading 100% claim. | Final Run 3 handoff, 23 backend and 20 native suites. |
-| Run 3 UI/capture | CSS specificity, tiny Worktrees text and malformed characters needed correction; apparent black native-window gap **did not reproduce** in the measured 96-DPI WebView2/Win32 bounds test. | Check actual packaged pixels and native measurements; don't turn screenshots into unproven root causes. | Focused package evidence and 3 Win32 bounds checks. |
-| Run 4 initial create | A new linked checkout was placed inside the existing repository rather than alongside it. | Specify destination ownership/path rules and verify exact independent Git structure before UI integration. | Packaged fixture exposed; fix reported. |
-| Run 4 failed launch | Saving a valid executable cleared the Retry action; a refresh then selected the primary checkout on retry, causing an agent to launch with the **wrong cwd**. | The session/retry target must retain an immutable, validated checkout path independent of selected UI tab or refreshed worktree list. | Packaged tests later reported exact linked cwd; full acceptance pending. |
-| Run 4 test fixture | Windows PTY Enter produced trailing carriage return in the helper's command text. | Use realistic Windows line discipline in harmless test helpers without changing correct product behavior. | Fixture correction reported; verify exact test result. |
-| Run 4 fast startup | Terminal output arrived before `TerminalDock` could subscribe/attach, leaving an intermittently blank terminal. | Output must be buffered by the authoritative native session, with bounded replay for late consumers; mounting a listener earlier alone is not a durable guarantee. | Root cause identified; architectural correction underway. |
-| Run 4 fast exit | Child process really exited with code 7, but the UI could miss its exit event before React recorded its session ID. | Record exit independently in native lifecycle state and allow snapshot reconciliation. A single event cannot be the only truth. | Agent reported dedicated wait/snapshot redesign in progress; not accepted. |
-| Run 4 process tree | Rust ConPTY sessions gained Windows Job Object containment during implementation. | Child cleanup, PID, failure visibility and app shutdown are native lifecycle responsibilities; verify they work for child processes too. | Implementation reported; full clean-exit/orphan checks pending. |
-| Run 4 delivery | Multiple expensive package/rebuild cycles uncovered successive bugs along the same session boundary. | After repeated connected lifecycle failures, stop local patching and review ownership, ordering, and recovery assumptions as a system. | Architectural stop was requested and observed. |
+| Run | Verified outcome | Carry-forward rule |
+| --- | --- | --- |
+| Run 2 | #003, #032, #062 accepted. | Git common-dir identity is shared; each checkout has its own HEAD, index and working state. |
+| Run 3 | #036/#037 accepted; #049 **PARTIAL** due to incomplete interrupted recovery and external-write races. | Native success on a narrow path does not justify broader acceptance. |
+| Run 4 | #082/#083/#084 accepted; 4 Rust lifecycle tests, 4 frontend sync groups, 24/24 backend and 22/22 packaged native. | Backend owns immutable agent/process state and bounded replay; UI mounts and normal terminals must never redefine identity. |
+| Run 4 regressions | Four history suites failed from hidden mounted route matching broad CSS `:has()`; two provenance suites relied on missing Run 3-local JSON. All six retested green. | Scope global CSS selectors by **visible route**; each isolated run verifies its own executable hash and inherited UI. |
 
-**Current Run 4 checkpoint when this document was written:** reducer synchronization tests reported passing, UI type-check reported passing; Rust tests launching real ConPTY helpers were being rerun after a Windows API import fix. Full authoritative-state tests, fresh native acceptance, full regressions, #082/#083/#084 disposition, commit and push remain **unverified here**. Update after the actual handoff.
+Run 4 final commit: `305c30411b87fb98c2c20478e3f6aaae5e62c57a`. One RTK stderr-stream parser diagnostic was non-fatal (native runner exit 0); evidence is in [Run 4 packet](RUN4_LUNA_HIGH_AGENT_WORKSPACES_2026-10-11.md).
 
 ## Architecture contract for stateful/native workflows
 
@@ -132,12 +126,12 @@ After **every completed run** or material architectural incident, append a dated
 - **Evidence:** The recorded Run 4 tool matrix and the verified local 12.5 research, 12.6 extraction manifest and agent/worktree/terminal feature labels.
 - **Reuse:** Every new run cites the actual research evidence and distinguishes supported behaviour from unconfirmed candidate features.
 
-### 2026-10-11 - Run 4 ownership reset
-- **Observed:** multiple native-test failures across destination, retry, checkout selection, early PTY output and exit notification.
-- **Root cause:** verified individual races; broader cross-layer session authority failure identified as a design defect. Do not claim every aspect is fixed yet.
-- **Change/decision:** stop package loop; Rust authoritative sequenced/bounded state and independent child wait path proposed; React snapshot/event reconciliation being implemented.
-- **Evidence:** `docs/RUN4_LUNA_HIGH_AGENT_WORKSPACES_2026-10-11.md` and pending final native/run regression logs. Pending completion must remain explicit.
-- **Reuse:** define source of truth, transition matrix and process/PTY tests before starting cross-component UI changes.
+### 2026-10-11 - Run 4 lifecycle and regressions (final)
+- **Observed:** checkout-selection retry launched in the wrong directory; early output and exit events were lost; ordinary terminal sessions could masquerade as agent sessions in the same checkout. Four unrelated history suites subsequently failed and two provenance suites could not find a Run 3-specific JSON in the isolated Run 4 checkout.
+- **Root causes:** worktree path was incorrectly used as process identity; React events outran UI subscriptions; hidden mounted Agent Sessions matched a broad CSS `:has(.agent-sessions-page)` selector; provenance checks were coupled to another checkout's ignored local file.
+- **Change/decision:** Rust `TerminalManager` owns immutable ID, purpose, CWD, PID, exit state and bounded 64 KiB output; backend process wait and revisioned snapshots permit late terminal attach and UI remount. Agent/normal-terminal sessions remain independent. Scope the CSS selector to the **visible** route and add packaged regression coverage. Package provenance is local to each isolated checkout and retains an exact EXE hash check.
+- **Evidence:** [Run 4 packet](RUN4_LUNA_HIGH_AGENT_WORKSPACES_2026-10-11.md); 4 Rust lifecycle, 4 frontend sync, 24/24 backend and 22/22 native regression groups; accepted 082/083/084; final pushed commit `305c30411b87fb98c2c20478e3f6aaae5e62c57a`; packaged EXE SHA256 `6C0C4FF84E87F468BDC199EB07FF819716BED25B91A4F6BBF0AD98AA6E2255A5`.
+- **Reuse:** native state is authoritative, route visibility differs from DOM mounting, and provenance is verified per checkout/build. Diagnose shared suite failures by common root, not weakened selectors or copied local artifacts.
 
 ### 2026-10-11 - Run 3 acceptance integrity
 - **Observed:** #036/#037 accepted; #049 still partial, despite passing discard/undo paths. Native window-size report wasn't reproduced at 96 DPI.
@@ -150,9 +144,9 @@ After **every completed run** or material architectural incident, append a dated
 
 - [REA evidence index](REA_EVIDENCE_INDEX.md) — PRIMARY product reference sources, local report locations and required evidence-to-requirement review.
 - [Development rules](../AGENTS.md) — authoritative Git/safety/native/Penpot policy.
-- [Feature coverage](FEATURE_COVERAGE.md) — authoritative 104-row per-ID disposition. **Use rows, not the potentially stale summary paragraph:** Run 3 row-by-row inspection found 30 accepted, 45 partial, 1 backend-only and 28 unverified, while an older summary still said 26 accepted. Recalculate after every run.
+- [Feature coverage](FEATURE_COVERAGE.md) — authoritative 104-row per-ID disposition. **Use current rows, not cached totals or old roadmap counts.** Run 4 accepted #082/#083/#084; recompute current counts from the ledger whenever needed, rather than repeating Run 3 numbers.
 - [Development programme](DEVELOPMENT_PROGRAM_2026-10-11.md) — backlog and dependency map, **not proof that remaining work is complete**.
 - [Run 3 final handoff](RUN3_HANDOFF_2026-10-11.md) — exact accepted results and #049 gap.
-- [Run 4 execution packet](RUN4_LUNA_HIGH_AGENT_WORKSPACES_2026-10-11.md) — requirements, tools, current execution evidence; initial plan was too procedural and under-specified lifecycle authority.
+- [Run 4 execution packet](RUN4_LUNA_HIGH_AGENT_WORKSPACES_2026-10-11.md) — completed 082–084, 24 backend/22 packaged-native suites and final package provenance; initial plan was too procedural and under-specified lifecycle authority.
 
 *Editorial rule: update this playbook only when a lesson produces a different engineering decision or test. Keep it shorter and more useful over time, not longer by default.*
