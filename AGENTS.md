@@ -8,6 +8,8 @@ Start with: `README.md`, `docs/FEATURE_COVERAGE.md`, `docs/FEATURE_SPRINT_2026-1
 
 **Active delivery plan:** `docs/DEVELOPMENT_PROGRAM_2026-10-11.md` maps every one of the 80 unaccepted scope IDs exactly once, sets batch dependencies, proper REA/ReAgent/Penpot/Model Testing roles, native gates and release criteria. For the isolated GPT-6 Luna (Maximum reasoning) test, read `docs/LUNA_MAX_PILOT_035.md` and work only in an independent topic checkout. Neither plan grants permission to modify `main`, invent UI styling, or treat mock provider writes as acceptance.
 
+**Engineering playbook (living):** Read [docs/ENGINEERING_PLAYBOOK.md](docs/ENGINEERING_PLAYBOOK.md) before drafting a new run or modifying a cross-component workflow. Define authoritative state, transitions and failure/retry behavior before UI implementation; update the playbook with evidence-backed lessons after major defects. It complements, rather than replaces, the safety and native gates below.
+
 ## Repo-first working model
 
 - `main` is the integrated, tested public baseline. Develop on a feature branch and preserve commit history.
