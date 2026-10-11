@@ -39,6 +39,16 @@ with tempfile.TemporaryDirectory(prefix="arclane-worktrees-") as tmp:
     assert git(repo,"write-tree")==tree
     print("PASS attach existing branch, exact branch HEAD/index/file and source preservation")
 
+    def inspect(checkout):
+        p=subprocess.run([CLI,"inspect",str(checkout)],text=True,capture_output=True,check=True)
+        return json.loads(p.stdout)["result"]
+    primary=inspect(repo)["worktrees"]
+    linked=inspect(branch_path)["worktrees"]
+    assert [pathlib.Path(w["path"]) for w in primary if w["main"]]==[repo],primary
+    assert [pathlib.Path(w["path"]) for w in linked if w["main"]]==[repo]
+    assert len({w["commonDir"] for w in linked})==1
+    print("PASS primary-worktree identity and shared Git common directory stay correct from linked checkout")
+
     duplicate=root/"duplicate"
     action(repo,"worktree_add_existing",duplicate,"feature/shared",ok=False)
     assert not duplicate.exists()
@@ -60,8 +70,8 @@ with tempfile.TemporaryDirectory(prefix="arclane-worktrees-") as tmp:
     action(repo,"worktree_remove",branch_path,ok=False)
     assert branch_path.exists()
     action(repo,"worktree_unlock",branch_path)
-    action(repo,"worktree_remove",branch_path)
-    action(repo,"worktree_remove",detached)
+    action(branch_path,"worktree_remove",branch_path)
+    action(detached,"worktree_remove",detached)
     action(repo,"worktree_prune")
     assert git(repo,"rev-parse","refs/heads/feature/shared")==start
     assert git(repo,"write-tree")==tree

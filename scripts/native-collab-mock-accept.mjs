@@ -30,6 +30,7 @@ try{
  let page;for(let i=0;i<70;i++){page=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().startsWith("http://tauri.localhost"));if(page)break;await wait(140);}
  if(!page)throw Error("Production Arclane interface not found");
  page.on("pageerror",e=>errors.push(String(e)));
+ await page.locator(".commit-row").filter({hasText:"mock data fixture"}).waitFor({timeout:15000});
  await page.getByRole("button",{name:"Pull requests and CI"}).first().click();
  await page.locator(".collab-item").first().waitFor({timeout:15000});
  if(await page.locator(".collab-item").count()!==4)throw Error("Expected four mocked GitHub pull requests");

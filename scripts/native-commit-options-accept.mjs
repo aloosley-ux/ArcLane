@@ -4,7 +4,7 @@ write('notes[1].txt','original\n');git('add','.');git('commit','-qm','Original s
 const head=git('rev-parse','HEAD'),tree=git('rev-parse','HEAD^{tree}');git('update-ref','refs/remotes/origin/main',head);
 const session=await launch(repo,'native-commit-options',9391),{page}=session,checks=[];
 try{
- await page.getByRole('button',{name:'Amend, author & co-authors…'}).click();
+ await page.getByRole('button',{name:/Amend, author & co-authors/}).click();
  let dialog=page.getByRole('dialog',{name:'Commit options'});
  await dialog.getByLabel(/Amend previous commit/).check();
  await expect(dialog.getByLabel('Commit message',{exact:true})).toHaveValue('Original summary\n\nOriginal body');
@@ -17,14 +17,14 @@ try{
  checks.push('Message-only amend changes hash and retains tree and remote ref');
  write('notes[1].txt','staged content\n');git('add','--','notes[1].txt');write('notes[1].txt','unstaged content\n');
  await page.getByRole('button',{name:'Refresh history',exact:true}).click();await expect(page.getByRole('button',{name:'Unstage notes[1].txt',exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Amend, author & co-authors…'}).click();dialog=page.getByRole('dialog',{name:'Commit options'});
+ await page.getByRole('button',{name:/Amend, author & co-authors/}).click();dialog=page.getByRole('dialog',{name:'Commit options'});
  await dialog.getByLabel('Commit message',{exact:true}).fill('Custom author\n\nDetailed explanation');await dialog.getByLabel('Override author for this commit').check();
  await dialog.getByLabel('Author name',{exact:true}).fill('Ada Lovelace');await dialog.getByLabel('Author email',{exact:true}).fill('ada@invalid.local');
  await dialog.getByLabel('Co-authors (one Name <email> per line)',{exact:true}).fill('Grace Hopper <grace@invalid.local>');
  await dialog.getByRole('button',{name:'Commit staged changes',exact:true}).click();await expect(dialog).toHaveCount(0);await expect(page.locator('.commit-row').first()).toContainText('Custom author');
  if(git('show','HEAD:notes[1].txt')!=='staged content'||git('show','-s','--format=%an <%ae>')!=='Ada Lovelace <ada@invalid.local>'||!git('show','-s','--format=%B').includes('Co-authored-by: Grace Hopper <grace@invalid.local>'))throw Error('Authored commit incorrect');
  checks.push('Native author, body, coauthor and staged-only contents independently verified');
- await page.getByRole('button',{name:'Amend, author & co-authors…'}).click();dialog=page.getByRole('dialog',{name:'Commit options'});
+ await page.getByRole('button',{name:/Amend, author & co-authors/}).click();dialog=page.getByRole('dialog',{name:'Commit options'});
  await dialog.getByLabel(/Amend previous commit/).check();await dialog.getByLabel('I understand this rewrites history').check();
  git('commit','--allow-empty','-qm','Concurrent commit');const concurrent=git('rev-parse','HEAD');
  await dialog.getByRole('button',{name:'Amend commit',exact:true}).click();await expect(page.locator('.error-toast')).toContainText('HEAD changed');

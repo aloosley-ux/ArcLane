@@ -31,8 +31,9 @@ try{
  let page;for(let i=0;i<70;i++){page=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().startsWith("http://tauri.localhost"));if(page)break;await wait(150);}
  if(!page)throw Error("Production WebView2 page absent");
  page.on("pageerror",e=>errors.push(String(e)));
- await page.getByRole("button",{name:"Repository tools"}).first().click();
- await page.locator(".rtools").waitFor({timeout:14000});
+ await page.locator(".commit-row").filter({hasText:"initial"}).waitFor({timeout:14000});
+ await page.locator('.workspace-tabs button[aria-label="Repository tools"]').click();
+ try{await page.locator(".rtools").waitFor({timeout:14000});}catch(error){console.error("TOOLBOX_ROUTE_DIAGNOSTIC",await page.locator("body").innerText().catch(()=>"(no document body)"),await page.locator(".workspace-tabs button[aria-current=page]").allTextContents());throw error;}
  await page.locator(".rtools-none").first().waitFor({timeout:14000});
  tests.push("native window mounts on-demand Repository Tools workspace");
  await page.getByRole("textbox",{name:"Remote name"}).fill("origin");

@@ -22,9 +22,11 @@ const linkedPath=path.join(linked,'linked-work');
 git('worktree','add','-q',linkedPath,'feature/work');
 const before=git('write-tree'),tracked=fs.readFileSync(path.join(repo,'history.txt'),'utf8');
 const session=await launch(repo,'partial-tracking-worktree',9486),{page}=session,checks=[];
+const branchName='feature/from-ui-'+Date.now();
+const newPath=path.join(path.dirname(repo),'arclane-'+branchName.replaceAll('/','-'));
 try{
- await expect(page.locator('.identity-tracking .ahead')).toContainText('↑ 1');
- await expect(page.locator('.identity-tracking .behind')).toContainText('↓ 1');
+ await expect(page.locator('.identity-tracking .ahead')).toHaveText(/1$/);
+ await expect(page.locator('.identity-tracking .behind')).toHaveText(/1$/);
  checks.push('018 packaged tracking shows exact independent left/right rev-list counts (1 ahead, 1 behind)');
  await page.locator('.workspace-tabs').getByRole('button',{name:'Worktrees',exact:true}).click();
  const cards=page.locator('.worktree-grid .worktree-card');
@@ -34,12 +36,11 @@ try{
  checks.push('032 native worktree list shows main/linked checkout, exact branch and disk path');
  await page.locator('.new-worktree-card').filter({hasText:'Create a worktree'}).click();
  const dialog=page.getByRole('dialog',{name:'New worktree'});
- await dialog.getByRole('textbox').fill('feature/from-ui');
+ await dialog.getByRole('textbox').fill(branchName);
  await dialog.getByRole('button',{name:'Create worktree'}).click();
  await expect(page.locator('.worktree-card')).toHaveCount(3,{timeout:16000});
- const newPath=path.join(path.dirname(repo),'arclane-feature-from-ui');
  if(!fs.existsSync(path.join(newPath,'.git')))throw Error('App-created linked worktree did not exist on disk: '+newPath);
- if(git('rev-parse','refs/heads/feature/from-ui')!==own)throw Error('Worktree branch ref mismatch');
+ if(git('rev-parse','refs/heads/'+branchName)!==own)throw Error('Worktree branch ref mismatch');
  const listed=git('worktree','list','--porcelain');
  if(!listed.replaceAll('\\','/').toLowerCase().includes(newPath.replaceAll('\\','/').toLowerCase()))throw Error('New worktree absent from git worktree list');
  checks.push('032 create linked worktree through native UI; validate new directory, branch ref and Git worktree registry');
@@ -47,4 +48,4 @@ try{
  checks.push('Original checkout preserved exact HEAD, index and file bytes');
  await evidence(session,'native-existing-tracking-worktree-audit',checks,repo);
 }catch(e){await evidence(session,'native-existing-tracking-worktree-audit-failure',checks,repo).catch(()=>{});throw e}
-finally{await session.close();}
+finally{await session.close();if(fs.existsSync(newPath))git('worktree','remove',newPath);}

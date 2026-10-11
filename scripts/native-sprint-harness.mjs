@@ -18,7 +18,14 @@ export async function launch(repo,name,port,environment={},existingProfile=null)
  const child=spawn(path.join(base,'Build','Arclane.exe'),[],{cwd:base,env:{...process.env,...environment,ARCLANE_DATA_DIR:profile,WEBVIEW2_USER_DATA_FOLDER:path.join(profile,'webview2'),WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`},stdio:'ignore'});
  fs.writeFileSync(path.join(profile,'launch.json'),JSON.stringify({pid:child.pid,port,repo}));
  let browser,page;const errors=[];
- const close=async()=>{await browser?.close().catch(()=>{});if(child.exitCode===null)try{execFileSync('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore'})}catch{}};
+ const close=async()=>{
+  await browser?.close().catch(()=>{});
+  if(child.exitCode===null){
+   try{execFileSync('powershell',['-NoProfile','-Command',`try{(Get-Process -Id ${child.pid} -ErrorAction Stop).CloseMainWindow()|Out-Null}catch{}`],{stdio:'ignore'})}catch{}
+   for(let i=0;i<100&&child.exitCode===null;i++)await wait(100);
+   if(child.exitCode===null)throw Error(`Packaged ArcLane process ${child.pid} did not close gracefully`);
+  }
+ };
  try{
   let ready=false;for(let i=0;i<100;i++){try{if((await fetch(`http://127.0.0.1:${port}/json/version`,{signal:AbortSignal.timeout(300)})).ok){ready=true;break}}catch{}if(child.exitCode!==null)break;await wait(150)}
   if(!ready)throw Error('Packaged WebView2 debugger unavailable');

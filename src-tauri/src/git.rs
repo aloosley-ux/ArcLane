@@ -107,6 +107,13 @@ fn git(p:&Path,args:&[&str])->Result<String,String>{
     aa.extend(a(&["-c","core.quotepath=false"]));aa.extend(a(args));
     spawn("git",&aa,None)
 }
+/// Canonical identity shared by the primary checkout and all linked worktrees.
+pub fn common_dir(p:&Path)->Result<PathBuf,String>{
+    let value=git(p,&["rev-parse","--git-common-dir"])?;
+    let candidate=PathBuf::from(value);
+    let absolute=if candidate.is_absolute(){candidate}else{p.join(candidate)};
+    absolute.canonicalize().map_err(|e|format!("Cannot identify shared Git directory: {e}"))
+}
 fn git_owned(p:&Path,args:Vec<String>)->Result<String,String>{
     let mut aa=a(&["-C"]); aa.push(p.to_string_lossy().into_owned());
     aa.extend(a(&["-c","core.quotepath=false"]));aa.extend(args);
@@ -224,15 +231,27 @@ fn refs(p:&Path)->Vec<Value>{
     }).collect()
 }
 fn worktrees(p:&Path)->Vec<Value>{
-    let out=git(p,&["worktree","list","--porcelain"]).unwrap_or_default();
-    out.split("\n\n").filter_map(|section|{
+    let out=git(p,&["worktree","list","--porcelain"]).unwrap_or_default().replace("\r\n","\n");
+    let sections:Vec<_>=out.split("\n\n").filter(|section|section.lines().any(|line|line.starts_with("worktree "))).collect();
+    let primary=sections.first().and_then(|section|section.lines().find_map(|line|line.strip_prefix("worktree "))).unwrap_or("");
+    sections.into_iter().filter_map(|section|{
         let mut path="";let mut branch="";let mut head="";let mut locked=false;
         for line in section.lines(){if let Some(s)=line.strip_prefix("worktree "){path=s;}
             if let Some(s)=line.strip_prefix("branch refs/heads/"){branch=s;}
             if let Some(s)=line.strip_prefix("HEAD "){head=s;}
             if line.starts_with("locked"){locked=true;}
         }
-        if path.is_empty(){None}else{Some(json!({"path":path,"branch":branch,"head":head,"locked":locked,"main":Path::new(path)==p}))}
+        if path.is_empty(){None}else{
+            let main=Path::new(path).canonicalize().ok().zip(Path::new(primary).canonicalize().ok()).is_some_and(|(a,b)|a==b);
+            let status=Path::new(path).canonicalize().ok().and_then(|checkout|parse_status(&checkout).ok()).map(|(files,_)|{
+                let staged=files.iter().filter(|f|f["staged"]==true).count();
+                let modified=files.iter().filter(|f|f["unstaged"]==true).count();
+                let untracked=files.iter().filter(|f|f["untracked"]==true).count();
+                let conflicts=files.iter().filter(|f|f["conflict"]==true).count();
+                json!({"staged":staged,"modified":modified,"untracked":untracked,"conflicts":conflicts,"total":files.len()})
+            });
+            Some(json!({"path":path,"branch":branch,"head":head,"locked":locked,"main":main,"commonDir":common_dir(p).ok().map(|v|v.to_string_lossy().replace('\\',"/")),"status":status}))
+        }
     }).collect()
 }
 pub fn inspect(path:&str)->Result<Value,String>{

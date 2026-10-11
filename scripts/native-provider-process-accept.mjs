@@ -8,6 +8,7 @@ const noChildren=async()=>{await wait(150);for(const pid of pids()){if(!Number.i
 const delayed=()=>{fs.writeFileSync(path.join(data,'delay-ms'),'60000');fs.writeFileSync(path.join(data,'spawn-child'),'1')};
 const clear=()=>{for(const name of ['delay-ms','spawn-child','error.txt'])if(fs.existsSync(path.join(data,name)))fs.unlinkSync(path.join(data,name))};
 try{
+ await page.locator(".commit-row").filter({hasText:"Provider fixture"}).waitFor({timeout:15000});
  await page.getByRole('button',{name:'Pull requests and CI',exact:true}).click();await expect(page.locator('.collab-item')).toHaveCount(4);
  await page.locator('.collab-item').filter({hasText:'Payment integration'}).click();await expect(page.locator('.collab-file')).toContainText(['src/payments.ts']);
  await page.getByRole('button',{name:'Inspect PR diff',exact:true}).click();let d=page.getByRole('dialog',{name:'Pull request diff'});await expect(d.getByRole('region',{name:'Pull request patch'})).toContainText('retries = 3');await d.getByRole('textbox',{name:'Find in patch'}).fill('retries');await d.getByRole('button',{name:'Next patch match'}).click();await expect(d.locator('.diff-search-hit')).toHaveCount(2);checks.push('Native PR patch and search execute offline gh pr diff contract');await d.getByRole('button',{name:'Close provider details'}).click();

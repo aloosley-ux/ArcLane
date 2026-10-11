@@ -58,15 +58,23 @@
     let selection=PathBuf::from(target);
     if !selection.is_absolute(){return Err("Worktree path must be absolute".into());}
     let normalized=selection.canonicalize().map_err(|_|"Worktree folder does not exist".to_string())?;
-    let main=path.canonicalize().map_err(|e|e.to_string())?;
+    let registered=git(path,&args(&["worktree","list","--porcelain"]))?.replace("\r\n","\n");
+    let main=registered.lines().find_map(|line|line.strip_prefix("worktree "))
+        .and_then(|p|PathBuf::from(p).canonicalize().ok())
+        .ok_or_else(||"Cannot identify the primary worktree".to_string())?;
     if normalized==main{return Err("Refusing to modify the main worktree".into());}
-    let registered=git(path,&args(&["worktree","list","--porcelain"]))?;
     // Exact worktree path from 'git worktree list' rather than prefix or substring matching.
     let listed=registered.lines().filter_map(|line|line.strip_prefix("worktree "))
         .filter_map(|p|PathBuf::from(p).canonicalize().ok())
         .any(|p|p==normalized);
     if !listed{return Err("Folder is not a registered Git worktree".into());}
     Ok(normalized)
+ }
+ fn primary_worktree(path:&Path)->Result<PathBuf,String>{
+    let listed=git(path,&args(&["worktree","list","--porcelain"]))?.replace("\r\n","\n");
+    listed.lines().find_map(|line|line.strip_prefix("worktree "))
+        .map(PathBuf::from).filter(|p|p.is_dir())
+        .ok_or_else(||"Cannot identify the primary worktree".to_string())
  }
  fn repo_state_path(path:&Path,name:&str)->Result<PathBuf,String>{
     let s=git(path,&args(&["rev-parse","--git-path",name]))?;
@@ -81,6 +89,7 @@
  }
  pub fn execute(path:&Path,op:&str,file:&str,input:&str)->Result<Value,String>{
     let val=input.trim();
+    let mut execution_path=path.to_path_buf();
     let command:Vec<String>=match op{
        "branch_delete"=>{existing_branch(path,val)?;args(&["branch","-d",val])},
        "branch_from_commit"=>{valid_commit(path,file)?;valid_branch(val)?;git(path,&args(&["check-ref-format","--branch",val]))?;args(&["switch","-c",val,file])},
@@ -153,7 +162,7 @@
           let mut command=args(&["stash",action]);if op.ends_with("_index"){command.push("--index".into());}command.push(val.into());command
        },
        "stash_drop"=>{stash_selector(val)?;args(&["stash","drop",val])},
-       "worktree_remove"=>{let w=worktree(path,file)?;args(&["worktree","remove",w.to_string_lossy().as_ref()])},
+       "worktree_remove"=>{let w=worktree(path,file)?;execution_path=primary_worktree(path)?;args(&["worktree","remove",w.to_string_lossy().as_ref()])},
        "worktree_lock"=>{let w=worktree(path,file)?;args(&["worktree","lock",w.to_string_lossy().as_ref()])},
        "worktree_unlock"=>{let w=worktree(path,file)?;args(&["worktree","unlock",w.to_string_lossy().as_ref()])},
        "worktree_prune"=>args(&["worktree","prune"]),
@@ -175,7 +184,7 @@
        },
        _=>return Err("Unsupported advanced operation".into())
     };
-    let result=git(path,&command)?;
+    let result=git(&execution_path,&command)?;
     Ok(json!({"ok":true,"command":format!("git {}",command.join(" ")),"output":result}))
  }
  pub fn sequencer_status(path:&Path)->Value{

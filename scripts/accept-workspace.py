@@ -1,27 +1,35 @@
 """Persistent workspace settings; Git state is independently checked."""
 import json, subprocess, tempfile, pathlib, os
 base=pathlib.Path(__file__).resolve().parent.parent
-cli=r'C:\AI\REA\Experiments\Forge\src-tauri\target\release\arclane-cli.exe'
+cli=os.environ.get('ARCLANE_CLI')
+if not cli or not pathlib.Path(cli).is_file(): raise SystemExit('Set ARCLANE_CLI to the compiled arclane-cli.exe')
+(base/'artifacts').mkdir(exist_ok=True)
 profile=pathlib.Path(tempfile.mkdtemp(prefix='workspace-profile-',dir=base/'artifacts'))
 env=dict(os.environ,ARCLANE_DATA_DIR=str(profile))
 repos=[]
-def git(repo,*args): return subprocess.check_output(['git','-C',str(repo),*args],text=True).strip()
+def git(repo,*args): return subprocess.check_output(['git','-C',str(repo),*args],text=True,encoding='utf-8').strip()
 for i in range(3):
  r=pathlib.Path(tempfile.mkdtemp(prefix='arclane-tabs-',dir=r'C:\AI\REA\Experiments\Forge-Testbed'))
  git(r,'init','-q','-b','main');git(r,'config','user.name','Tabs');git(r,'config','user.email','tabs@invalid.local');git(r,'config','core.autocrlf','false')
  (r/'file[1].txt').write_bytes(b'original\n');git(r,'add','.');git(r,'commit','-qm','Tab fixture');repos.append(git(r,'rev-parse','--show-toplevel'))
+git(repos[0],'branch','feature/workspace-group')
+linked=pathlib.Path(tempfile.mkdtemp(prefix='linked workspace [東京] ',dir=profile))/'checkout [一]'
+git(repos[0],'worktree','add','-q',str(linked),'feature/workspace-group')
+repos.append(str(linked))
 def call(kind,value=None,ok=True):
  args=[cli,kind,repos[0]]+([] if value is None else [json.dumps(value)])
- p=subprocess.run(args,env=env,capture_output=True,text=True)
+ p=subprocess.run(args,env=env,capture_output=True,text=True,encoding='utf-8')
  assert (p.returncode==0)==ok,(p.stdout,p.stderr)
  result=json.loads(p.stdout if ok else p.stderr)
  return result['result'] if ok else result
 before=[(git(r,'rev-parse','HEAD'),git(r,'write-tree'),pathlib.Path(r,'file[1].txt').read_bytes()) for r in repos]
 (profile/'repos.json').write_text(json.dumps(repos+[repos[0]]),encoding='utf-8')
-state=call('workspace');assert len(state['tabs'])==3 and state['active']==repos[0]
+state=call('workspace');assert len(state['tabs'])==4 and state['active']==repos[0]
+assert state['tabs'][0]['commonDir']==state['tabs'][3]['commonDir']
 print('PASS migrate and deduplicate recent repositories')
-state={'tabs':[{'path':repos[2],'alias':'Third'},{'path':repos[0],'alias':'  Project A  '}],'active':repos[2],'closed':[{'path':repos[1],'alias':'Second'}]}
+state={'tabs':[{'path':repos[2],'alias':'Third'},{'path':repos[0],'alias':'  Project A  '},{'path':str(linked),'alias':'Linked'}],'active':repos[2],'closed':[{'path':repos[1],'alias':'Second'}]}
 saved=call('save_workspace',state);assert saved['tabs'][1]['alias']=='Project A' and call('workspace')==saved
+assert saved['tabs'][1]['commonDir']==saved['tabs'][2]['commonDir']
 saved['active']=repos[0];call('save_workspace',saved);assert call('workspace')==saved
 print('PASS aliases, order, active and closed tabs survive repeated atomic saves')
 prior=(profile/'workspace.json').read_bytes()
