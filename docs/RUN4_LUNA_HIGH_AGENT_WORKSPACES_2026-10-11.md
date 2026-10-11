@@ -1,6 +1,6 @@
 # ArcLane — Run 4 execution packet: Agent Workspaces (Luna High)
 
-**Status:** READY TO EXECUTE — planning and branch setup only; no Run 4 implementation or tests claimed.
+**Status:** COMPLETE — implementation accepted and pushed at `305c30411b87fb98c2c20478e3f6aaae5e62c57a` (082/083/084, full backend 24/24, packaged native 22/22). The later REA-first instructions merge is documentation-only and does not alter this executable's provenance.
 **Date:** 11 October 2026.
 **Model:** GPT-6 Luna, **High** reasoning. Single agent, single local run; no parallel builds or other agents.
 **Repository:** https://github.com/aloosley-ux/ArcLane
@@ -12,7 +12,7 @@
 ### Run 4 execution record
 
 - Source base: `590458e32ad46b4e0d6884493b195aa51632075b`; isolated checkout `C:\AI\ArcLane-Run4`; branch `feature/luna-high-agent-workspaces`; Run 3 parent ancestry verified before edits.
-- Tool matrix before code: Git/GitHub REQUIRED (checkout/history now; branch-only push after acceptance); Penpot REQUIRED and completed before UI edits; REA SKIPPED (no unresolved UX ambiguity); ReAgent SKIPPED (no differential experiment required); local Rust/TypeScript/Python REQUIRED; PowerShell REQUIRED; packaged WebView2/Playwright REQUIRED; Figma/Canva SKIPPED (Penpot is authority); Model Testing SKIPPED (out of scope); web research CONDITIONAL (no blocker yet).
+- **Historical execution record, not the policy for future runs:** Tool matrix before code: Git/GitHub REQUIRED (checkout/history now; branch-only push after acceptance); Penpot REQUIRED and completed before UI edits; REA SKIPPED (no unresolved UX ambiguity; **later identified as a planning error** — current `AGENTS.md` and `docs/REA_EVIDENCE_INDEX.md` now require targeted existing REA evidence review before all new feature runs); ReAgent SKIPPED (no differential experiment required); local Rust/TypeScript/Python REQUIRED; PowerShell REQUIRED; packaged WebView2/Playwright REQUIRED; Figma/Canva SKIPPED (Penpot is authority); Model Testing SKIPPED (out of scope); web research CONDITIONAL (no blocker yet).
 - Penpot connected file: ArcLane Design Playground, page `Page 1` (`52a5041f-08a1-80f1-8008-c5171920d529`). Existing Review Bench frame `466dcfea-ddde-80ca-8008-c526d4a9ede8`; existing Worktrees light/dark frames `362e4773-7c31-8074-8008-c568ba6e5012` and `362e4773-7c31-8074-8008-c568bd564978` were inspected and exported.
 - Run 4 frames created and exported for visual review: light `362e4773-7c31-8074-8008-c57f4f6548ef` (1440×900); dark `362e4773-7c31-8074-8008-c57f522bf735` (1440×900); compact `362e4773-7c31-8074-8008-c57f5576e261` (1080×680).
 - Design-to-code checklist: preserve the ArcLane top tab/command/mode/status shell and shared theme tokens; use the same `repo.worktrees` paths and branch labels as Worktrees; make selected checkout and real Git dirty/lock status explicit; discover Codex/Kilo only on entering/refreshing Agent Sessions; show missing executable and configured path distinctly; require explicit branch+launch confirmation; surface pending/running/exited PID and exit code; provide retry after launch failure while retaining the checkout; embed the agent process in the existing ConPTY terminal; keep worktree list and actions usable at 1080×680, with light/dark semantic contrast.
