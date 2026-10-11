@@ -1,4 +1,6 @@
 import{invoke}from "@tauri-apps/api/core";
+import{listen}from "@tauri-apps/api/event";
+import{TerminalSessionState,type TerminalSnapshot}from "./terminal-session-state";
 import type{Repository,HistoryPage,IgnoredPage,DiffResult,HunkResponse,FileComparison,FileHistory,FileBlame,ConflictData,ConflictSummary,ActionResult,ProviderPr,ProviderRun}from "./types";
 export const client={
   workspace:()=>invoke<import("./types").WorkspaceState>("load_workspace"),
@@ -37,9 +39,23 @@ export const client={
   runs:(path:string)=>invoke<ProviderRun[]>("github_query",{path,kind:"runs"}),
   openExternal:(url:string)=>invoke<void>("open_external",{url}),
   openPath:(path:string,kind:"editor"|"terminal"|"explorer")=>invoke<void>("open_path",{path,kind}),
-  terminalOpen:(path:string,rows=28,cols=105)=>invoke<{id:string;path:string;pid?:number}>("terminal_open",{path,rows,cols}),
+  terminalOpen:(path:string,rows=28,cols=105)=>invoke<TerminalSnapshot>("terminal_open",{path,rows,cols}),
+  agentDiscover:()=>invoke<Array<{agent:"codex"|"kilo";available:boolean;path:string|null}>>("agent_discover"),
+  agentValidate:(agent:"codex"|"kilo",path:string)=>invoke<string>("agent_validate",{agent,path}),
+  agentLaunch:(path:string,executable:string,args:string[]=[])=>invoke<TerminalSnapshot>("terminal_launch",{path,executable,args}),
   terminalSend:(id:string,data:string)=>invoke<void>("terminal_send",{id,data}),
   terminalResize:(id:string,rows:number,cols:number)=>invoke<void>("terminal_resize",{id,rows,cols}),
   terminalClose:(id:string)=>invoke<void>("terminal_close",{id}),
-  terminalSessions:()=>invoke<Array<{id:string;path:string;pid?:number}>>("terminal_sessions"),
+  terminalSessions:()=>invoke<TerminalSnapshot[]>("terminal_sessions"),
 };
+
+/** Subscribe first, then snapshot. Revisions merge notifications and the snapshot without gaps or replay duplicates. */
+export function watchTerminalSessions(onChange:(sessions:TerminalSnapshot[])=>void,onError?:(error:unknown)=>void){
+ let active=true;let unlisten:(()=>void)|undefined;
+ const state=new TerminalSessionState(sessions=>{if(active)onChange(sessions);});
+ void listen<TerminalSnapshot>("arclane-terminal-output",({payload})=>state.event(payload)).then(async stop=>{
+  if(!active){stop();return;}unlisten=stop;
+  try{state.bootstrap(await client.terminalSessions());}catch(error){onError?.(error);}
+ }).catch(error=>{if(active)onError?.(error);});
+ return()=>{active=false;unlisten?.();};
+}

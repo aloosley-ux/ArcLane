@@ -85,9 +85,9 @@
 | 079 | Provider collaboration | Links and fallback to external web | not verified | Unsupported native actions open exact URLs |
 | 080 | Provider collaboration | Jira/Trello and provider integration settings | not verified | No integrations run without consent |
 | 081 | Provider collaboration | Launchpad cross-repo issues/PRs/attention | partial/mock only — on-demand GitHub PRs/issues/CI list; no cross-repo aggregations verified | Cross-repo list/filter and detail |
-| 082 | Agent and terminal | Worktree-centred Agent Sessions mode | not verified | Same worktrees in List and Agents views |
-| 083 | Agent and terminal | External agent CLI detection/config | not verified | Detect local executables without side effects |
-| 084 | Agent and terminal | Create branch+worktree+agent session | not verified | Named worktree and child process verified |
+| 082 | Agent and terminal | Worktree-centred Agent Sessions mode | accepted — packaged native WebView2; Worktrees-derived checkout identity and tab/remount snapshot checks | `native-agent-workspaces-accept.mjs` |
+| 083 | Agent and terminal | External agent CLI detection/config | accepted — local Codex/Kilo discovery without execution; stale and invalid executable paths handled; explicit valid path accepted | `accept-agent-workspaces.py`, `native-agent-workspaces-accept.mjs` |
+| 084 | Agent and terminal | Create branch+worktree+agent session | accepted — confirmed worktree creation, harmless executable fixture, exact cwd/PID/argv, ConPTY output/input, exit 7, retry and child cleanup | `accept-agent-workspaces.py`, `native-agent-workspaces-accept.mjs`; 4 Rust lifecycle tests |
 | 085 | Agent and terminal | Issue -> agent context handoff | not verified | Issue ID and title forwarded once |
 | 086 | Agent and terminal | Dedicated embedded terminal per worktree | partial — two real ConPTY tabs in selected repository with cwd/process/teardown acceptance; comprehensive worktree attachment matrix unaccepted | Process attaches to intended cwd and exits cleanly |
 | 087 | Agent and terminal | Agent session progress and permissions | not verified | Visible when supported; no invented status |

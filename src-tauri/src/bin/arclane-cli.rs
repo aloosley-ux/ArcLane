@@ -1,4 +1,5 @@
 #[path="../git.rs"] mod git;
+#[path="../agents.rs"] mod agents;
 #[path="../advanced.rs"] mod advanced;
 #[path="../hunks.rs"] mod hunks;
 #[path="../repository.rs"] mod repository;
@@ -41,6 +42,8 @@ fn main(){
     "hunks"=>hunks::list(&git::root(&input[2])?,field("file").ok_or("Missing file")?,opts["staged"]==true),
     "apply_hunk"=>{let root=git::root(&input[2])?;git::with_write_guard(&root,||hunks::apply(&root,field("file").ok_or("Missing file")?,opts["staged"]==true,opts["index"].as_u64().ok_or("Missing index")? as usize))},
     "action"=>git::action_with_request(&input[2],field("op").ok_or("Missing action op")?,field("file"),field("input"),field("requestId")),
+    "agent_discover"=>agents::agent_discover(),
+    "agent_validate"=>agents::agent_validate(field("agent").ok_or("Missing agent")?.into(),field("path").ok_or("Missing path")?.into()).map(|path|json!({"path":path})),
     "cancel_git"=>{let repo=git::root(&input[2])?;Ok(json!({"cancelled":git_runtime::cancel(&repo,field("requestId").ok_or("Missing request ID")?)?}))},
     "collab"=>provider::query(&git::root(&input[2])?,field("kind").ok_or("Missing kind")?,field("id")),
     "collab_action"=>provider::mutate(&git::root(&input[2])?,field("operation").ok_or("Missing op")?,field("target").unwrap_or(""),&opts["detail"]),

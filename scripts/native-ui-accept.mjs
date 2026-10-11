@@ -112,7 +112,7 @@ try{
  for(let n=0;n<25;n++){sessions=await invoke("terminal_sessions");if(sessions.length===1)break;await wait(130);}
  if(sessions.length!==1)throw Error("Closing terminal tab did not terminate its process");
  result.tests.push("closing one terminal tab releases its session");
- await page.getByRole("button",{name:"Hide and close all terminal processes"}).click();
+ await page.getByRole("button",{name:"Stop and close all terminal processes"}).click();
  for(let n=0;n<25;n++){sessions=await invoke("terminal_sessions");if(sessions.length===0)break;await wait(130);}
  if(sessions.length!==0)throw Error("Closing terminal dock leaked a session");
  result.tests.push("dismissing dock closes all pseudo-terminals");

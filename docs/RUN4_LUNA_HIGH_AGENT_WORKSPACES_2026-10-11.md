@@ -9,6 +9,16 @@
 **Exact accepted Run 3 parent:** `3b39a7978b248cb3eb1e9a4aa0fcd475b19dcd4a` on `feature/sol-low-file-review`. Verify ancestry and current HEAD before changes.
 **Target:** a coherent 30–60-minute engineering run *if implementation and tests permit*, not a deadline that excuses missing native acceptance.
 
+### Run 4 execution record
+
+- Source base: `590458e32ad46b4e0d6884493b195aa51632075b`; isolated checkout `C:\AI\ArcLane-Run4`; branch `feature/luna-high-agent-workspaces`; Run 3 parent ancestry verified before edits.
+- Tool matrix before code: Git/GitHub REQUIRED (checkout/history now; branch-only push after acceptance); Penpot REQUIRED and completed before UI edits; REA SKIPPED (no unresolved UX ambiguity); ReAgent SKIPPED (no differential experiment required); local Rust/TypeScript/Python REQUIRED; PowerShell REQUIRED; packaged WebView2/Playwright REQUIRED; Figma/Canva SKIPPED (Penpot is authority); Model Testing SKIPPED (out of scope); web research CONDITIONAL (no blocker yet).
+- Penpot connected file: ArcLane Design Playground, page `Page 1` (`52a5041f-08a1-80f1-8008-c5171920d529`). Existing Review Bench frame `466dcfea-ddde-80ca-8008-c526d4a9ede8`; existing Worktrees light/dark frames `362e4773-7c31-8074-8008-c568ba6e5012` and `362e4773-7c31-8074-8008-c568bd564978` were inspected and exported.
+- Run 4 frames created and exported for visual review: light `362e4773-7c31-8074-8008-c57f4f6548ef` (1440×900); dark `362e4773-7c31-8074-8008-c57f522bf735` (1440×900); compact `362e4773-7c31-8074-8008-c57f5576e261` (1080×680).
+- Design-to-code checklist: preserve the ArcLane top tab/command/mode/status shell and shared theme tokens; use the same `repo.worktrees` paths and branch labels as Worktrees; make selected checkout and real Git dirty/lock status explicit; discover Codex/Kilo only on entering/refreshing Agent Sessions; show missing executable and configured path distinctly; require explicit branch+launch confirmation; surface pending/running/exited PID and exit code; provide retry after launch failure while retaining the checkout; embed the agent process in the existing ConPTY terminal; keep worktree list and actions usable at 1080×680, with light/dark semantic contrast.
+
+The gate also exposed a compact-frame overlap between the selected-checkout controls and terminal. Resolve that layout constraint during implementation/packaged pixel review before claiming compact acceptance.
+
 ## Mission — finish three connected user journeys
 
 | ID | Current baseline | Required Run 4 outcome |
@@ -69,6 +79,16 @@ Create at least:
 **G5 — Regression**: Run relevant existing Worktrees, Workspace, Terminal and Ignored Files acceptance (where present), then one complete backend and native pass via `scripts/verify-sprint.ps1`. Register new suites. Maintain existing assertions, don't fake green via weak selectors. Rebuild and rerun only affected tests if a late UI fix requires it; retain unchanged passing evidence.
 
 **G6 — Handoff**: Individually mark 082/083/084 accepted only on independent backend + fresh packaged native evidence. If one is incomplete, mark PARTIAL with exact gap. Include Penpot references, actual tests, executable hash, resource/startup/idle changes if measured, CLI failure behavior, commit SHA, push and clean branch. No merge/install/provider writes/Actions. Stop.
+
+## Run 4 final acceptance record
+
+- Lifecycle contract: `TerminalManager` owns immutable session ID, exact checkout CWD, PID, running/exited state, real exit code and a bounded 64 KiB output history. Exit is recorded by the process waiter independently of React and PTY EOF. Snapshot revision plus output offsets let listeners attach before or after exit without losing or duplicating history. Closing a session removes its retained record and closes its Windows Job Object; child cleanup is verified.
+- Focused lifecycle checks: 4 Rust tests passed (50 immediate start/exit processes with stdout and exit 7, bounded UTF-8 history, failed spawn/retry identity, and child cleanup); 4 TypeScript synchronization groups passed (subscribe/snapshot race, late UI attachment, tab selection identity, and retry/tombstone state).
+- Full backend: 24 Python acceptance scripts passed; 0 failed. Focused Rust and frontend lifecycle checks also passed.
+- Full packaged native regression: 22 suites passed; 0 failed. The six initially failing suites were grouped into two causes. Four history failures shared one App regression: the hidden Agent Sessions page matched `.work-main:has(.agent-sessions-page)` and hid History's shared title bar. The selector now applies only while the Agent Sessions route is visible; graph, Review Bench, commit options and operation workflows all pass. Two provenance failures came from the isolated Run 4 checkout lacking Run 3's ignored JSON record. Their contract checks the built EXE hash and inherited packaged UI behavior; the harness now selects the explicit Run 4 build record and still verifies the exact EXE SHA-256. Both suites pass without weakening assertions.
+- Package: `Build/Arclane.exe`, 11,517,952 bytes, SHA-256 `6C0C4FF84E87F468BDC199EB07FF819716BED25B91A4F6BBF0AD98AA6E2255A`; built 2026-10-11 04:27:43 UTC by `rtk proxy npx tauri build --no-bundle`. Build provenance is in ignored local `artifacts/run4-provenance.json`.
+- Packaged screenshots: Review Bench `artifacts/review-bench-native-light.png`, `review-bench-native-dark.png`, `review-bench-native-1080.png`; Agent Sessions `artifacts/native-agent-workspaces-light.png`, `native-agent-workspaces-dark.png`, `native-agent-workspaces-dark-1080x680.png`. Penpot frame IDs are recorded above.
+- Requirements **082**, **083**, and **084** are accepted against backend and packaged native evidence. No claims are made for 085, 087, 088, 089 or full 104. No real agent CLI, provider mutation, Actions, or installed-app overwrite was used.
 
 ## Suggested concrete commands (verify installed paths and runner semantics)
 
